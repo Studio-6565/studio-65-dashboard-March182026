@@ -177,7 +177,7 @@ export default function Dashboard() {
       </header>
 
       {/* Main */}
-      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 24px' }}>
+      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '16px' }}>
 
         {/* Projects Tab */}
         {tab === 'Projects' && (
