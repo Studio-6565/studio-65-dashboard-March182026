@@ -32,19 +32,19 @@ export default function StatsBar({ projects }) {
 
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,minmax(0,1fr))', gap: 10, marginBottom: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8, marginBottom: 8 }}>
         {stats.map(s => (
-          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
+          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>{s.label}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
           </div>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
         {ytdStats.map(s => (
-          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderLeft: `3px solid ${s.accent}`, borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
+          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderLeft: `3px solid ${s.accent}`, borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>{s.label}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
           </div>
         ))}
       </div>
