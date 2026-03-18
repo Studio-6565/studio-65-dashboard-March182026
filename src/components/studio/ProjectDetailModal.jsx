@@ -18,7 +18,7 @@ const DetailTab = ({ label, active, onClick }) => (
 
 export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange }) {
   const [tab, setTab] = useState('overview');
-  const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '' });
+  const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
   const [editingCrewForm, setEditingCrewForm] = useState({});
   const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '' });
