@@ -352,24 +352,35 @@ Please confirm you're good to go. See you on set! 🙏`;
             <div style={{ color: '#666', fontSize: 13, padding: '10px 0' }}>No crew contacts found. Add crew members on the Contacts page first.</div>
           ) : (
             <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 10, alignItems: 'end' }}>
-                <div>
-                  <label style={LL}>Select from Contacts</label>
-                  <select style={{ ...SS, background: '#1E1E1E' }} value={crewForm.name} onChange={e => {
-                    const c = crewContacts[parseInt(e.target.value)];
-                    if (c) setCrewForm({ name: c.name || '', role: c.role || '', cost: c.rate || '', phone: c.phone || '' });
-                    else setCrewForm({ name: '', role: '', cost: '', phone: '' });
-                  }}>
-                    <option value="">— pick a contact —</option>
-                    {crewContacts.map((c, i) => <option key={i} value={i}>{c.name}{c.role ? ' — ' + c.role : ''}{c.rate ? ' ($' + c.rate + ')' : ''}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={LL}>Override Cost ($)</label>
-                  <input style={{ ...SS, background: '#1E1E1E', width: 100 }} type="number" placeholder={crewForm.cost || '0'} value={crewForm.cost} onChange={e => setCrewForm(f => ({ ...f, cost: e.target.value }))} />
-                </div>
-                <button onClick={handleAddCrew} style={{ height: 38, padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'end' }}>+ Add</button>
+              <div style={{ marginBottom: 10 }}>
+                <label style={LL}>Select from Contacts</label>
+                <select style={{ ...SS, background: '#1E1E1E' }} onChange={e => {
+                  const idx = e.target.value;
+                  if (idx === '') { setCrewForm({ name: '', role: '', cost: '', phone: '' }); return; }
+                  const c = crewContacts[parseInt(idx)];
+                  if (c) setCrewForm({ name: c.name || '', role: c.role || '', cost: c.rate || '', phone: c.phone || '' });
+                }}>
+                  <option value="">— pick a contact —</option>
+                  {crewContacts.map((c, i) => <option key={i} value={i}>{c.name}{c.role ? ' — ' + c.role : ''}{c.rate ? ' ($' + c.rate + ')' : ''}</option>)}
+                </select>
               </div>
+              {crewForm.name && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 10, alignItems: 'end' }}>
+                  <div>
+                    <label style={LL}>Role</label>
+                    <input style={{ ...SS, background: '#1E1E1E' }} value={crewForm.role} onChange={e => setCrewForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" />
+                  </div>
+                  <div>
+                    <label style={LL}>Rate / Flat Cost ($)</label>
+                    <input style={{ ...SS, background: '#1E1E1E' }} type="number" value={crewForm.cost} onChange={e => setCrewForm(f => ({ ...f, cost: e.target.value }))} placeholder="0" />
+                  </div>
+                  <div>
+                    <label style={LL}>Hours</label>
+                    <input style={{ ...SS, background: '#1E1E1E' }} type="number" value={crewForm.hours || ''} onChange={e => setCrewForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. 8" />
+                  </div>
+                  <button onClick={handleAddCrew} style={{ height: 38, padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
+                </div>
+              )}
             </div>
           )}
         </div>
