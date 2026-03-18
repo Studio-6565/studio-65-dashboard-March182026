@@ -187,6 +187,24 @@ Please confirm you're good to go. See you on set! 🙏`;
 
   const crewContacts = (contacts || []).filter(c => (c.types || []).includes('Crew'));
 
+  const handleSaveCrewToContacts = async (c) => {
+    const exists = (contacts || []).find(ct => ct.name.toLowerCase() === c.name.toLowerCase());
+    if (exists) { showToast(`${c.name} already in Contacts`, 'amber'); return; }
+    const created = await base44.entities.Contact.create({ name: c.name, types: ['Crew'], role: c.role || '', phone: c.phone || '', rate: String(c.cost || '') });
+    onContactsChange([...(contacts || []), created]);
+    showToast(`${c.name} saved to Contacts`, 'green');
+  };
+
+  const handleSaveVendorToContacts = async (r) => {
+    const name = r.vendor || r.equipment;
+    if (!name) { showToast('No vendor name to save', 'red'); return; }
+    const exists = (contacts || []).find(ct => ct.name.toLowerCase() === name.toLowerCase());
+    if (exists) { showToast(`${name} already in Contacts`, 'amber'); return; }
+    const created = await base44.entities.Contact.create({ name, types: ['Vendor'], phone: r.phone || '', notes: `Equipment: ${r.equipment}` });
+    onContactsChange([...(contacts || []), created]);
+    showToast(`${name} saved to Contacts`, 'green');
+  };
+
   const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
 
   return (
