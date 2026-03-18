@@ -116,6 +116,22 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
           <label style={labelStyle}>End Date (multi-day)</label>
           <input style={inputStyle} type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} />
         </div>
+        {/* Extra non-consecutive dates */}
+        <div style={{ gridColumn: '1/-1' }}>
+          <label style={labelStyle}>Additional Shoot Dates (non-consecutive)</label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+            {(form.extra_dates || []).map((d, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: '"DM Mono", monospace', fontSize: 11, padding: '4px 10px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 6 }}>
+                {d}
+                <button type="button" onClick={() => setForm(f => ({ ...f, extra_dates: f.extra_dates.filter((_, j) => j !== i) }))} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
+              </span>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input style={{ ...inputStyle, flex: 1 }} type="date" value={extraDateInput} onChange={e => setExtraDateInput(e.target.value)} />
+            <button type="button" onClick={() => { if (extraDateInput) { setForm(f => ({ ...f, extra_dates: [...(f.extra_dates || []), extraDateInput] })); setExtraDateInput(''); } }} style={{ padding: '0 16px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add Date</button>
+          </div>
+        </div>
         <div>
           <label style={labelStyle}>Call / Start Time</label>
           <input style={inputStyle} type="time" value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} />
