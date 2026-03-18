@@ -388,6 +388,7 @@ Please confirm you're good to go. See you on set! 🙏`;
                     <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{r.vendor || '—'} · {fmt(r.cost)}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button onClick={() => handleSaveVendorToContacts(r)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.1)', color: '#7BC853' }}>+ Contacts</button>
                     <WaButton phone={r.phone} message={gearAvailMsg(r, p)} label="Avail?" />
                     <WaButton phone={r.phone} message={gearPayMsg(r, p)} label="Payment" />
                     <button onClick={() => handleRentalPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: r.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: r.paid ? 'rgba(123,200,83,0.18)' : 'rgba(245,158,11,0.12)', color: r.paid ? '#7BC853' : '#F59E0B' }}>{r.paid ? 'Paid ✓' : 'Mark Paid'}</button>
