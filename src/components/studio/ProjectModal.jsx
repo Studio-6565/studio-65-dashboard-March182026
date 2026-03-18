@@ -106,8 +106,32 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
           <input style={inputStyle} value={form.client} onChange={e => setForm(f => ({ ...f, client: e.target.value }))} placeholder="e.g. ATM" />
         </div>
         <div>
-          <label style={labelStyle}>Project Date</label>
+          <label style={labelStyle}>Start Date</label>
           <input style={inputStyle} type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+        </div>
+        <div>
+          <label style={labelStyle}>End Date (multi-day)</label>
+          <input style={inputStyle} type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} />
+        </div>
+        <div>
+          <label style={labelStyle}>Call / Start Time</label>
+          <input style={inputStyle} type="time" value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} />
+        </div>
+        <div>
+          <label style={labelStyle}>Wrap / End Time</label>
+          <input style={inputStyle} type="time" value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} />
+        </div>
+        <div style={{ gridColumn: '1/-1' }}>
+          <label style={labelStyle}>Shoot Address</label>
+          <input style={inputStyle} value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="e.g. 123 Queen St W, Toronto, ON" />
+        </div>
+        <div>
+          <label style={labelStyle}>Point of Contact Name</label>
+          <input style={inputStyle} value={form.poc_name} onChange={e => setForm(f => ({ ...f, poc_name: e.target.value }))} placeholder="e.g. Sarah Johnson" />
+        </div>
+        <div>
+          <label style={labelStyle}>Point of Contact Phone</label>
+          <input style={inputStyle} value={form.poc_phone} onChange={e => setForm(f => ({ ...f, poc_phone: e.target.value }))} placeholder="+1 416 555 0100" />
         </div>
         <div>
           <label style={labelStyle}>Status</label>
