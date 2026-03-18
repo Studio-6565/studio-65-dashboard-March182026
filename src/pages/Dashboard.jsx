@@ -254,7 +254,7 @@ export default function Dashboard() {
 
         {/* Contacts Tab */}
         {tab === 'Contacts' && (
-          <ContactsView contacts={contacts} onContactsChange={setContacts} />
+          <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />
         )}
       </main>
 
