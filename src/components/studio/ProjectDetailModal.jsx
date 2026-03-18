@@ -77,7 +77,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const handleAddCrew = async () => {
     if (!crewForm.name.trim()) { showToast('Enter a name', 'red'); return; }
     const cost = parseFloat(crewForm.cost) || 0;
-    const crew = [...(p.crew || []), { name: crewForm.name.trim(), role: crewForm.role.trim(), cost, phone: crewForm.phone.trim(), paid: false }];
+    const crew = [...(p.crew || []), { name: crewForm.name.trim(), role: crewForm.role.trim(), cost, phone: crewForm.phone.trim(), email: (crewForm.email || '').trim(), paid: false }];
     const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
     const net = p.revenue - crew_cost - p.rental_cost;
     await update({ crew, crew_cost, net, _logMsg: `${crewForm.name} added to crew` });
