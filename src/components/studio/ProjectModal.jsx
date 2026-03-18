@@ -39,7 +39,7 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
       });
       setDeliverables(JSON.parse(JSON.stringify(editingProject.deliverables || [])));
     } else {
-      setForm({ name: '', client: '', date: new Date().toISOString().split('T')[0], end_date: '', start_time: '', end_time: '', address: '', poc_name: '', poc_phone: '', status: 'Booked', revenue: '', crew_cost: '', rental_cost: '', track_hours: false });
+      setForm({ name: '', client: '', date: new Date().toISOString().split('T')[0], end_date: '', extra_dates: [], start_time: '', end_time: '', address: '', poc_name: '', poc_phone: '', status: 'Booked', revenue: '', crew_cost: '', rental_cost: '', track_hours: false });
       setDeliverables([]);
       setSelectedTpl(null);
     }
