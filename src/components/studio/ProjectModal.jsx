@@ -5,10 +5,12 @@ import { fmt, nextProjectId } from '@/lib/studio';
 export default function ProjectModal({ open, onClose, editingProject, templates, projects, onSave }) {
   const [form, setForm] = useState({
     name: '', client: '', date: new Date().toISOString().split('T')[0], end_date: '',
+    extra_dates: [],
     start_time: '', end_time: '', address: '', poc_name: '', poc_phone: '',
     status: 'Booked', revenue: '', crew_cost: '', rental_cost: '',
     track_hours: false,
   });
+  const [extraDateInput, setExtraDateInput] = useState('');
   const [deliverables, setDeliverables] = useState([]);
   const [delInput, setDelInput] = useState('');
   const [delDue, setDelDue] = useState('');
