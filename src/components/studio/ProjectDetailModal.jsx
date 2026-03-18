@@ -268,22 +268,56 @@ Please confirm you're good to go. See you on set! 🙏`;
       {/* Crew */}
       {tab === 'crew' && (
         <div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Crew Members</div>
-          <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Crew Members</div>
+            {(p.crew || []).some(c => c.phone) && (
+              <button onClick={handleNotifyAllCrew} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
+                📣 Notify All Crew
+              </button>
+            )}
+          </div>
+          <div style={{ maxHeight: 300, overflowY: 'auto', marginBottom: 16 }}>
             {!(p.crew || []).length ? <div style={{ color: '#666', fontSize: 13, padding: '8px 0' }}>No crew added yet.</div> :
               (p.crew || []).map((c, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#2A2A2A', borderRadius: 8, padding: '10px 12px', marginBottom: 6, flexWrap: 'wrap' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail?" />
-                    <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Payment" />
-                    <button onClick={() => handleCrewPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: c.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: c.paid ? 'rgba(123,200,83,0.18)' : 'rgba(123,200,83,0.1)', color: '#7BC853' }}>{c.paid ? 'Paid ✓' : 'Mark Paid'}</button>
-                    <button onClick={() => handleDelCrew(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
-                  </div>
+                <div key={i} style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 12px', marginBottom: 6 }}>
+                  {editingCrewIdx === i ? (
+                    // Inline edit mode
+                    <div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
+                        {[['Name', 'name', 'text'], ['Role', 'role', 'text'], ['Cost ($)', 'cost', 'number'], ['WhatsApp #', 'phone', 'text']].map(([l, k, type]) => (
+                          <div key={k}>
+                            <label style={LL}>{l}</label>
+                            <input style={{ ...SS, background: '#1E1E1E', padding: '7px 10px' }} type={type} value={editingCrewForm[k] || ''} onChange={e => setEditingCrewForm(f => ({ ...f, [k]: e.target.value }))} />
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={handleEditCrewSave} style={{ padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: '#4A9EFF', color: '#fff' }}>Save</button>
+                        <button onClick={() => setEditingCrewIdx(null)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: '#333', border: 'none', color: '#aaa', fontFamily: '"DM Mono", monospace' }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    // View mode
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {c.phone && (
+                          <button onClick={() => { const phone = c.phone.replace(/[^0-9+]/g,'').replace('+',''); window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(crewBookingMsg(c)),'_blank'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
+                            📣 Book
+                          </button>
+                        )}
+                        <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail?" />
+                        <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Payment" />
+                        <button onClick={() => handleEditCrewStart(i)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>Edit</button>
+                        <button onClick={() => handleCrewPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: c.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: c.paid ? 'rgba(123,200,83,0.18)' : 'rgba(123,200,83,0.1)', color: '#7BC853' }}>{c.paid ? 'Paid ✓' : 'Mark Paid'}</button>
+                        <button onClick={() => handleDelCrew(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             {(p.crew || []).length > 0 && (
