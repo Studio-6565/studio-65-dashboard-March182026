@@ -221,7 +221,7 @@ export default function Dashboard() {
                 )}
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
                 {filtered.map(p => (
                   <ProjectCard key={p.id} project={p} onClick={() => openDetail(p)} />
                 ))}
