@@ -252,6 +252,17 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
               <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, fontFamily: '"DM Mono", monospace', fontWeight: 600, background: st.bg, color: st.clr }}>{p.status || 'Booked'}</span>
             </div>
           </div>
+          {(p.address || p.start_time || p.poc_name) && (
+            <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '12px 14px', marginBottom: 16 }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Shoot Details</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {(p.date || p.end_date) && <div style={{ fontSize: 12 }}>📅 <span style={{ color: '#999' }}>{fmtDateRange(p)}</span></div>}
+                {(p.start_time || p.end_time) && <div style={{ fontSize: 12 }}>⏰ <span style={{ color: '#999' }}>{p.start_time}{p.end_time ? ' – ' + p.end_time : ''}</span></div>}
+                {p.address && <div style={{ fontSize: 12 }}>📍 <span style={{ color: '#999' }}>{p.address}</span></div>}
+                {p.poc_name && <div style={{ fontSize: 12 }}>👤 <span style={{ color: '#999' }}>{p.poc_name}{p.poc_phone ? ' · ' + p.poc_phone : ''}</span></div>}
+              </div>
+            </div>
+          )}
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Client Payment</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#2A2A2A', borderRadius: 8, padding: '12px 14px' }}>
