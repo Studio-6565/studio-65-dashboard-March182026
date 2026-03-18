@@ -390,7 +390,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                   const idx = e.target.value;
                   if (idx === '') { setCrewForm({ name: '', role: '', cost: '', phone: '' }); return; }
                   const c = crewContacts[parseInt(idx)];
-                  if (c) setCrewForm({ name: c.name || '', role: c.role || '', cost: c.rate || '', phone: c.phone || '' });
+                  if (c) setCrewForm({ name: c.name || '', role: c.role || '', cost: c.rate || '', phone: c.phone || '', email: c.email || '' });
                 }}>
                   <option value="">— pick a contact —</option>
                   {crewContacts.map((c, i) => <option key={i} value={i}>{c.name}{c.role ? ' — ' + c.role : ''}{c.rate ? ' ($' + c.rate + ')' : ''}</option>)}
