@@ -185,27 +185,29 @@ export default function Dashboard() {
             <StatsBar projects={projects} />
 
             {/* Filters row */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search projects..."
-                style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '6px 12px', color: '#fff', fontSize: 12, outline: 'none', width: 200 }}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search projects..."
+                  style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: '#fff', fontSize: 12, outline: 'none', flex: 1 }}
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#666', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} style={{ accentColor: '#E81A1A' }} />
+                  Archived
+                </label>
+              </div>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {STATUS_FILTERS.map(s => (
                   <button key={s} onClick={() => setStatusFilter(s)} style={{
-                    padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                    padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
                     cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace',
                     background: statusFilter === s ? '#E81A1A' : '#1E1E1E',
                     color: statusFilter === s ? '#fff' : '#666', transition: 'all 0.15s',
                   }}>{s}</button>
                 ))}
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#666', cursor: 'pointer', marginLeft: 'auto' }}>
-                <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} style={{ accentColor: '#E81A1A' }} />
-                Show Archived
-              </label>
             </div>
 
             {!filtered.length ? (
