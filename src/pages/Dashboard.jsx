@@ -155,21 +155,23 @@ export default function Dashboard() {
       <StudioToast />
 
       {/* Header */}
-      <header style={{ borderBottom: '1px solid #1E1E1E', padding: '0 16px', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 12, height: 52 }}>
-          <div style={{ fontSize: 18, fontWeight: 800, flexShrink: 0 }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
-          <nav style={{ display: 'flex', gap: 1, flex: 1, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <header style={{ borderBottom: '1px solid #1E1E1E', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8, height: 52, padding: '0 12px' }}>
+          <div style={{ fontSize: 16, fontWeight: 800, flexShrink: 0, letterSpacing: '-0.5px' }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
+          <div style={{ width: 1, height: 20, background: '#333', flexShrink: 0 }} />
+          <nav style={{ display: 'flex', gap: 2, flex: 1, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {TABS.map(t => (
               <button key={t} onClick={() => setTab(t)} style={{
-                padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
                 cursor: 'pointer', background: tab === t ? '#1E1E1E' : 'transparent',
-                color: tab === t ? '#fff' : '#666', border: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
+                color: tab === t ? '#fff' : '#555', border: tab === t ? '1px solid #333' : '1px solid transparent',
+                transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
               }}>{t}</button>
             ))}
           </nav>
           {tab === 'Projects' && (
             <button onClick={() => { setEditingProject(null); setProjectModalOpen(true); }} style={{
-              padding: '7px 14px', background: '#E81A1A', border: 'none', borderRadius: 8,
+              padding: '6px 12px', background: '#E81A1A', border: 'none', borderRadius: 7,
               color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
             }}>+ New</button>
           )}
