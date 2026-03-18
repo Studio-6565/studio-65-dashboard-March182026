@@ -48,9 +48,41 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
     if (!form.name.trim()) { showToast('Name is required', 'red'); return; }
     if (!form.types.length) { showToast('Select at least one type', 'red'); return; }
     if (editingId) {
-      const updated = await base44.entities.Contact.update(editingId, form);
+      const oldContact = contacts.find(c => c.id === editingId);
+      await base44.entities.Contact.update(editingId, form);
       onContactsChange(contacts.map(c => c.id === editingId ? { ...c, ...form } : c));
-      showToast(form.name + ' updated', 'blue');
+
+      // Sync changes across all projects where this crew member appears
+      if (oldContact && projects && onProjectsChange) {
+        const oldName = oldContact.name;
+        const updatedProjects = [];
+        for (const project of projects) {
+          const crew = project.crew || [];
+          const hasMatch = crew.some(c => c.name.toLowerCase() === oldName.toLowerCase());
+          if (hasMatch) {
+            const newCrew = crew.map(c => {
+              if (c.name.toLowerCase() !== oldName.toLowerCase()) return c;
+              return {
+                ...c,
+                name: form.name || c.name,
+                role: form.role || c.role,
+                phone: form.phone !== undefined ? form.phone : c.phone,
+              };
+            });
+            const updated = { ...project, crew: newCrew };
+            await base44.entities.Project.update(project.id, updated);
+            updatedProjects.push(updated);
+          }
+        }
+        if (updatedProjects.length > 0) {
+          onProjectsChange(projects.map(p => updatedProjects.find(u => u.id === p.id) || p));
+          showToast(`${form.name} updated across ${updatedProjects.length} project(s)`, 'blue');
+        } else {
+          showToast(form.name + ' updated', 'blue');
+        }
+      } else {
+        showToast(form.name + ' updated', 'blue');
+      }
     } else {
       const created = await base44.entities.Contact.create(form);
       onContactsChange([...contacts, created]);
