@@ -25,8 +25,18 @@ export const waLink = (phone, msg) => {
   window.open(url, '_blank');
 };
 
-export const crewAvailMsg = (crew, project) =>
-  `Hi ${crew.name}! This is Rathan from Studio 65 🎬\n\nI have an upcoming shoot — *${project.name}* on *${project.date}* for ${project.client}.\n\nAre you available to work as *${crew.role || 'crew'}*?\n\nLet me know ASAP so I can lock in the team. Thanks! 🙏`;
+export const fmtDateRange = (p) => {
+  if (p.end_date && p.end_date !== p.date) return `${p.date} – ${p.end_date}`;
+  return p.date || '';
+};
+
+export const crewAvailMsg = (crew, project) => {
+  const dateStr = fmtDateRange(project);
+  const timeStr = project.start_time && project.end_time ? `\n⏰ *Time:* ${project.start_time} – ${project.end_time}` : project.start_time ? `\n⏰ *Call Time:* ${project.start_time}` : '';
+  const addrStr = project.address ? `\n📍 *Location:* ${project.address}` : '';
+  const pocStr = project.poc_name ? `\n👤 *Point of Contact:* ${project.poc_name}${project.poc_phone ? ' · ' + project.poc_phone : ''}` : '';
+  return `Hi ${crew.name}! This is Rathan from Studio 65 🎬\n\nI have an upcoming shoot and wanted to check your availability:\n\n📌 *Project:* ${project.name}\n📅 *Date:* ${dateStr}${timeStr}${addrStr}${pocStr}\n🎥 *Your Role:* ${crew.role || 'Crew'}\n\nReply *Y* if you're available or *N* if you're not. Thanks! 🙏`;
+};
 
 export const crewPayMsg = (crew, project) =>
   `Hi ${crew.name}! Rathan here from Studio 65 👋\n\nJust flagging that your payment of *${fmt(crew.cost)}* for *${project.name}* (${project.date}) is ready to be processed.\n\nCan you confirm your payment details are still the same so I can get this sorted? Thanks!`;
