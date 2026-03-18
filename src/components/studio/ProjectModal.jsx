@@ -64,7 +64,7 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
 
   const handleSave = () => {
     if (!form.name.trim() || !form.client.trim()) return;
-    onSave({ ...form, revenue: rev, crew_cost: crew, rental_cost: rental, net, deliverables });
+    onSave({ ...form, revenue: rev, crew_cost: crew, rental_cost: rental, net, deliverables, extra_dates: form.extra_dates || [] });
   };
 
   const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
