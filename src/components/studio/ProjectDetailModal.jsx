@@ -81,7 +81,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
     const net = p.revenue - crew_cost - p.rental_cost;
     await update({ crew, crew_cost, net, _logMsg: `${crewForm.name} added to crew` });
-    setCrewForm({ name: '', role: '', cost: '', phone: '' });
+    setCrewForm({ name: '', role: '', cost: '', phone: '', email: '' });
     showToast(crewForm.name + ' added to crew');
   };
 
