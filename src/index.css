@@ -57,6 +57,15 @@
   }
 }
 
+/* Responsive helpers */
+.md-hidden { display: block; }
+.md-grid { display: none; }
+@media (min-width: 768px) {
+  .md-hidden { display: none; }
+  .md-grid { display: block; }
+  .md-nav { display: block !important; }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--studio-charcoal); }
