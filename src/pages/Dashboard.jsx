@@ -13,7 +13,6 @@ import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import { nextProjectId, addLog } from '@/lib/studio';
 
 const TABS = ['Projects', 'Analytics', 'Crew', 'Timeline', 'Contacts'];
-const TAB_SHORT = { Projects: 'Projects', Analytics: 'Stats', Crew: 'Crew', Timeline: 'Timeline', Contacts: 'Contacts' };
 const STATUS_FILTERS = ['All', 'Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
 
 export default function Dashboard() {
