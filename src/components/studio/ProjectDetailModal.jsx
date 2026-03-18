@@ -106,18 +106,18 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   };
 
   const crewBookingMsg = (c) => {
-    return `Hi ${c.name}! Rathan here from Studio 65 🎬
+    const dateStr = p.end_date && p.end_date !== p.date ? `${p.date} – ${p.end_date}` : p.date;
+    const timeStr = p.start_time && p.end_time ? `\n⏰ *Time:* ${p.start_time} – ${p.end_time}` : p.start_time ? `\n⏰ *Call Time:* ${p.start_time}` : '';
+    const addrStr = p.address ? `\n📍 *Location:* ${p.address}` : '';
+    const pocStr = p.poc_name ? `\n👤 *Point of Contact:* ${p.poc_name}${p.poc_phone ? ' · ' + p.poc_phone : ''}` : '';
+    return `Hi ${c.name}! Rathan here from Studio 65 🎬\n\nYou're confirmed for an upcoming shoot! Here are your details:\n\n📌 *Project:* ${p.name}\n📅 *Date:* ${dateStr}${timeStr}${addrStr}${pocStr}\n🎥 *Your Role:* ${c.role || 'Crew'}\n💰 *Your Pay:* ${fmt(c.cost)}${p.notes ? `\n\n📝 *Notes:*\n${p.notes}` : ''}\n\nSee you on set! 🙏`;
+  };
 
-You're booked for an upcoming shoot! Here are the details:
-
-📌 *Project:* ${p.name}
-👤 *Client:* ${p.client}
-📅 *Date:* ${p.date}
-🎥 *Your Role:* ${c.role || 'Crew'}
-💰 *Your Pay:* ${fmt(c.cost)}
-${p.notes ? `\n📝 *Notes:*\n${p.notes}` : ''}
-
-Please confirm you're good to go. See you on set! 🙏`;
+  const handleSetAvail = async (i, status) => {
+    const crew = [...p.crew];
+    crew[i] = { ...crew[i], avail: status };
+    await update({ crew, _logMsg: `${crew[i].name} marked ${status === 'yes' ? 'available' : 'unavailable'}` });
+    showToast(`${crew[i].name}: ${status === 'yes' ? 'Available ✓' : 'Unavailable ✗'}`, status === 'yes' ? 'green' : 'red');
   };
 
   const handleNotifyAllCrew = () => {
