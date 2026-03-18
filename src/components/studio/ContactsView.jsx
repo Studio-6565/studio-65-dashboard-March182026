@@ -20,7 +20,6 @@ const WaSvg = () => (
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
-
 const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '' };
 
 export default function ContactsView({ contacts, onContactsChange, projects, onProjectsChange }) {
@@ -28,6 +27,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   const [filter, setFilter] = useState('all');
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   const filtered = contacts.filter(c => {
     const q = search.toLowerCase();
@@ -52,7 +52,6 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
       await base44.entities.Contact.update(editingId, form);
       onContactsChange(contacts.map(c => c.id === editingId ? { ...c, ...form } : c));
 
-      // Sync changes across all projects where this crew member appears
       if (oldContact && projects && onProjectsChange) {
         const oldName = oldContact.name;
         const updatedProjects = [];
@@ -62,12 +61,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
           if (hasMatch) {
             const newCrew = crew.map(c => {
               if (c.name.toLowerCase() !== oldName.toLowerCase()) return c;
-              return {
-                ...c,
-                name: form.name || c.name,
-                role: form.role || c.role,
-                phone: form.phone !== undefined ? form.phone : c.phone,
-              };
+              return { ...c, name: form.name || c.name, role: form.role || c.role, phone: form.phone !== undefined ? form.phone : c.phone };
             });
             const updated = { ...project, crew: newCrew };
             await base44.entities.Project.update(project.id, updated);
@@ -88,12 +82,14 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
       onContactsChange([...contacts, created]);
       showToast(form.name + ' added');
     }
-    setForm(emptyForm); setEditingId(null);
+    setForm(emptyForm); setEditingId(null); setShowForm(false);
   };
 
   const handleEdit = (c) => {
     setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '' });
     setEditingId(c.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (c) => {
@@ -103,96 +99,119 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
     showToast(c.name + ' removed', 'red');
   };
 
+  const handleCancel = () => {
+    setForm(emptyForm); setEditingId(null); setShowForm(false);
+  };
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 16, alignItems: 'start' }}>
-      {/* Left: grid */}
-      <div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '5px 12px', color: '#fff', fontSize: 12, outline: 'none', flex: 1 }} />
-          <select value={filter} onChange={e => setFilter(e.target.value)} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '5px 10px', color: '#666', fontFamily: '"DM Mono", monospace', fontSize: 11, outline: 'none' }}>
-            <option value="all">All types</option>
-            {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
-        {!filtered.length ? (
-          <div style={{ textAlign: 'center', padding: '48px 20px', color: '#666', fontSize: 14 }}>
-            {contacts.length ? 'No contacts match your search.' : 'No contacts yet. Add your first one using the form →'}
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 10 }}>
-            {filtered.map(c => {
-              const types = Array.isArray(c.types) ? c.types : (c.type ? [c.type] : ['Other']);
-              const initials = c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-              return (
-                <div key={c.id} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '14px 16px', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#555'} onMouseLeave={e => e.currentTarget.style.borderColor = '#333'}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#2A2A2A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</div>
-                      <div style={{ fontSize: 11, color: '#666', marginTop: 1 }}>{c.role || '—'}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', flexShrink: 0 }}>
-                      {types.map(t => {
-                        const tc = TYPE_COLORS[t] || TYPE_COLORS.Other;
-                        return <span key={t} style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: tc.bg, color: tc.color }}>{t}</span>;
-                      })}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 }}>
-                    {c.phone && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>📱 {c.phone}</div>}
-                    {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
-                    {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}</div>}
-                    {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {c.phone && (
-                      <button onClick={() => waLink(c.phone, `Hi ${c.name}! This is Rathan from Studio 65 👋`)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
-                        <WaSvg /> WhatsApp
-                      </button>
-                    )}
-                    {c.email && <a href={`mailto:${c.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>✉ Email</a>}
-                    <button onClick={() => handleEdit(c)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>Edit</button>
-                    <button onClick={() => handleDelete(c)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+    <div>
+      {/* Top bar */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search contacts..."
+          style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 0 }}
+        />
+        <select
+          value={filter} onChange={e => setFilter(e.target.value)}
+          style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 10px', color: '#666', fontFamily: '"DM Mono", monospace', fontSize: 11, outline: 'none' }}
+        >
+          <option value="all">All types</option>
+          {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <button
+          onClick={() => { setForm(emptyForm); setEditingId(null); setShowForm(s => !s); }}
+          style={{ padding: '7px 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+        >
+          + Add
+        </button>
       </div>
 
-      {/* Right: form */}
-      <div style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, padding: 20, position: 'sticky', top: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16 }}>{editingId ? 'Edit Contact' : 'Add Contact'}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div><label style={labelStyle}>Full Name</label><input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Vithu Karunakaran" /></div>
-          <div>
-            <label style={labelStyle}>Type (select all that apply)</label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
-              {TYPES.map(t => {
-                const tc = TYPE_COLORS[t];
-                const active = form.types.includes(t);
-                return (
-                  <label key={t} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', padding: '5px 10px', background: active ? tc.bg : '#2A2A2A', border: `1px solid ${active ? tc.color : '#333'}`, borderRadius: 6, fontSize: 12 }}>
-                    <input type="checkbox" checked={active} onChange={() => toggleType(t)} style={{ accentColor: tc.color }} /> {t}
-                  </label>
-                );
-              })}
+      {/* Form panel — shown inline on mobile, above list */}
+      {showForm && (
+        <div style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16 }}>{editingId ? 'Edit Contact' : 'Add Contact'}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div><label style={labelStyle}>Full Name</label><input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Vithu Karunakaran" /></div>
+            <div>
+              <label style={labelStyle}>Type (select all that apply)</label>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
+                {TYPES.map(t => {
+                  const tc = TYPE_COLORS[t];
+                  const active = form.types.includes(t);
+                  return (
+                    <label key={t} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', padding: '6px 10px', background: active ? tc.bg : '#2A2A2A', border: `1px solid ${active ? tc.color : '#333'}`, borderRadius: 6, fontSize: 12 }}>
+                      <input type="checkbox" checked={active} onChange={() => toggleType(t)} style={{ accentColor: tc.color }} /> {t}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div><label style={labelStyle}>Role / Company</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" /></div>
+              <div><label style={labelStyle}>WhatsApp / Phone</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
+              <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" /></div>
+              <div><label style={labelStyle}>Default Rate ($/hr or flat)</label><input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder="e.g. 50 or 1200" /></div>
+            </div>
+            <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={handleSave} style={{ flex: 1, padding: '10px 20px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                {editingId ? 'Save Changes' : 'Add Contact'}
+              </button>
+              <button onClick={handleCancel} style={{ padding: '10px 18px', background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
             </div>
           </div>
-          <div><label style={labelStyle}>Role / Company</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" /></div>
-          <div><label style={labelStyle}>WhatsApp / Phone</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
-          <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" /></div>
-          <div><label style={labelStyle}>Default Rate ($/hr or flat)</label><input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder="e.g. 50 or 1200" /></div>
-          <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 72 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={handleSave} style={{ flex: 1, padding: '9px 20px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              {editingId ? 'Save Changes' : 'Add Contact'}
-            </button>
-            {editingId && <button onClick={() => { setForm(emptyForm); setEditingId(null); }} style={{ padding: '9px 18px', background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>}
-          </div>
         </div>
-      </div>
+      )}
+
+      {/* Contact cards grid */}
+      {!filtered.length ? (
+        <div style={{ textAlign: 'center', padding: '48px 20px', color: '#666', fontSize: 14 }}>
+          {contacts.length ? 'No contacts match your search.' : 'No contacts yet. Tap "+ Add" to create your first one.'}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+          {filtered.map(c => {
+            const types = Array.isArray(c.types) ? c.types : (c.type ? [c.type] : ['Other']);
+            const initials = c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            return (
+              <div key={c.id} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#2A2A2A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</div>
+                    <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{c.role || '—'}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', flexShrink: 0, maxWidth: 100, justifyContent: 'flex-end' }}>
+                    {types.map(t => {
+                      const tc = TYPE_COLORS[t] || TYPE_COLORS.Other;
+                      return <span key={t} style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: tc.bg, color: tc.color }}>{t}</span>;
+                    })}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
+                  {c.phone && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888' }}>📱 {c.phone}</div>}
+                  {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
+                  {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}</div>}
+                  {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {c.phone && (
+                    <button onClick={() => waLink(c.phone, `Hi ${c.name}! This is Rathan from Studio 65 👋`)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
+                      <WaSvg /> WhatsApp
+                    </button>
+                  )}
+                  {c.email && (
+                    <a href={`mailto:${c.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>✉ Email</a>
+                  )}
+                  <button onClick={() => handleEdit(c)} style={{ padding: '6px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>Edit</button>
+                  <button onClick={() => handleDelete(c)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, padding: '4px 6px' }}>×</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
