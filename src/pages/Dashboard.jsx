@@ -133,6 +133,8 @@ export default function Dashboard() {
 
   const openDetail = (p) => setDetailProject(p);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const openEdit = () => {
     if (!detailProject) return;
     setEditingProject(detailProject);
