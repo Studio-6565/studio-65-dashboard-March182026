@@ -91,6 +91,48 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     await update({ crew, crew_cost, net: p.revenue - crew_cost - p.rental_cost, _logMsg: `Crew member removed` });
   };
 
+  const handleEditCrewStart = (i) => {
+    setEditingCrewIdx(i);
+    setEditingCrewForm({ ...p.crew[i] });
+  };
+
+  const handleEditCrewSave = async () => {
+    const crew = [...p.crew];
+    crew[editingCrewIdx] = { ...crew[editingCrewIdx], ...editingCrewForm, cost: parseFloat(editingCrewForm.cost) || 0 };
+    const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
+    await update({ crew, crew_cost, net: p.revenue - crew_cost - p.rental_cost, _logMsg: `${crew[editingCrewIdx].name} crew info updated` });
+    setEditingCrewIdx(null);
+    showToast('Crew updated', 'blue');
+  };
+
+  const crewBookingMsg = (c) => {
+    return `Hi ${c.name}! Rathan here from Studio 65 🎬
+
+You're booked for an upcoming shoot! Here are the details:
+
+📌 *Project:* ${p.name}
+👤 *Client:* ${p.client}
+📅 *Date:* ${p.date}
+🎥 *Your Role:* ${c.role || 'Crew'}
+💰 *Your Pay:* ${fmt(c.cost)}
+${p.notes ? `\n📝 *Notes:*\n${p.notes}` : ''}
+
+Please confirm you're good to go. See you on set! 🙏`;
+  };
+
+  const handleNotifyAllCrew = () => {
+    const crewWithPhone = (p.crew || []).filter(c => c.phone);
+    if (!crewWithPhone.length) { showToast('No crew members have WhatsApp numbers saved', 'red'); return; }
+    crewWithPhone.forEach((c, i) => {
+      setTimeout(() => {
+        const phone = c.phone.replace(/[^0-9+]/g, '').replace('+', '');
+        const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(crewBookingMsg(c));
+        window.open(url, '_blank');
+      }, i * 400);
+    });
+    showToast(`Opening WhatsApp for ${crewWithPhone.length} crew member(s)`, 'green');
+  };
+
   const handleAddRental = async () => {
     if (!rentalForm.equipment.trim()) { showToast('Enter equipment name', 'red'); return; }
     const cost = parseFloat(rentalForm.cost) || 0;
