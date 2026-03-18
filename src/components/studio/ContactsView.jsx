@@ -23,7 +23,7 @@ const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
 
 const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '' };
 
-export default function ContactsView({ contacts, onContactsChange }) {
+export default function ContactsView({ contacts, onContactsChange, projects, onProjectsChange }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [form, setForm] = useState(emptyForm);
