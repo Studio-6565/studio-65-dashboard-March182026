@@ -30,21 +30,23 @@ export default function StatsBar({ projects }) {
     { label: 'YTD Projects', value: ytd.length + ' projects', color: '#F59E0B', accent: '#F59E0B' },
   ];
 
+  const allStats = [...stats, ...ytdStats];
+
   return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8, marginBottom: 8 }}>
-        {stats.map(s => (
-          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>{s.label}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
-        {ytdStats.map(s => (
-          <div key={s.label} style={{ background: '#1E1E1E', border: '1px solid #333', borderLeft: `3px solid ${s.accent}`, borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>{s.label}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff' }}>{s.value}</div>
+    <div style={{ marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div style={{ display: 'flex', gap: 8, paddingBottom: 4, minWidth: 'max-content' }}>
+        {allStats.map((s, i) => (
+          <div key={s.label} style={{
+            background: '#1E1E1E',
+            border: '1px solid #2A2A2A',
+            borderLeft: s.accent ? `3px solid ${s.accent}` : '1px solid #2A2A2A',
+            borderRadius: 8,
+            padding: '8px 14px',
+            flexShrink: 0,
+            minWidth: 110,
+          }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 8, color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3, whiteSpace: 'nowrap' }}>{s.label}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.5px', color: s.color || '#fff', whiteSpace: 'nowrap' }}>{s.value}</div>
           </div>
         ))}
       </div>
