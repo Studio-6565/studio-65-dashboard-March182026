@@ -26,8 +26,10 @@ export const waLink = (phone, msg) => {
 };
 
 export const fmtDateRange = (p) => {
-  if (p.end_date && p.end_date !== p.date) return `${p.date} – ${p.end_date}`;
-  return p.date || '';
+  let base = p.date || '';
+  if (p.end_date && p.end_date !== p.date) base = `${p.date} – ${p.end_date}`;
+  if (p.extra_dates && p.extra_dates.length) base += ', ' + p.extra_dates.join(', ');
+  return base;
 };
 
 export const crewAvailMsg = (crew, project) => {
