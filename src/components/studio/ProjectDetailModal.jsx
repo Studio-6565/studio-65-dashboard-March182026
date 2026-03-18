@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StudioModal from './StudioModal';
 import WaButton from './WaButton';
-import { fmt, fmtH, fmtTs, crewOwed, rentalsOwed, margin, marginColor, STATUS_STYLE, crewAvailMsg, crewPayMsg, gearAvailMsg, gearPayMsg, addLog } from '@/lib/studio';
+import { fmt, fmtH, fmtTs, fmtDateRange, crewOwed, rentalsOwed, margin, marginColor, STATUS_STYLE, crewAvailMsg, crewPayMsg, gearAvailMsg, gearPayMsg, addLog } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 
