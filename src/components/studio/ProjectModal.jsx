@@ -4,7 +4,8 @@ import { fmt, nextProjectId } from '@/lib/studio';
 
 export default function ProjectModal({ open, onClose, editingProject, templates, projects, onSave }) {
   const [form, setForm] = useState({
-    name: '', client: '', date: new Date().toISOString().split('T')[0],
+    name: '', client: '', date: new Date().toISOString().split('T')[0], end_date: '',
+    start_time: '', end_time: '', address: '', poc_name: '', poc_phone: '',
     status: 'Booked', revenue: '', crew_cost: '', rental_cost: '',
     track_hours: false,
   });
