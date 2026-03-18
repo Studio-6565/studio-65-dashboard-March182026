@@ -19,6 +19,8 @@ const DetailTab = ({ label, active, onClick }) => (
 export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate }) {
   const [tab, setTab] = useState('overview');
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '' });
+  const [editingCrewIdx, setEditingCrewIdx] = useState(null);
+  const [editingCrewForm, setEditingCrewForm] = useState({});
   const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '' });
   const [delForm, setDelForm] = useState({ name: '', due: '' });
   const [hourForm, setHourForm] = useState({ desc: '', person: '', hours: '', date: new Date().toISOString().split('T')[0] });
@@ -26,7 +28,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const noteTimer = useRef(null);
 
   useEffect(() => {
-    if (project) { setNotes(project.notes || ''); setTab('overview'); }
+    if (project) { setNotes(project.notes || ''); setTab('overview'); setEditingCrewIdx(null); }
   }, [project?.id]);
 
   if (!project) return null;
