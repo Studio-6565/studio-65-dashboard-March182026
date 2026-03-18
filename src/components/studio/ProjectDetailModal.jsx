@@ -316,11 +316,20 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                     </div>
                   ) : (
                     // View mode
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
+                      <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
                         <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
+                        {/* Availability badge */}
+                        <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, padding: '2px 7px', borderRadius: 4, fontWeight: 700,
+                            background: c.avail === 'yes' ? 'rgba(123,200,83,0.15)' : c.avail === 'no' ? 'rgba(232,26,26,0.12)' : 'rgba(100,100,100,0.12)',
+                            color: c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#666'
+                          }}>{c.avail === 'yes' ? '✓ Available' : c.avail === 'no' ? '✗ Unavailable' : '— Pending'}</span>
+                          <button onClick={() => handleSetAvail(i, 'yes')} title="Mark Available" style={{ padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(123,200,83,0.3)', background: 'transparent', color: '#7BC853' }}>Y</button>
+                          <button onClick={() => handleSetAvail(i, 'no')} title="Mark Unavailable" style={{ padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(232,26,26,0.3)', background: 'transparent', color: '#E81A1A' }}>N</button>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {c.phone && (
@@ -330,7 +339,6 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                         )}
                         <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail?" />
                         <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Payment" />
-                        <button onClick={() => handleSaveCrewToContacts(c)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.1)', color: '#7BC853' }}>+ Contacts</button>
                         <button onClick={() => handleEditCrewStart(i)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>Edit</button>
                         <button onClick={() => handleCrewPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: c.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: c.paid ? 'rgba(123,200,83,0.18)' : 'rgba(123,200,83,0.1)', color: '#7BC853' }}>{c.paid ? 'Paid ✓' : 'Mark Paid'}</button>
                         <button onClick={() => handleDelCrew(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
