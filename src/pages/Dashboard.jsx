@@ -278,6 +278,7 @@ export default function Dashboard() {
         onEdit={openEdit}
         onDuplicate={handleDuplicate}
         onSaveAsTemplate={handleSaveAsTemplate}
+        onContactsChange={setContacts}
       />
     </div>
   );
