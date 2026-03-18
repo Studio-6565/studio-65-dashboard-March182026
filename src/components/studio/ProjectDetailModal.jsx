@@ -358,6 +358,11 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                         )}
                         <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail?" />
                         <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Payment" />
+                        {c.email && (
+                          <button onClick={() => handleEmailCrew(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>
+                            ✉ Email
+                          </button>
+                        )}
                         <button onClick={() => handleEditCrewStart(i)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>Edit</button>
                         <button onClick={() => handleCrewPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: c.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: c.paid ? 'rgba(123,200,83,0.18)' : 'rgba(123,200,83,0.1)', color: '#7BC853' }}>{c.paid ? 'Paid ✓' : 'Mark Paid'}</button>
                         <button onClick={() => handleDelCrew(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
