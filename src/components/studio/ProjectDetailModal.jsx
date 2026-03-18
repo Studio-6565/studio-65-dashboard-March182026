@@ -16,7 +16,7 @@ const DetailTab = ({ label, active, onClick }) => (
   }}>{label}</button>
 );
 
-export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate }) {
+export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange }) {
   const [tab, setTab] = useState('overview');
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
