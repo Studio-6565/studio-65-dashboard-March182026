@@ -39,9 +39,9 @@ export default function ProjectCard({ project: p, onClick }) {
       }} />
 
       {/* Card top */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-        <div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666' }}>{p.project_id} · {p.date}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666' }}>{p.project_id} · {fmtDateRange(p)}{p.start_time ? ' · ' + p.start_time : ''}{p.end_time ? '–' + p.end_time : ''}</div>
           <div style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{p.name}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', background: '#2A2A2A', borderRadius: 4, color: '#D9D9D9', fontFamily: '"DM Mono", monospace' }}>{p.client}</span>
@@ -50,6 +50,13 @@ export default function ProjectCard({ project: p, onClick }) {
             {p.track_hours && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontFamily: '"DM Mono", monospace' }}>⏱ {(totalHrs).toFixed(1)} hrs</span>}
             {p.notes && <span style={{ fontSize: 10, color: '#666' }}>📝</span>}
           </div>
+          {/* Shoot logistics */}
+          {(p.address || p.poc_name) && (
+            <div style={{ marginTop: 7, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {p.address && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
+              {p.poc_name && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#888' }}>👤 {p.poc_name}{p.poc_phone ? ' · ' + p.poc_phone : ''}</div>}
+            </div>
+          )}
         </div>
         <span style={{
           fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px',
