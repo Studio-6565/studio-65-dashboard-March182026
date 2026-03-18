@@ -164,11 +164,11 @@ export default function Dashboard() {
             <nav style={{ display: 'flex', gap: 2, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 1 }}>
               {TABS.map(t => (
                 <button key={t} onClick={() => setTab(t)} style={{
-                  padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                  padding: '5px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
                   cursor: 'pointer', background: tab === t ? '#1E1E1E' : 'transparent',
                   color: tab === t ? '#fff' : '#555', border: tab === t ? '1px solid #333' : '1px solid transparent',
                   transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
-                }}>{t}</button>
+                }}>{TAB_SHORT[t]}</button>
               ))}
             </nav>
           </div>
