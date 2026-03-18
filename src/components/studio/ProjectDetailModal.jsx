@@ -187,6 +187,14 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
 
   const crewContacts = (contacts || []).filter(c => (c.types || []).includes('Crew'));
 
+  const handleEmailCrew = (c) => {
+    if (!c.email) { showToast('No email saved for ' + c.name, 'red'); return; }
+    const dateStr = p.end_date && p.end_date !== p.date ? `${p.date} – ${p.end_date}` : p.date;
+    const subject = encodeURIComponent(`Shoot Confirmation – ${p.name}`);
+    const body = encodeURIComponent(`Hi ${c.name},\n\nYou're confirmed for an upcoming shoot!\n\nProject: ${p.name}\nDate: ${dateStr}${p.start_time ? '\nCall Time: ' + p.start_time : ''}${p.end_time ? '\nWrap: ' + p.end_time : ''}${p.address ? '\nLocation: ' + p.address : ''}${p.poc_name ? '\nPoint of Contact: ' + p.poc_name + (p.poc_phone ? ' · ' + p.poc_phone : '') : ''}\nYour Role: ${c.role || 'Crew'}\nYour Pay: $${c.cost}${p.notes ? '\n\nNotes:\n' + p.notes : ''}\n\nSee you on set!\nRathan – Studio 65`);
+    window.open(`mailto:${c.email}?subject=${subject}&body=${body}`, '_blank');
+  };
+
   const handleSaveCrewToContacts = async (c) => {
     const exists = (contacts || []).find(ct => ct.name.toLowerCase() === c.name.toLowerCase());
     if (exists) { showToast(`${c.name} already in Contacts`, 'amber'); return; }

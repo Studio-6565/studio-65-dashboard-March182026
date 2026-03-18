@@ -1,5 +1,5 @@
 import React from 'react';
-import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE } from '@/lib/studio';
+import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
 
 const StatusTag = ({ status }) => {
   const s = STATUS_STYLE[status] || STATUS_STYLE['Booked'];
