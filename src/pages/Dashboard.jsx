@@ -161,25 +161,50 @@ export default function Dashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 52, padding: '0 12px', maxWidth: 1400, margin: '0 auto' }}>
           <div style={{ fontSize: 16, fontWeight: 800, flexShrink: 0, letterSpacing: '-0.5px' }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
           <div style={{ width: 1, height: 20, background: '#333', flexShrink: 0 }} />
-          <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-            <nav style={{ display: 'flex', gap: 2, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 1 }}>
+          {/* Desktop nav */}
+          <div style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'none' }} className="md-nav">
+            <nav style={{ display: 'flex', gap: 2 }}>
               {TABS.map(t => (
                 <button key={t} onClick={() => setTab(t)} style={{
-                  padding: '5px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                  padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
                   cursor: 'pointer', background: tab === t ? '#1E1E1E' : 'transparent',
                   color: tab === t ? '#fff' : '#555', border: tab === t ? '1px solid #333' : '1px solid transparent',
                   transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
-                }}>{TAB_SHORT[t]}</button>
+                }}>{t}</button>
               ))}
             </nav>
           </div>
-          {tab === 'Projects' && (
-            <button onClick={() => { setEditingProject(null); setProjectModalOpen(true); }} style={{
-              padding: '6px 12px', background: '#E81A1A', border: 'none', borderRadius: 7,
-              color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
-            }}>+ New</button>
-          )}
+          {/* Current tab label (mobile) */}
+          <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#fff' }}>{tab}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {tab === 'Projects' && (
+              <button onClick={() => { setEditingProject(null); setProjectModalOpen(true); }} style={{
+                padding: '6px 12px', background: '#E81A1A', border: 'none', borderRadius: 7,
+                color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>+ New</button>
+            )}
+            {/* Hamburger */}
+            <button onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'center' }}>
+              <span style={{ display: 'block', width: 20, height: 2, background: menuOpen ? '#E81A1A' : '#fff', borderRadius: 2, transition: 'all 0.2s', transform: menuOpen ? 'translateY(6px) rotate(45deg)' : 'none' }} />
+              <span style={{ display: 'block', width: 20, height: 2, background: '#fff', borderRadius: 2, transition: 'all 0.2s', opacity: menuOpen ? 0 : 1 }} />
+              <span style={{ display: 'block', width: 20, height: 2, background: menuOpen ? '#E81A1A' : '#fff', borderRadius: 2, transition: 'all 0.2s', transform: menuOpen ? 'translateY(-6px) rotate(-45deg)' : 'none' }} />
+            </button>
+          </div>
         </div>
+        {/* Dropdown menu */}
+        {menuOpen && (
+          <div style={{ background: '#0F0F0F', borderTop: '1px solid #1E1E1E', borderBottom: '1px solid #1E1E1E' }}>
+            {TABS.map(t => (
+              <button key={t} onClick={() => { setTab(t); setMenuOpen(false); }} style={{
+                display: 'block', width: '100%', padding: '13px 16px', textAlign: 'left',
+                background: tab === t ? '#1E1E1E' : 'transparent',
+                color: tab === t ? '#fff' : '#888', fontSize: 14, fontWeight: 600,
+                border: 'none', borderBottom: '1px solid #1A1A1A', cursor: 'pointer',
+                borderLeft: tab === t ? '3px solid #E81A1A' : '3px solid transparent',
+              }}>{t}</button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Main */}
