@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, CartesianGrid, Legend
+  PieChart, Pie, Cell, CartesianGrid, Legend, AreaChart, Area
 } from 'recharts';
-import { fmt, margin, marginColor, crewOwed } from '@/lib/studio';
+import { fmt, margin, marginColor } from '@/lib/studio';
 
 const MONO = '"DM Mono", monospace';
-const card = { background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, padding: 20 };
-const label = { fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 };
+const SYNE = 'Syne, sans-serif';
+
+const card = {
+  background: 'linear-gradient(135deg, #1E1E1E 0%, #1a1a1a 100%)',
+  border: '1px solid #2a2a2a',
+  borderRadius: 16,
+  padding: 24,
+};
+
 const STATUS_COLORS = {
   Booked: '#4A9EFF',
   'In Production': '#F59E0B',
@@ -16,20 +23,51 @@ const STATUS_COLORS = {
   Invoiced: '#E81A1A',
 };
 
-function SectionTitle({ children }) {
+const tooltipStyle = {
+  contentStyle: {
+    background: '#111',
+    border: '1px solid #333',
+    borderRadius: 10,
+    fontSize: 11,
+    fontFamily: MONO,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+  },
+  labelStyle: { color: '#888', marginBottom: 4 },
+  cursor: { fill: 'rgba(255,255,255,0.03)' },
+};
+
+function SectionLabel({ children }) {
   return (
-    <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>
+    <div style={{
+      fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase',
+      letterSpacing: '0.12em', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10,
+    }}>
+      <div style={{ flex: 1, height: 1, background: '#222' }} />
       {children}
+      <div style={{ flex: 1, height: 1, background: '#222' }} />
     </div>
   );
 }
 
-function StatCard({ label: lbl, value, sub, color, accent }) {
+function KpiCard({ label, value, sub, color, accent, icon }) {
   return (
-    <div style={{ ...card, padding: '14px 16px', borderLeft: accent ? `3px solid ${accent}` : '1px solid #333' }}>
-      <div style={label}>{lbl}</div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: color || '#fff', letterSpacing: '-0.5px' }}>{value}</div>
-      {sub && <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', marginTop: 4 }}>{sub}</div>}
+    <div style={{
+      background: '#141414',
+      border: '1px solid #252525',
+      borderRadius: 14,
+      padding: '18px 20px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* glow accent */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg, ${accent || '#333'}, transparent)`,
+      }} />
+      {icon && <div style={{ fontSize: 18, marginBottom: 10, opacity: 0.7 }}>{icon}</div>}
+      <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: color || '#fff', letterSpacing: '-0.8px', fontFamily: SYNE }}>{value}</div>
+      {sub && <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 5 }}>{sub}</div>}
     </div>
   );
 }
@@ -37,12 +75,15 @@ function StatCard({ label: lbl, value, sub, color, accent }) {
 export default function AnalyticsView({ projects }) {
   const [yearFilter, setYearFilter] = useState('all');
 
-  const allYears = [...new Set(projects.map(p => p.date ? new Date(p.date).getFullYear() : null).filter(Boolean))].sort((a, b) => b - a);
-  const thisYear = new Date().getFullYear();
+  const allYears = [...new Set(
+    projects.map(p => p.date ? new Date(p.date).getFullYear() : null).filter(Boolean)
+  )].sort((a, b) => b - a);
 
-  const filtered = yearFilter === 'all' ? projects.filter(p => !p.archived) : projects.filter(p => !p.archived && p.date && new Date(p.date).getFullYear() === parseInt(yearFilter));
+  const filtered = yearFilter === 'all'
+    ? projects.filter(p => !p.archived)
+    : projects.filter(p => !p.archived && p.date && new Date(p.date).getFullYear() === parseInt(yearFilter));
 
-  // --- Core KPIs ---
+  // KPIs
   const totalRev = filtered.reduce((s, p) => s + (p.revenue || 0), 0);
   const totalNet = filtered.reduce((s, p) => s + (p.net || 0), 0);
   const totalCrewCost = filtered.reduce((s, p) => s + (p.crew_cost || 0), 0);
@@ -53,12 +94,10 @@ export default function AnalyticsView({ projects }) {
   const avgProjectValue = filtered.length ? Math.round(totalRev / filtered.length) : 0;
   const paidCount = filtered.filter(p => p.paid).length;
   const collectionRate = filtered.length ? Math.round(paidCount / filtered.length * 100) : 0;
-
-  // deliverable completion rate
   const allDels = filtered.flatMap(p => p.deliverables || []);
   const delRate = allDels.length ? Math.round(allDels.filter(d => d.done).length / allDels.length * 100) : 0;
 
-  // --- Monthly chart ---
+  // Monthly
   const monthMap = {};
   filtered.forEach(p => {
     if (!p.date) return;
@@ -72,7 +111,7 @@ export default function AnalyticsView({ projects }) {
   });
   const monthlyData = Object.values(monthMap).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 
-  // --- Status breakdown ---
+  // Status
   const statusMap = {};
   filtered.forEach(p => {
     const s = p.status || 'Booked';
@@ -82,7 +121,7 @@ export default function AnalyticsView({ projects }) {
   });
   const statusData = Object.values(statusMap).sort((a, b) => b.value - a.value);
 
-  // --- Client breakdown ---
+  // Clients
   const clientMap = {};
   filtered.forEach(p => {
     if (!clientMap[p.client]) clientMap[p.client] = { name: p.client, rev: 0, net: 0, count: 0, paid: 0 };
@@ -93,7 +132,7 @@ export default function AnalyticsView({ projects }) {
   });
   const clientData = Object.values(clientMap).sort((a, b) => b.rev - a.rev).slice(0, 8);
 
-  // --- Crew spend ---
+  // Crew
   const crewMap = {};
   filtered.forEach(p => {
     (p.crew || []).forEach(c => {
@@ -105,87 +144,122 @@ export default function AnalyticsView({ projects }) {
   });
   const crewData = Object.values(crewMap).sort((a, b) => b.total - a.total).slice(0, 8);
 
-  // --- Cost breakdown pie ---
+  // Cost pie
   const costPie = [
     { name: 'Net Profit', value: Math.max(totalNet, 0), color: '#7BC853' },
     { name: 'Crew Cost', value: totalCrewCost, color: '#E81A1A' },
     { name: 'Rental Cost', value: totalRentalCost, color: '#F59E0B' },
   ].filter(d => d.value > 0);
 
-  const tooltipStyle = { contentStyle: { background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, fontSize: 11, fontFamily: MONO }, labelStyle: { color: '#888' } };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 40 }}>
 
-      {/* Year filter */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase' }}>Period:</span>
-        {['all', ...allYears.map(String)].map(y => (
-          <button key={y} onClick={() => setYearFilter(y)} style={{
-            padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-            border: 'none', fontFamily: MONO,
-            background: yearFilter === y ? '#E81A1A' : '#1E1E1E',
-            color: yearFilter === y ? '#fff' : '#555',
-          }}>{y === 'all' ? 'All Time' : y}</button>
-        ))}
-      </div>
-
-      {/* KPI grid */}
-      <div>
-        <SectionTitle>Overview</SectionTitle>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
-          <StatCard label="Total Revenue" value={fmt(totalRev)} accent="#E81A1A" />
-          <StatCard label="Total Net Profit" value={fmt(totalNet)} color="#7BC853" accent="#7BC853" />
-          <StatCard label="Collected" value={fmt(collected)} sub={`${collectionRate}% collection rate`} color="#7BC853" accent="#7BC853" />
-          <StatCard label="Outstanding" value={fmt(outstanding)} color={outstanding > 0 ? '#E81A1A' : '#7BC853'} accent={outstanding > 0 ? '#E81A1A' : '#7BC853'} />
-          <StatCard label="Avg Margin" value={`${avgMargin}%`} color={marginColor(avgMargin)} accent={marginColor(avgMargin)} />
-          <StatCard label="Avg Project Value" value={fmt(avgProjectValue)} accent="#4A9EFF" />
-          <StatCard label="Total Projects" value={filtered.length} sub={`${paidCount} paid`} accent="#F59E0B" />
-          <StatCard label="Delivery Rate" value={`${delRate}%`} sub={`${allDels.filter(d => d.done).length}/${allDels.length} deliverables`} accent="#A78BFA" />
+      {/* Header + Year filter */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px' }}>Analytics</div>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>
+            {filtered.length} projects · {fmt(totalRev)} revenue
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #222', borderRadius: 10, padding: '4px 6px' }}>
+          {['all', ...allYears.map(String)].map(y => (
+            <button key={y} onClick={() => setYearFilter(y)} style={{
+              padding: '5px 14px', borderRadius: 7, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              border: 'none', fontFamily: MONO, transition: 'all 0.15s',
+              background: yearFilter === y ? '#E81A1A' : 'transparent',
+              color: yearFilter === y ? '#fff' : '#555',
+            }}>{y === 'all' ? 'All Time' : y}</button>
+          ))}
         </div>
       </div>
 
-      {/* Monthly Revenue + Project Count */}
+      {/* KPI Grid */}
       <div>
-        <SectionTitle>Monthly Revenue & Volume</SectionTitle>
-        <div style={card}>
-          <div style={{ height: 220 }}>
+        <SectionLabel>Key Metrics</SectionLabel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+          <KpiCard label="Total Revenue" value={fmt(totalRev)} accent="#E81A1A" icon="💰" />
+          <KpiCard label="Total Net Profit" value={fmt(totalNet)} color="#7BC853" accent="#7BC853" icon="📈" />
+          <KpiCard label="Collected" value={fmt(collected)} sub={`${collectionRate}% collection rate`} color="#7BC853" accent="#7BC853" icon="✅" />
+          <KpiCard label="Outstanding" value={fmt(outstanding)} color={outstanding > 0 ? '#E81A1A' : '#7BC853'} accent={outstanding > 0 ? '#E81A1A' : '#7BC853'} icon="⏳" />
+          <KpiCard label="Avg Margin" value={`${avgMargin}%`} color={marginColor(avgMargin)} accent={marginColor(avgMargin)} icon="📊" />
+          <KpiCard label="Avg Project Value" value={fmt(avgProjectValue)} accent="#4A9EFF" icon="🎬" />
+          <KpiCard label="Total Projects" value={filtered.length} sub={`${paidCount} paid`} accent="#F59E0B" icon="📁" />
+          <KpiCard label="Delivery Rate" value={`${delRate}%`} sub={`${allDels.filter(d => d.done).length}/${allDels.length} deliverables`} accent="#A78BFA" icon="🎯" />
+        </div>
+      </div>
+
+      {/* Monthly Chart — full width */}
+      <div>
+        <SectionLabel>Monthly Revenue & Volume</SectionLabel>
+        <div style={{ ...card, padding: '24px 24px 16px' }}>
+          <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Peak Month', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Revenue))) : '—', color: '#E81A1A' },
+              { label: 'Avg/Month', value: monthlyData.length ? fmt(Math.round(totalRev / monthlyData.length)) : '—', color: '#fff' },
+              { label: 'Best Net Month', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Net))) : '—', color: '#7BC853' },
+            ].map(s => (
+              <div key={s.label} style={{ background: '#111', borderRadius: 10, padding: '10px 16px' }}>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase', marginBottom: 3 }}>{s.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: s.color }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} barSize={14} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="month" tick={{ fill: '#555', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" tick={{ fill: '#555', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#555', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
+              <AreaChart data={monthlyData} barSize={14} barGap={4}>
+                <defs>
+                  <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#E81A1A" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#E81A1A" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7BC853" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#7BC853" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                <XAxis dataKey="month" tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
                 <Tooltip {...tooltipStyle} formatter={(v, n) => [n === 'Projects' ? v : fmt(v), n]} />
-                <Legend wrapperStyle={{ fontSize: 11, fontFamily: MONO, color: '#777' }} />
-                <Bar yAxisId="left" dataKey="Revenue" fill="rgba(232,26,26,0.65)" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="left" dataKey="Net" fill="rgba(123,200,83,0.7)" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="Projects" fill="rgba(74,158,255,0.5)" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Legend wrapperStyle={{ fontSize: 11, fontFamily: MONO, color: '#555', paddingTop: 12 }} />
+                <Area type="monotone" dataKey="Revenue" stroke="#E81A1A" strokeWidth={2} fill="url(#revGrad)" dot={{ fill: '#E81A1A', r: 3, strokeWidth: 0 }} />
+                <Area type="monotone" dataKey="Net" stroke="#7BC853" strokeWidth={2} fill="url(#netGrad)" dot={{ fill: '#7BC853', r: 3, strokeWidth: 0 }} />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Status breakdown + Cost pie */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Status distribution */}
+      {/* 2-col: Status + Cost Pie */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+        {/* Status */}
         <div>
-          <SectionTitle>Pipeline by Status</SectionTitle>
-          <div style={{ ...card, height: 260, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {statusData.length === 0 ? <div style={{ color: '#555', fontSize: 13 }}>No data</div> :
+          <SectionLabel>Pipeline by Status</SectionLabel>
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {statusData.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> :
               statusData.map(s => {
                 const pct = filtered.length ? Math.round(s.value / filtered.length * 100) : 0;
                 const col = STATUS_COLORS[s.name] || '#666';
                 return (
-                  <div key={s.name}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: col }}>{s.name}</span>
-                      <span style={{ fontFamily: MONO, fontSize: 11, color: '#666' }}>{s.value} · {fmt(s.rev)}</span>
+                  <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700 }}>{s.name}</span>
+                        <span style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>
+                          {s.value} project{s.value !== 1 ? 's' : ''} · {fmt(s.rev)}
+                        </span>
+                      </div>
+                      <div style={{ height: 6, background: '#111', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', borderRadius: 3,
+                          background: `linear-gradient(90deg, ${col}, ${col}88)`,
+                          width: `${pct}%`, transition: 'width 0.6s ease',
+                        }} />
+                      </div>
                     </div>
-                    <div style={{ height: 6, background: '#2A2A2A', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', borderRadius: 3, background: col, width: `${pct}%`, transition: 'width 0.5s ease' }} />
-                    </div>
+                    <span style={{ fontFamily: MONO, fontSize: 10, color: col, minWidth: 30, textAlign: 'right' }}>{pct}%</span>
                   </div>
                 );
               })
@@ -193,28 +267,34 @@ export default function AnalyticsView({ projects }) {
           </div>
         </div>
 
-        {/* Cost breakdown pie */}
+        {/* Cost donut */}
         <div>
-          <SectionTitle>Revenue Breakdown</SectionTitle>
-          <div style={{ ...card, height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-            {costPie.length === 0 ? <div style={{ color: '#555', fontSize: 13 }}>No data</div> : (
+          <SectionLabel>Revenue Split</SectionLabel>
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            {costPie.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> : (
               <>
-                <PieChart width={130} height={130}>
-                  <Pie data={costPie} cx={60} cy={60} innerRadius={35} outerRadius={58} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                <PieChart width={160} height={160}>
+                  <Pie data={costPie} cx={75} cy={75} innerRadius={45} outerRadius={70} paddingAngle={4} dataKey="value" strokeWidth={0}>
                     {costPie.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
                   <Tooltip {...tooltipStyle} formatter={(v) => [fmt(v)]} />
                 </PieChart>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {costPie.map(d => (
-                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 10, height: 10, borderRadius: 2, background: d.color, flexShrink: 0 }} />
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: 600 }}>{fmt(d.value)}</div>
-                        <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{d.name}</div>
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {costPie.map(d => {
+                    const pct = totalRev > 0 ? Math.round(d.value / totalRev * 100) : 0;
+                    return (
+                      <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{d.name}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: 13, fontWeight: 700 }}>{fmt(d.value)}</div>
+                          <div style={{ fontFamily: MONO, fontSize: 9, color: '#444' }}>{pct}%</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -222,46 +302,57 @@ export default function AnalyticsView({ projects }) {
         </div>
       </div>
 
-      {/* Client breakdown */}
+      {/* Client section */}
       <div>
-        <SectionTitle>Top Clients by Revenue</SectionTitle>
-        <div style={card}>
-          <div style={{ height: 200 }}>
+        <SectionLabel>Top Clients</SectionLabel>
+        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+          {/* Chart */}
+          <div style={{ padding: '24px 24px 0', height: 220 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={clientData} layout="vertical" barSize={14}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: '#555', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
-                <YAxis type="category" dataKey="name" tick={{ fill: '#ccc', fontSize: 11 }} axisLine={false} tickLine={false} width={80} />
+              <BarChart data={clientData} layout="vertical" barSize={10} barGap={3}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
+                <YAxis type="category" dataKey="name" tick={{ fill: '#aaa', fontSize: 11, fontFamily: SYNE }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip {...tooltipStyle} formatter={(v, n) => [fmt(v), n]} />
-                <Bar dataKey="rev" name="Revenue" fill="rgba(232,26,26,0.6)" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="net" name="Net" fill="rgba(123,200,83,0.7)" radius={[0, 4, 4, 0]} />
+                <Legend wrapperStyle={{ fontSize: 11, fontFamily: MONO, color: '#555' }} />
+                <Bar dataKey="rev" name="Revenue" fill="rgba(232,26,26,0.65)" radius={[0, 6, 6, 0]} />
+                <Bar dataKey="net" name="Net" fill="rgba(123,200,83,0.7)" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          {/* Client table */}
-          <div style={{ marginTop: 16, overflowX: 'auto' }}>
+          {/* Table */}
+          <div style={{ padding: '0 24px 24px', marginTop: 20, overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
-                <tr>
+                <tr style={{ borderBottom: '1px solid #222' }}>
                   {['Client', 'Projects', 'Revenue', 'Net', 'Avg/Project', 'Paid'].map(h => (
-                    <th key={h} style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', padding: '6px 10px', textAlign: h === 'Client' ? 'left' : 'right', borderBottom: '1px solid #2A2A2A' }}>{h}</th>
+                    <th key={h} style={{
+                      fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase',
+                      padding: '8px 12px', textAlign: h === 'Client' ? 'left' : 'right',
+                      letterSpacing: '0.06em',
+                    }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {clientData.map(c => (
-                  <tr key={c.name} style={{ transition: 'background 0.15s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#2A2A2A'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', background: '#2A2A2A', borderRadius: 4, color: '#D9D9D9', fontFamily: MONO }}>{c.name}</span>
+                {clientData.map((c, idx) => (
+                  <tr key={c.name}
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.15s', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}>
+                    <td style={{ padding: '10px 12px' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{c.name}</span>
                     </td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right', fontFamily: MONO, color: '#666' }}>{c.count}</td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right', fontFamily: MONO }}>{fmt(c.rev)}</td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right', fontFamily: MONO, color: '#7BC853' }}>{fmt(c.net)}</td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right', fontFamily: MONO, color: '#4A9EFF' }}>{fmt(Math.round(c.rev / c.count))}</td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right', fontFamily: MONO }}>
-                      <span style={{ color: c.paid === c.count ? '#7BC853' : '#F59E0B' }}>{c.paid}/{c.count}</span>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#555' }}>{c.count}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, fontWeight: 600 }}>{fmt(c.rev)}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#7BC853', fontWeight: 600 }}>{fmt(c.net)}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#4A9EFF' }}>{fmt(Math.round(c.rev / c.count))}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO }}>
+                      <span style={{
+                        padding: '3px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700,
+                        background: c.paid === c.count ? 'rgba(123,200,83,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: c.paid === c.count ? '#7BC853' : '#F59E0B',
+                      }}>{c.paid}/{c.count}</span>
                     </td>
                   </tr>
                 ))}
@@ -274,26 +365,37 @@ export default function AnalyticsView({ projects }) {
       {/* Crew spend */}
       {crewData.length > 0 && (
         <div>
-          <SectionTitle>Crew Spend</SectionTitle>
+          <SectionLabel>Crew Spend</SectionLabel>
           <div style={card}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
               {crewData.map(c => {
                 const pct = c.total > 0 ? Math.round(c.paid / c.total * 100) : 0;
+                const fullPaid = c.paid >= c.total;
                 return (
-                  <div key={c.name}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{c.projects} shoot{c.projects !== 1 ? 's' : ''}</span>
+                  <div key={c.name} style={{ background: '#111', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e1e1e' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</div>
+                        <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>
+                          {c.projects} shoot{c.projects !== 1 ? 's' : ''}
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                        <span style={{ fontFamily: MONO, fontSize: 11, color: '#7BC853' }}>{fmt(c.paid)} paid</span>
-                        <span style={{ fontFamily: MONO, fontSize: 11 }}>{fmt(c.total)} total</span>
-                        <span style={{ fontFamily: MONO, fontSize: 10, padding: '2px 7px', borderRadius: 4, background: c.paid === c.total ? 'rgba(123,200,83,0.12)' : 'rgba(232,26,26,0.1)', color: c.paid === c.total ? '#7BC853' : '#E81A1A' }}>{pct}%</span>
-                      </div>
+                      <span style={{
+                        fontFamily: MONO, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 6,
+                        background: fullPaid ? 'rgba(123,200,83,0.12)' : 'rgba(232,26,26,0.1)',
+                        color: fullPaid ? '#7BC853' : '#E81A1A',
+                      }}>{pct}%</span>
                     </div>
-                    <div style={{ height: 5, background: '#2A2A2A', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', borderRadius: 3, background: c.paid === c.total ? '#7BC853' : '#E81A1A', width: `${pct}%`, transition: 'width 0.5s ease' }} />
+                    <div style={{ height: 5, background: '#1e1e1e', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
+                      <div style={{
+                        height: '100%', borderRadius: 3,
+                        background: fullPaid ? 'linear-gradient(90deg, #7BC853, #5aa33e)' : 'linear-gradient(90deg, #E81A1A, #c01515)',
+                        width: `${pct}%`, transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontFamily: MONO, fontSize: 10, color: '#7BC853' }}>{fmt(c.paid)} paid</span>
+                      <span style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>{fmt(c.total - c.paid)} owed · {fmt(c.total)} total</span>
                     </div>
                   </div>
                 );
