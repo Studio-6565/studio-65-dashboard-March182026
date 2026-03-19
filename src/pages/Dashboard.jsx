@@ -265,11 +265,7 @@ export default function Dashboard() {
 
         {/* Analytics Tab */}
         {tab === 'Analytics' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <StatsBar projects={projects} />
-            <MonthlyChart projects={projects.filter(p => !p.archived)} />
-            <ClientTable projects={projects} />
-          </div>
+          <AnalyticsView projects={projects} />
         )}
 
         {/* Calendar Tab */}
