@@ -152,62 +152,70 @@ export default function AnalyticsView({ projects }) {
   ].filter(d => d.value > 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 40 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 40 }}>
 
       {/* Header + Year filter */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px' }}>Analytics</div>
-          <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>
-            {filtered.length} projects · {fmt(totalRev)} revenue
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px' }}>Analytics</div>
+            <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>
+              {filtered.length} projects · {fmt(totalRev)} revenue
+            </div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #222', borderRadius: 10, padding: '4px 6px' }}>
-          {['all', ...allYears.map(String)].map(y => (
-            <button key={y} onClick={() => setYearFilter(y)} style={{
-              padding: '5px 14px', borderRadius: 7, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              border: 'none', fontFamily: MONO, transition: 'all 0.15s',
-              background: yearFilter === y ? '#E81A1A' : 'transparent',
-              color: yearFilter === y ? '#fff' : '#555',
-            }}>{y === 'all' ? 'All Time' : y}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* KPI Grid */}
-      <div>
-        <SectionLabel>Key Metrics</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-          <KpiCard label="Total Revenue" value={fmt(totalRev)} accent="#E81A1A" icon="💰" />
-          <KpiCard label="Total Net Profit" value={fmt(totalNet)} color="#7BC853" accent="#7BC853" icon="📈" />
-          <KpiCard label="Collected" value={fmt(collected)} sub={`${collectionRate}% collection rate`} color="#7BC853" accent="#7BC853" icon="✅" />
-          <KpiCard label="Outstanding" value={fmt(outstanding)} color={outstanding > 0 ? '#E81A1A' : '#7BC853'} accent={outstanding > 0 ? '#E81A1A' : '#7BC853'} icon="⏳" />
-          <KpiCard label="Avg Margin" value={`${avgMargin}%`} color={marginColor(avgMargin)} accent={marginColor(avgMargin)} icon="📊" />
-          <KpiCard label="Avg Project Value" value={fmt(avgProjectValue)} accent="#4A9EFF" icon="🎬" />
-          <KpiCard label="Total Projects" value={filtered.length} sub={`${paidCount} paid`} accent="#F59E0B" icon="📁" />
-          <KpiCard label="Delivery Rate" value={`${delRate}%`} sub={`${allDels.filter(d => d.done).length}/${allDels.length} deliverables`} accent="#A78BFA" icon="🎯" />
-        </div>
-      </div>
-
-      {/* Monthly Chart — full width */}
-      <div>
-        <SectionLabel>Monthly Revenue & Volume</SectionLabel>
-        <div style={{ ...card, padding: '24px 24px 16px' }}>
-          <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
-            {[
-              { label: 'Peak Month', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Revenue))) : '—', color: '#E81A1A' },
-              { label: 'Avg/Month', value: monthlyData.length ? fmt(Math.round(totalRev / monthlyData.length)) : '—', color: '#fff' },
-              { label: 'Best Net Month', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Net))) : '—', color: '#7BC853' },
-            ].map(s => (
-              <div key={s.label} style={{ background: '#111', borderRadius: 10, padding: '10px 16px' }}>
-                <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase', marginBottom: 3 }}>{s.label}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: s.color }}>{s.value}</div>
-              </div>
+        {/* Year filter — scrollable on mobile */}
+        <div style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #222', borderRadius: 10, padding: '4px 6px', width: 'fit-content' }}>
+            {['all', ...allYears.map(String)].map(y => (
+              <button key={y} onClick={() => setYearFilter(y)} style={{
+                padding: '5px 14px', borderRadius: 7, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                border: 'none', fontFamily: MONO, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                background: yearFilter === y ? '#E81A1A' : 'transparent',
+                color: yearFilter === y ? '#fff' : '#555',
+              }}>{y === 'all' ? 'All Time' : y}</button>
             ))}
           </div>
-          <div style={{ height: 260 }}>
+        </div>
+      </div>
+
+      {/* KPI Grid — 2 cols on mobile, auto-fill on desktop */}
+      <div>
+        <SectionLabel>Key Metrics</SectionLabel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <KpiCard label="Total Revenue" value={fmt(totalRev)} accent="#E81A1A" icon="💰" />
+          <KpiCard label="Net Profit" value={fmt(totalNet)} color="#7BC853" accent="#7BC853" icon="📈" />
+          <KpiCard label="Collected" value={fmt(collected)} sub={`${collectionRate}% rate`} color="#7BC853" accent="#7BC853" icon="✅" />
+          <KpiCard label="Outstanding" value={fmt(outstanding)} color={outstanding > 0 ? '#E81A1A' : '#7BC853'} accent={outstanding > 0 ? '#E81A1A' : '#7BC853'} icon="⏳" />
+          <KpiCard label="Avg Margin" value={`${avgMargin}%`} color={marginColor(avgMargin)} accent={marginColor(avgMargin)} icon="📊" />
+          <KpiCard label="Avg Project" value={fmt(avgProjectValue)} accent="#4A9EFF" icon="🎬" />
+          <KpiCard label="Projects" value={filtered.length} sub={`${paidCount} paid`} accent="#F59E0B" icon="📁" />
+          <KpiCard label="Delivery Rate" value={`${delRate}%`} sub={`${allDels.filter(d => d.done).length}/${allDels.length} done`} accent="#A78BFA" icon="🎯" />
+        </div>
+      </div>
+
+      {/* Monthly Chart */}
+      <div>
+        <SectionLabel>Monthly Revenue & Volume</SectionLabel>
+        <div style={{ ...card, padding: '16px 14px' }}>
+          {/* Mini stats row — scrollable */}
+          <div style={{ overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 10, width: 'fit-content' }}>
+              {[
+                { label: 'Peak Month', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Revenue))) : '—', color: '#E81A1A' },
+                { label: 'Avg/Month', value: monthlyData.length ? fmt(Math.round(totalRev / monthlyData.length)) : '—', color: '#fff' },
+                { label: 'Best Net', value: monthlyData.length ? fmt(Math.max(...monthlyData.map(m => m.Net))) : '—', color: '#7BC853' },
+              ].map(s => (
+                <div key={s.label} style={{ background: '#111', borderRadius: 10, padding: '8px 14px', flexShrink: 0 }}>
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase', marginBottom: 3 }}>{s.label}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: s.color }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData} barSize={14} barGap={4}>
+              <AreaChart data={monthlyData}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#E81A1A" stopOpacity={0.15} />
@@ -219,86 +227,77 @@ export default function AnalyticsView({ projects }) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                <XAxis dataKey="month" tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
-                <Tooltip {...tooltipStyle} formatter={(v, n) => [n === 'Projects' ? v : fmt(v), n]} />
-                <Legend wrapperStyle={{ fontSize: 11, fontFamily: MONO, color: '#555', paddingTop: 12 }} />
-                <Area type="monotone" dataKey="Revenue" stroke="#E81A1A" strokeWidth={2} fill="url(#revGrad)" dot={{ fill: '#E81A1A', r: 3, strokeWidth: 0 }} />
-                <Area type="monotone" dataKey="Net" stroke="#7BC853" strokeWidth={2} fill="url(#netGrad)" dot={{ fill: '#7BC853', r: 3, strokeWidth: 0 }} />
+                <XAxis dataKey="month" tick={{ fill: '#444', fontSize: 9, fontFamily: MONO }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fill: '#444', fontSize: 9, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} width={38} />
+                <Tooltip {...tooltipStyle} formatter={(v, n) => [fmt(v), n]} />
+                <Legend wrapperStyle={{ fontSize: 10, fontFamily: MONO, color: '#555', paddingTop: 10 }} />
+                <Area type="monotone" dataKey="Revenue" stroke="#E81A1A" strokeWidth={2} fill="url(#revGrad)" dot={false} />
+                <Area type="monotone" dataKey="Net" stroke="#7BC853" strokeWidth={2} fill="url(#netGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* 2-col: Status + Cost Pie */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
-        {/* Status */}
-        <div>
-          <SectionLabel>Pipeline by Status</SectionLabel>
-          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {statusData.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> :
-              statusData.map(s => {
-                const pct = filtered.length ? Math.round(s.value / filtered.length * 100) : 0;
-                const col = STATUS_COLORS[s.name] || '#666';
-                return (
-                  <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 700 }}>{s.name}</span>
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>
-                          {s.value} project{s.value !== 1 ? 's' : ''} · {fmt(s.rev)}
-                        </span>
+      {/* Status — full width on mobile */}
+      <div>
+        <SectionLabel>Pipeline by Status</SectionLabel>
+        <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {statusData.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> :
+            statusData.map(s => {
+              const pct = filtered.length ? Math.round(s.value / filtered.length * 100) : 0;
+              const col = STATUS_COLORS[s.name] || '#666';
+              return (
+                <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, flexWrap: 'wrap', gap: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{s.name}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{s.value} · {fmt(s.rev)}</span>
+                    </div>
+                    <div style={{ height: 6, background: '#111', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: 3, background: `linear-gradient(90deg, ${col}, ${col}88)`, width: `${pct}%`, transition: 'width 0.6s ease' }} />
+                    </div>
+                  </div>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: col, minWidth: 28, textAlign: 'right' }}>{pct}%</span>
+                </div>
+              );
+            })
+          }
+        </div>
+      </div>
+
+      {/* Cost donut — full width on mobile, horizontal layout */}
+      <div>
+        <SectionLabel>Revenue Split</SectionLabel>
+        <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
+          {costPie.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> : (
+            <>
+              <PieChart width={140} height={140}>
+                <Pie data={costPie} cx={65} cy={65} innerRadius={40} outerRadius={62} paddingAngle={4} dataKey="value" strokeWidth={0}>
+                  {costPie.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                </Pie>
+                <Tooltip {...tooltipStyle} formatter={(v) => [fmt(v)]} />
+              </PieChart>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 160 }}>
+                {costPie.map(d => {
+                  const pct = totalRev > 0 ? Math.round(d.value / totalRev * 100) : 0;
+                  return (
+                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{d.name}</div>
                       </div>
-                      <div style={{ height: 6, background: '#111', borderRadius: 3, overflow: 'hidden' }}>
-                        <div style={{
-                          height: '100%', borderRadius: 3,
-                          background: `linear-gradient(90deg, ${col}, ${col}88)`,
-                          width: `${pct}%`, transition: 'width 0.6s ease',
-                        }} />
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 13, fontWeight: 700 }}>{fmt(d.value)}</div>
+                        <div style={{ fontFamily: MONO, fontSize: 9, color: '#444' }}>{pct}%</div>
                       </div>
                     </div>
-                    <span style={{ fontFamily: MONO, fontSize: 10, color: col, minWidth: 30, textAlign: 'right' }}>{pct}%</span>
-                  </div>
-                );
-              })
-            }
-          </div>
-        </div>
-
-        {/* Cost donut */}
-        <div>
-          <SectionLabel>Revenue Split</SectionLabel>
-          <div style={{ ...card, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-            {costPie.length === 0 ? <div style={{ color: '#444', fontSize: 13 }}>No data</div> : (
-              <>
-                <PieChart width={160} height={160}>
-                  <Pie data={costPie} cx={75} cy={75} innerRadius={45} outerRadius={70} paddingAngle={4} dataKey="value" strokeWidth={0}>
-                    {costPie.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip {...tooltipStyle} formatter={(v) => [fmt(v)]} />
-                </PieChart>
-                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {costPie.map(d => {
-                    const pct = totalRev > 0 ? Math.round(d.value / totalRev * 100) : 0;
-                    return (
-                      <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: 2, background: d.color, flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{d.name}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 13, fontWeight: 700 }}>{fmt(d.value)}</div>
-                          <div style={{ fontFamily: MONO, fontSize: 9, color: '#444' }}>{pct}%</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -306,53 +305,38 @@ export default function AnalyticsView({ projects }) {
       <div>
         <SectionLabel>Top Clients</SectionLabel>
         <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          {/* Chart */}
-          <div style={{ padding: '24px 24px 0', height: 220 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={clientData} layout="vertical" barSize={10} barGap={3}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: '#444', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
-                <YAxis type="category" dataKey="name" tick={{ fill: '#aaa', fontSize: 11, fontFamily: SYNE }} axisLine={false} tickLine={false} width={90} />
-                <Tooltip {...tooltipStyle} formatter={(v, n) => [fmt(v), n]} />
-                <Legend wrapperStyle={{ fontSize: 11, fontFamily: MONO, color: '#555' }} />
-                <Bar dataKey="rev" name="Revenue" fill="rgba(232,26,26,0.65)" radius={[0, 6, 6, 0]} />
-                <Bar dataKey="net" name="Net" fill="rgba(123,200,83,0.7)" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          {/* Scrollable client cards on mobile */}
+          <div style={{ padding: '16px 16px 0', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            <div style={{ display: 'flex', gap: 10, width: 'fit-content', paddingBottom: 4 }}>
+              {clientData.map(c => (
+                <div key={c.name} style={{ background: '#111', borderRadius: 10, padding: '10px 14px', minWidth: 130, flexShrink: 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>{c.name}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700 }}>{fmt(c.rev)}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 10, color: '#7BC853', marginTop: 2 }}>{fmt(c.net)} net</div>
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', marginTop: 4 }}>{c.count} project{c.count !== 1 ? 's' : ''}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          {/* Table */}
-          <div style={{ padding: '0 24px 24px', marginTop: 20, overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          {/* Full table */}
+          <div style={{ padding: '12px 16px 16px', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 460 }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #222' }}>
-                  {['Client', 'Projects', 'Revenue', 'Net', 'Avg/Project', 'Paid'].map(h => (
-                    <th key={h} style={{
-                      fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase',
-                      padding: '8px 12px', textAlign: h === 'Client' ? 'left' : 'right',
-                      letterSpacing: '0.06em',
-                    }}>{h}</th>
+                  {['Client', 'Rev', 'Net', 'Avg', 'Paid'].map(h => (
+                    <th key={h} style={{ fontFamily: MONO, fontSize: 9, color: '#444', textTransform: 'uppercase', padding: '6px 10px', textAlign: h === 'Client' ? 'left' : 'right', letterSpacing: '0.06em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {clientData.map((c, idx) => (
-                  <tr key={c.name}
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.15s', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'}>
-                    <td style={{ padding: '10px 12px' }}>
-                      <span style={{ fontSize: 12, fontWeight: 700 }}>{c.name}</span>
-                    </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#555' }}>{c.count}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, fontWeight: 600 }}>{fmt(c.rev)}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#7BC853', fontWeight: 600 }}>{fmt(c.net)}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO, color: '#4A9EFF' }}>{fmt(Math.round(c.rev / c.count))}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: MONO }}>
-                      <span style={{
-                        padding: '3px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700,
-                        background: c.paid === c.count ? 'rgba(123,200,83,0.12)' : 'rgba(245,158,11,0.12)',
-                        color: c.paid === c.count ? '#7BC853' : '#F59E0B',
-                      }}>{c.paid}/{c.count}</span>
+                  <tr key={c.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
+                    <td style={{ padding: '8px 10px', fontSize: 12, fontWeight: 700 }}>{c.name}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: MONO, fontWeight: 600 }}>{fmt(c.rev)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: MONO, color: '#7BC853', fontWeight: 600 }}>{fmt(c.net)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: MONO, color: '#4A9EFF' }}>{fmt(Math.round(c.rev / c.count))}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: MONO }}>
+                      <span style={{ padding: '2px 7px', borderRadius: 5, fontSize: 10, fontWeight: 700, background: c.paid === c.count ? 'rgba(123,200,83,0.12)' : 'rgba(245,158,11,0.12)', color: c.paid === c.count ? '#7BC853' : '#F59E0B' }}>{c.paid}/{c.count}</span>
                     </td>
                   </tr>
                 ))}
@@ -366,34 +350,24 @@ export default function AnalyticsView({ projects }) {
       {crewData.length > 0 && (
         <div>
           <SectionLabel>Crew Spend</SectionLabel>
-          <div style={card}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+          <div style={{ ...card, padding: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {crewData.map(c => {
                 const pct = c.total > 0 ? Math.round(c.paid / c.total * 100) : 0;
                 const fullPaid = c.paid >= c.total;
                 return (
-                  <div key={c.name} style={{ background: '#111', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e1e1e' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                  <div key={c.name} style={{ background: '#111', borderRadius: 12, padding: '12px 14px', border: '1px solid #1e1e1e' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</div>
-                        <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>
-                          {c.projects} shoot{c.projects !== 1 ? 's' : ''}
-                        </div>
+                        <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginTop: 2 }}>{c.projects} shoot{c.projects !== 1 ? 's' : ''}</div>
                       </div>
-                      <span style={{
-                        fontFamily: MONO, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 6,
-                        background: fullPaid ? 'rgba(123,200,83,0.12)' : 'rgba(232,26,26,0.1)',
-                        color: fullPaid ? '#7BC853' : '#E81A1A',
-                      }}>{pct}%</span>
+                      <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 6, background: fullPaid ? 'rgba(123,200,83,0.12)' : 'rgba(232,26,26,0.1)', color: fullPaid ? '#7BC853' : '#E81A1A' }}>{pct}%</span>
                     </div>
                     <div style={{ height: 5, background: '#1e1e1e', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
-                      <div style={{
-                        height: '100%', borderRadius: 3,
-                        background: fullPaid ? 'linear-gradient(90deg, #7BC853, #5aa33e)' : 'linear-gradient(90deg, #E81A1A, #c01515)',
-                        width: `${pct}%`, transition: 'width 0.6s ease',
-                      }} />
+                      <div style={{ height: '100%', borderRadius: 3, background: fullPaid ? 'linear-gradient(90deg, #7BC853, #5aa33e)' : 'linear-gradient(90deg, #E81A1A, #c01515)', width: `${pct}%`, transition: 'width 0.6s ease' }} />
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 4 }}>
                       <span style={{ fontFamily: MONO, fontSize: 10, color: '#7BC853' }}>{fmt(c.paid)} paid</span>
                       <span style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>{fmt(c.total - c.paid)} owed · {fmt(c.total)} total</span>
                     </div>
