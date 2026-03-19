@@ -143,7 +143,7 @@ export default function Portal() {
             {pastProjects.length > 0 && (
               <div>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Past</div>
-                {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} />)}
+                {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
               </div>
             )}
           </>
