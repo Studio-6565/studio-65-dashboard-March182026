@@ -306,7 +306,22 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
       {tab === 'crew' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Crew Members</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Crew Members</div>
+              {(p.crew || []).length > 0 && (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}>
+                    ✓ {(p.crew || []).filter(c => c.avail === 'yes').length}
+                  </span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}>
+                    ✗ {(p.crew || []).filter(c => c.avail === 'no').length}
+                  </span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(100,100,100,0.12)', color: '#666' }}>
+                    ⏳ {(p.crew || []).filter(c => !c.avail || c.avail === 'pending').length}
+                  </span>
+                </div>
+              )}
+            </div>
             {(p.crew || []).some(c => c.phone) && (
               <button onClick={handleNotifyAllCrew} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
                 📣 Notify All Crew
