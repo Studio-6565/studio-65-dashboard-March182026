@@ -86,7 +86,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   };
 
   const handleEdit = (c) => {
-    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '' });
+    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '', portal_password: c.portal_password || '' });
     setEditingId(c.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -154,6 +154,11 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
               <div><label style={labelStyle}>Default Rate ($/hr or flat)</label><input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder="e.g. 50 or 1200" /></div>
             </div>
             <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
+            <div>
+              <label style={labelStyle}>Portal Access Code</label>
+              <input style={inputStyle} value={form.portal_password} onChange={e => setForm(f => ({ ...f, portal_password: e.target.value }))} placeholder="e.g. vithu2025 (they use this to log in)" />
+              <div style={{ fontSize: 10, color: '#555', marginTop: 4, fontFamily: '"DM Mono", monospace' }}>Share: {window.location.origin}/portal</div>
+            </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleSave} style={{ flex: 1, padding: '10px 20px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                 {editingId ? 'Save Changes' : 'Add Contact'}
