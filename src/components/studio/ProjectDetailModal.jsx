@@ -335,19 +335,43 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                     </div>
                   ) : (
                     // View mode
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap',
+                      borderLeft: `3px solid ${c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#444'}`,
+                      paddingLeft: 10, marginLeft: -12,
+                    }}>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
                       <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
                         <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
-                        {/* Availability badge */}
-                        <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, padding: '2px 7px', borderRadius: 4, fontWeight: 700,
-                            background: c.avail === 'yes' ? 'rgba(123,200,83,0.15)' : c.avail === 'no' ? 'rgba(232,26,26,0.12)' : 'rgba(100,100,100,0.12)',
-                            color: c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#666'
-                          }}>{c.avail === 'yes' ? '✓ Available' : c.avail === 'no' ? '✗ Unavailable' : '— Pending'}</span>
-                          <button onClick={() => handleSetAvail(i, 'yes')} title="Mark Available" style={{ padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(123,200,83,0.3)', background: 'transparent', color: '#7BC853' }}>Y</button>
-                          <button onClick={() => handleSetAvail(i, 'no')} title="Mark Unavailable" style={{ padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(232,26,26,0.3)', background: 'transparent', color: '#E81A1A' }}>N</button>
+                        {/* Availability status + quick Y/N toggle */}
+                        <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{
+                            fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700,
+                            background: c.avail === 'yes' ? 'rgba(123,200,83,0.18)' : c.avail === 'no' ? 'rgba(232,26,26,0.15)' : 'rgba(100,100,100,0.12)',
+                            color: c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#666',
+                            border: `1px solid ${c.avail === 'yes' ? 'rgba(123,200,83,0.3)' : c.avail === 'no' ? 'rgba(232,26,26,0.25)' : '#333'}`,
+                          }}>
+                            {c.avail === 'yes' ? '✓ Confirmed' : c.avail === 'no' ? '✗ Declined' : '⏳ Awaiting'}
+                          </span>
+                          <button
+                            onClick={() => handleSetAvail(i, c.avail === 'yes' ? 'pending' : 'yes')}
+                            title="Mark Available"
+                            style={{
+                              padding: '3px 10px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                              border: `1px solid ${c.avail === 'yes' ? '#7BC853' : 'rgba(123,200,83,0.3)'}`,
+                              background: c.avail === 'yes' ? 'rgba(123,200,83,0.2)' : 'transparent',
+                              color: '#7BC853',
+                            }}>Y</button>
+                          <button
+                            onClick={() => handleSetAvail(i, c.avail === 'no' ? 'pending' : 'no')}
+                            title="Mark Unavailable"
+                            style={{
+                              padding: '3px 10px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                              border: `1px solid ${c.avail === 'no' ? '#E81A1A' : 'rgba(232,26,26,0.3)'}`,
+                              background: c.avail === 'no' ? 'rgba(232,26,26,0.15)' : 'transparent',
+                              color: '#E81A1A',
+                            }}>N</button>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
