@@ -593,6 +593,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, textDecoration: d.done ? 'line-through' : 'none', color: d.done ? '#666' : '#fff' }}>{d.name}</div>
                     {d.due && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>Due: {d.due}</div>}
+                    {d.link && <a href={d.link} target="_blank" rel="noreferrer" style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF', marginTop: 2, display: 'block' }}>📎 View Submission</a>}
                   </div>
                   <button onClick={() => handleDelDeliverable(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
                 </div>
