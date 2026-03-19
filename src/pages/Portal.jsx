@@ -185,9 +185,24 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {role.type === 'crew' && (
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700, background: role.entry.avail === 'yes' ? 'rgba(123,200,83,0.15)' : role.entry.avail === 'no' ? 'rgba(232,26,26,0.12)' : 'rgba(100,100,100,0.1)', color: role.entry.avail === 'yes' ? '#7BC853' : role.entry.avail === 'no' ? '#E81A1A' : '#666' }}>
-              {role.entry.avail === 'yes' ? '✓ Confirmed' : role.entry.avail === 'no' ? '✗ Declined' : '⏳ Awaiting'}
-            </span>
+            role.entry.avail === 'yes' || role.entry.avail === 'no' ? (
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700, background: role.entry.avail === 'yes' ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)', color: role.entry.avail === 'yes' ? '#7BC853' : '#E81A1A' }}>
+                {role.entry.avail === 'yes' ? '✓ Confirmed' : '✗ Declined'}
+              </span>
+            ) : (
+              <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                <button
+                  disabled={saving}
+                  onClick={() => handleAvail('yes')}
+                  style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}
+                >✓ Confirm</button>
+                <button
+                  disabled={saving}
+                  onClick={() => handleAvail('no')}
+                  style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}
+                >✗ Decline</button>
+              </div>
+            )
           )}
           <span style={{ color: '#555', fontSize: 12 }}>{active ? '▲' : '▼'}</span>
         </div>
