@@ -4,6 +4,10 @@ import WaButton from './WaButton';
 import { fmt, fmtH, fmtTs, fmtDateRange, crewOwed, rentalsOwed, margin, marginColor, STATUS_STYLE, crewAvailMsg, crewPayMsg, gearAvailMsg, gearPayMsg, addLog } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
+import SetupTab from './tabs/SetupTab';
+import CallSheetTab from './tabs/CallSheetTab';
+import RemindersTab from './tabs/RemindersTab';
+import CrewRatingsTab from './tabs/CrewRatingsTab';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
