@@ -160,6 +160,12 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
   const del = p.deliverables || [];
   const doneDel = del.filter(d => d.done).length;
   const [saving, setSaving] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [delLinks, setDelLinks] = useState({});
+  const [delLinkSaving, setDelLinkSaving] = useState({});
+
+  const myCrewEntry = (p.crew || []).find(c => c.name.toLowerCase() === contact.name.toLowerCase());
 
   const handleAvail = async (status) => {
     setSaving(true);
@@ -169,6 +175,26 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
     await base44.entities.Project.update(p.id, { ...p, crew });
     onAvailChange(p.id, crew);
     setSaving(false);
+  };
+
+  const handleSaveNote = async () => {
+    if (!noteText.trim()) return;
+    setNoteSaving(true);
+    const crew = (p.crew || []).map(c =>
+      c.name.toLowerCase() === contact.name.toLowerCase() ? { ...c, portal_note: noteText.trim() } : c
+    );
+    await base44.entities.Project.update(p.id, { ...p, crew });
+    onAvailChange(p.id, crew);
+    setNoteSaving(false);
+    setNoteText('');
+  };
+
+  const handleSaveDelLink = async (i, link) => {
+    setDelLinkSaving(s => ({ ...s, [i]: true }));
+    const deliverables = (p.deliverables || []).map((d, j) => j === i ? { ...d, link } : d);
+    await base44.entities.Project.update(p.id, { ...p, deliverables });
+    onAvailChange(p.id, p.crew || []);
+    setDelLinkSaving(s => ({ ...s, [i]: false }));
   };
 
   return (
