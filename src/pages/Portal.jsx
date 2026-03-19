@@ -259,10 +259,30 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
               <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Deliverables — {doneDel}/{del.length} done</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {del.map((d, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#2A2A2A', borderRadius: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.done ? '#7BC853' : '#444', flexShrink: 0 }} />
-                    <div style={{ flex: 1, fontSize: 12, textDecoration: d.done ? 'line-through' : 'none', color: d.done ? '#555' : '#ddd' }}>{d.name}</div>
-                    {d.due && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666' }}>{d.due}</span>}
+                  <div key={i} style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: d.link ? 6 : 0 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.done ? '#7BC853' : '#444', flexShrink: 0 }} />
+                      <div style={{ flex: 1, fontSize: 12, textDecoration: d.done ? 'line-through' : 'none', color: d.done ? '#555' : '#ddd' }}>{d.name}</div>
+                      {d.due && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666' }}>{d.due}</span>}
+                    </div>
+                    {d.link && (
+                      <a href={d.link} target="_blank" rel="noreferrer" style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF', marginLeft: 18 }}>📎 {d.link}</a>
+                    )}
+                    {role.type === 'crew' && (
+                      <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input
+                          value={delLinks[i] !== undefined ? delLinks[i] : (d.link || '')}
+                          onChange={e => setDelLinks(l => ({ ...l, [i]: e.target.value }))}
+                          placeholder="Paste delivery link (Dropbox, Drive, WeTransfer...)"
+                          style={{ flex: 1, background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '6px 10px', color: '#fff', fontSize: 11, outline: 'none', fontFamily: 'Syne, sans-serif' }}
+                        />
+                        <button
+                          onClick={() => handleSaveDelLink(i, delLinks[i] !== undefined ? delLinks[i] : (d.link || ''))}
+                          disabled={delLinkSaving[i]}
+                          style={{ padding: '6px 12px', background: '#E81A1A', border: 'none', borderRadius: 6, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                        >{delLinkSaving[i] ? '...' : d.link ? 'Update' : 'Submit'}</button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
