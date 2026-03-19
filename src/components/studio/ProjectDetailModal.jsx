@@ -424,16 +424,29 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {/* Book: WA + Email */}
                         {c.phone && (
                           <button onClick={() => { const phone = c.phone.replace(/[^0-9+]/g,'').replace('+',''); window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(crewBookingMsg(c)),'_blank'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>
-                            📣 Book
+                            📣 Book WA
                           </button>
                         )}
-                        <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail?" />
-                        <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Payment" />
                         {c.email && (
-                          <button onClick={() => handleEmailCrew(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>
-                            ✉ Email
+                          <button onClick={() => handleEmailCrew(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.1)', color: '#25D366' }}>
+                            📣 Book ✉
+                          </button>
+                        )}
+                        {/* Avail: WA + Email */}
+                        <WaButton phone={c.phone} message={crewAvailMsg(c, p)} label="Avail? WA" />
+                        {c.email && (
+                          <button onClick={() => handleEmailCrewAvail(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.1)', color: '#4A9EFF' }}>
+                            Avail? ✉
+                          </button>
+                        )}
+                        {/* Payment: WA + Email */}
+                        <WaButton phone={c.phone} message={crewPayMsg(c, p)} label="Pay WA" />
+                        {c.email && (
+                          <button onClick={() => handleEmailCrewPayment(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.1)', color: '#4A9EFF' }}>
+                            Pay ✉
                           </button>
                         )}
                         <button onClick={() => handleEditCrewStart(i)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>Edit</button>
