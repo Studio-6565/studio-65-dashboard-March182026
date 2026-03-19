@@ -110,9 +110,9 @@ export default function AnalyticsView({ projects }) {
         </div>
       </div>
 
-      {/* KPI strip — 2×4 grid, compact */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-        {[
+      {/* KPI strip */}
+      {(() => {
+        const kpis = [
           { l: 'Revenue', v: fmt(totalRev), c: '#fff' },
           { l: 'Net Profit', v: fmt(totalNet), c: '#7BC853' },
           { l: 'Collected', v: fmt(collected), c: '#7BC853', s: `${collRate}%` },
@@ -121,14 +121,35 @@ export default function AnalyticsView({ projects }) {
           { l: 'Avg Project', v: fmt(f.length ? Math.round(totalRev / f.length) : 0), c: '#4A9EFF' },
           { l: 'Projects', v: f.length, c: '#fff', s: `${paidCount} paid` },
           { l: 'Delivery', v: `${delRate}%`, c: '#A78BFA', s: `${allDels.filter(d=>d.done).length}/${allDels.length}` },
-        ].map(k => (
-          <div key={k.l} style={{ background: '#141414', border: '1px solid #222', borderRadius: 10, padding: '10px 12px' }}>
-            <div style={{ fontFamily: MONO, fontSize: 8, color: '#444', textTransform: 'uppercase', marginBottom: 4 }}>{k.l}</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: k.c, letterSpacing: '-0.5px' }}>{k.v}</div>
-            {k.s && <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', marginTop: 2 }}>{k.s}</div>}
-          </div>
-        ))}
-      </div>
+        ];
+        const cardStyle = (k) => ({ background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 8, padding: '8px 14px', flexShrink: 0, minWidth: 110 });
+        return (
+          <>
+            {/* Mobile: horizontal scroll */}
+            <div className="md-hidden" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div style={{ display: 'flex', gap: 8, paddingBottom: 4, minWidth: 'max-content' }}>
+                {kpis.map(k => (
+                  <div key={k.l} style={cardStyle(k)}>
+                    <div style={{ fontFamily: MONO, fontSize: 8, color: '#555', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3, whiteSpace: 'nowrap' }}>{k.l}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.5px', color: k.c, whiteSpace: 'nowrap' }}>{k.v}</div>
+                    {k.s && <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', marginTop: 2 }}>{k.s}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Desktop: grid */}
+            <div className="md-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {kpis.map(k => (
+                <div key={k.l} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>{k.l}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', color: k.c }}>{k.v}</div>
+                  {k.s && <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', marginTop: 2 }}>{k.s}</div>}
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Monthly chart */}
       <div style={C}>
