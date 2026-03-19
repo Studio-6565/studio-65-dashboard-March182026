@@ -36,34 +36,40 @@ export default function TimelineView({ projects, onOpenDetail }) {
             const m = margin(p);
             const ss = STATUS_STYLE[st] || STATUS_STYLE['Booked'];
             return (
-              <div key={p.id} onClick={() => onOpenDetail(p)} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, padding: 18, marginBottom: 8, cursor: 'pointer', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#555'} onMouseLeave={e => e.currentTarget.style.borderColor = '#333'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: STATUS_DOT[st] || '#666', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>{p.date}</span>
-                      <span style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</span>
-                      <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', background: '#2A2A2A', borderRadius: 4, color: '#D9D9D9', fontFamily: '"DM Mono", monospace' }}>{p.client}</span>
-                      <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, fontFamily: '"DM Mono", monospace', fontWeight: 600, background: ss.bg, color: ss.clr }}>{st}</span>
-                    </div>
+              <div
+                key={p.id}
+                onClick={() => onOpenDetail(p)}
+                style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#555'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#333'}
+              >
+                {/* Top row: dot + name + client + status */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_DOT[st] || '#666', flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>{p.name}</span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666' }}>{p.date}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', background: '#2A2A2A', borderRadius: 4, color: '#D9D9D9', fontFamily: '"DM Mono", monospace' }}>{p.client}</span>
+                  <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, fontFamily: '"DM Mono", monospace', fontWeight: 600, background: ss.bg, color: ss.clr }}>{st}</span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 9px', borderRadius: 20, fontWeight: 500, background: p.paid ? 'rgba(123,200,83,0.1)' : 'rgba(232,26,26,0.1)', color: p.paid ? '#7BC853' : '#E81A1A', marginLeft: 'auto' }}>{p.paid ? 'Paid' : 'Unpaid'}</span>
+                </div>
+                {/* Bottom row: financials + deliverables */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 1 }}>Net</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#7BC853' }}>{fmt(p.net)}</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, flexWrap: 'wrap' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>Net</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#7BC853' }}>{fmt(p.net)}</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>Margin</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: marginColor(m) }}>{m}%</div>
-                    </div>
-                    <div style={{ textAlign: 'right', minWidth: 80 }}>
-                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666', marginBottom: 4 }}>Deliverables {done}/{del.length}</div>
+                  <div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 1 }}>Margin</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: marginColor(m) }}>{m}%</div>
+                  </div>
+                  {del.length > 0 && (
+                    <div style={{ flex: 1, minWidth: 80, maxWidth: 160 }}>
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 4 }}>Deliverables {done}/{del.length}</div>
                       <div style={{ height: 3, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${pct}%`, background: '#7BC853', borderRadius: 2 }} />
                       </div>
                     </div>
-                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 20, fontWeight: 500, background: p.paid ? 'rgba(123,200,83,0.1)' : 'rgba(232,26,26,0.1)', color: p.paid ? '#7BC853' : '#E81A1A', flexShrink: 0 }}>{p.paid ? 'Paid' : 'Not Paid'}</span>
-                  </div>
+                  )}
                 </div>
               </div>
             );

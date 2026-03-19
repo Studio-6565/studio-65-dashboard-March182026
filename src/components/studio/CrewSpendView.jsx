@@ -21,41 +21,32 @@ export default function CrewSpendView({ projects }) {
   );
 
   return (
-    <div style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-        <thead>
-          <tr>
-            {['Crew Member', 'Projects', 'Total Earned', 'Paid', 'Owed'].map((h, i) => (
-              <th key={h} style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: i === 3 ? '#7BC853' : i === 4 ? '#E81A1A' : '#666', textTransform: 'uppercase', padding: '6px 8px', textAlign: i > 1 ? 'right' : 'left', borderBottom: '1px solid #333' }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {members.map(name => {
-            const d = map[name];
-            const total = d.paid + d.owed;
-            const pct = total > 0 ? Math.round(d.paid / total * 100) : 0;
-            return (
-              <React.Fragment key={name}>
-                <tr>
-                  <td style={{ padding: '8px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', fontWeight: 600 }}>{name}</td>
-                  <td style={{ padding: '8px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>{d.projects.size}</td>
-                  <td style={{ padding: '8px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'right', fontFamily: '"DM Mono", monospace' }}>{fmt(total)}</td>
-                  <td style={{ padding: '8px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'right', fontFamily: '"DM Mono", monospace', color: '#7BC853' }}>{fmt(d.paid)}</td>
-                  <td style={{ padding: '8px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'right', fontFamily: '"DM Mono", monospace', color: d.owed > 0 ? '#E81A1A' : '#666' }}>{fmt(d.owed)}</td>
-                </tr>
-                <tr>
-                  <td colSpan={5} style={{ padding: '0 8px 8px' }}>
-                    <div style={{ height: 4, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: '#7BC853', borderRadius: 2 }} />
-                    </div>
-                  </td>
-                </tr>
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {members.map(name => {
+        const d = map[name];
+        const total = d.paid + d.owed;
+        const pct = total > 0 ? Math.round(d.paid / total * 100) : 0;
+        const allPaid = d.owed === 0;
+        return (
+          <div key={name} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{name}</span>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#555' }}>{d.projects.size} shoot{d.projects.size !== 1 ? 's' : ''}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#7BC853' }}>{fmt(d.paid)} paid</span>
+                {d.owed > 0 && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#E81A1A' }}>{fmt(d.owed)} owed</span>}
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>{fmt(total)} total</span>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: allPaid ? 'rgba(123,200,83,0.12)' : 'rgba(232,26,26,0.08)', color: allPaid ? '#7BC853' : '#E81A1A' }}>{pct}%</span>
+              </div>
+            </div>
+            <div style={{ height: 4, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: allPaid ? '#7BC853' : '#E81A1A', borderRadius: 2, transition: 'width 0.4s' }} />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
