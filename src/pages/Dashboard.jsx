@@ -273,6 +273,11 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Calendar Tab */}
+        {tab === 'Calendar' && (
+          <CalendarView projects={projects} onOpenDetail={openDetail} />
+        )}
+
         {/* Crew Tab */}
         {tab === 'Crew' && (
           <div>
