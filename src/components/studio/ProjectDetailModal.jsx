@@ -247,7 +247,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     showToast(`${name} saved to Contacts`, 'green');
   };
 
-  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
+  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720}>
