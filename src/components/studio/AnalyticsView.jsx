@@ -111,7 +111,7 @@ export default function AnalyticsView({ projects }) {
       </div>
 
       {/* KPI strip — 2×4 grid, compact */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
         {[
           { l: 'Revenue', v: fmt(totalRev), c: '#fff' },
           { l: 'Net Profit', v: fmt(totalNet), c: '#7BC853' },
