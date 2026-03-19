@@ -14,7 +14,7 @@ export default function StudioModal({ open, onClose, children, maxWidth = 660 })
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)',
         zIndex: 100, display: 'flex', alignItems: 'flex-end',
-        justifyContent: 'center', overflowY: 'auto',
+        justifyContent: 'center', overflowY: 'auto', padding: 0,
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
