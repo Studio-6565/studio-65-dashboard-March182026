@@ -137,7 +137,7 @@ export default function Portal() {
             {upcomingProjects.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Upcoming</div>
-                {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} />)}
+                {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
               </div>
             )}
             {pastProjects.length > 0 && (
