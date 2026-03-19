@@ -6,13 +6,14 @@ import MonthlyChart from '@/components/studio/MonthlyChart';
 import ClientTable from '@/components/studio/ClientTable';
 import CrewSpendView from '@/components/studio/CrewSpendView';
 import TimelineView from '@/components/studio/TimelineView';
+import CalendarView from '@/components/studio/CalendarView';
 import ContactsView from '@/components/studio/ContactsView';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectDetailModal from '@/components/studio/ProjectDetailModal';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import { nextProjectId, addLog } from '@/lib/studio';
 
-const TABS = ['Projects', 'Analytics', 'Crew', 'Timeline', 'Contacts'];
+const TABS = ['Projects', 'Analytics', 'Calendar', 'Crew', 'Timeline', 'Contacts'];
 const STATUS_FILTERS = ['All', 'Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
 
 export default function Dashboard() {
