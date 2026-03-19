@@ -547,13 +547,23 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
           </div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Add Rental Item</div>
           <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: 10, alignItems: 'end' }}>
-              {[['Equipment', 'equipment', 'e.g. Camera', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text'], ['Cost ($)', 'cost', '0', 'number'], ['WhatsApp #', 'phone', '+1 416 555 0100', 'text']].map(([l, k, ph, type]) => (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+              {[['Equipment', 'equipment', 'e.g. Camera', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text'], ['Cost ($)', 'cost', '0', 'number']].map(([l, k, ph, type]) => (
                 <div key={k}>
                   <label style={LL}>{l}</label>
                   <input style={{ ...SS, background: '#1E1E1E' }} type={type} placeholder={ph} value={rentalForm[k]} onChange={e => setRentalForm(f => ({ ...f, [k]: e.target.value }))} />
                 </div>
               ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 10, alignItems: 'end' }}>
+              <div>
+                <label style={LL}>WhatsApp #</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="text" placeholder="+1 416 555 0100" value={rentalForm.phone} onChange={e => setRentalForm(f => ({ ...f, phone: e.target.value }))} />
+              </div>
+              <div>
+                <label style={LL}>Email</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="email" placeholder="vendor@example.com" value={rentalForm.email} onChange={e => setRentalForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
               <button onClick={handleAddRental} style={{ height: 38, padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
             </div>
           </div>
