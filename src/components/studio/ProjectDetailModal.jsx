@@ -21,7 +21,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
   const [editingCrewForm, setEditingCrewForm] = useState({});
-  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '' });
+  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
   const [delForm, setDelForm] = useState({ name: '', due: '' });
   const [hourForm, setHourForm] = useState({ desc: '', person: '', hours: '', date: new Date().toISOString().split('T')[0] });
   const [notes, setNotes] = useState('');
@@ -136,11 +136,41 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const handleAddRental = async () => {
     if (!rentalForm.equipment.trim()) { showToast('Enter equipment name', 'red'); return; }
     const cost = parseFloat(rentalForm.cost) || 0;
-    const rentals = [...(p.rentals || []), { equipment: rentalForm.equipment.trim(), vendor: rentalForm.vendor.trim(), cost, phone: rentalForm.phone.trim(), paid: false }];
+    const rentals = [...(p.rentals || []), { equipment: rentalForm.equipment.trim(), vendor: rentalForm.vendor.trim(), cost, phone: rentalForm.phone.trim(), email: rentalForm.email.trim(), paid: false }];
     const rental_cost = rentals.reduce((s, r) => s + r.cost, 0);
     await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost, _logMsg: `${rentalForm.equipment} added to rentals` });
-    setRentalForm({ equipment: '', vendor: '', cost: '', phone: '' });
+    setRentalForm({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
     showToast(rentalForm.equipment + ' added');
+  };
+
+  const handleEmailRental = (r, type) => {
+    const email = r.email;
+    if (!email) { showToast('No email saved for this vendor', 'red'); return; }
+    const dateStr = fmtDateRange(p);
+    let subject, body;
+    if (type === 'avail') {
+      subject = encodeURIComponent(`Gear Availability Check – ${p.name}`);
+      body = encodeURIComponent(`Hi${r.vendor ? ' ' + r.vendor : ''},\n\nI'm looking to rent ${r.equipment} for an upcoming shoot.\n\nProject: ${p.name}\nDate: ${dateStr}${p.start_time ? '\nTime: ' + p.start_time : ''}${p.address ? '\nLocation: ' + p.address : ''}\n\nIs the gear available on that date? What's the best way to book?\n\nThanks!\nRathan – Studio 65`);
+    } else {
+      subject = encodeURIComponent(`Rental Payment – ${r.equipment} – ${p.name}`);
+      body = encodeURIComponent(`Hi${r.vendor ? ' ' + r.vendor : ''},\n\nFollowing up on the rental payment of $${r.cost} for ${r.equipment} used on ${p.name} (${dateStr}).\n\nCan you confirm receipt or let me know if there's anything outstanding?\n\nThanks!\nRathan – Studio 65`);
+    }
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  const handleEmailCrewAvail = (c) => {
+    if (!c.email) { showToast('No email saved for ' + c.name, 'red'); return; }
+    const dateStr = fmtDateRange(p);
+    const subject = encodeURIComponent(`Availability Check – ${p.name}`);
+    const body = encodeURIComponent(`Hi ${c.name},\n\nI have an upcoming shoot and wanted to check your availability.\n\nProject: ${p.name}\nDate: ${dateStr}${p.start_time ? '\nCall Time: ' + p.start_time : ''}${p.end_time ? '\nWrap: ' + p.end_time : ''}${p.address ? '\nLocation: ' + p.address : ''}\nRole: ${c.role || 'Crew'}\n\nPlease reply to confirm if you're available.\n\nThanks!\nRathan – Studio 65`);
+    window.open(`mailto:${c.email}?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  const handleEmailCrewPayment = (c) => {
+    if (!c.email) { showToast('No email saved for ' + c.name, 'red'); return; }
+    const subject = encodeURIComponent(`Payment – ${p.name}`);
+    const body = encodeURIComponent(`Hi ${c.name},\n\nJust flagging that your payment of $${c.cost} for ${p.name} (${p.date}) is ready to be processed.\n\nCan you confirm your payment details are still the same so I can get this sorted?\n\nThanks!\nRathan – Studio 65`);
+    window.open(`mailto:${c.email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleDelRental = async (i) => {
