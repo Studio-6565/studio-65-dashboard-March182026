@@ -519,8 +519,20 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <button onClick={() => handleSaveVendorToContacts(r)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.1)', color: '#7BC853' }}>+ Contacts</button>
-                    <WaButton phone={r.phone} message={gearAvailMsg(r, p)} label="Avail?" />
-                    <WaButton phone={r.phone} message={gearPayMsg(r, p)} label="Payment" />
+                    {/* Avail: WA + Email */}
+                    <WaButton phone={r.phone} message={gearAvailMsg(r, p)} label="Avail? WA" />
+                    {r.email && (
+                      <button onClick={() => handleEmailRental(r, 'avail')} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.1)', color: '#4A9EFF' }}>
+                        Avail? ✉
+                      </button>
+                    )}
+                    {/* Payment: WA + Email */}
+                    <WaButton phone={r.phone} message={gearPayMsg(r, p)} label="Pay WA" />
+                    {r.email && (
+                      <button onClick={() => handleEmailRental(r, 'pay')} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.1)', color: '#4A9EFF' }}>
+                        Pay ✉
+                      </button>
+                    )}
                     <button onClick={() => handleRentalPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: r.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: r.paid ? 'rgba(123,200,83,0.18)' : 'rgba(245,158,11,0.12)', color: r.paid ? '#7BC853' : '#F59E0B' }}>{r.paid ? 'Paid ✓' : 'Mark Paid'}</button>
                     <button onClick={() => handleDelRental(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
                   </div>
