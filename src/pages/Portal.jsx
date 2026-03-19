@@ -52,7 +52,7 @@ export default function Portal() {
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', padding: 20 }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
+            <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 60, marginBottom: 8 }} />
             <div style={{ fontSize: 13, color: '#666' }}>Crew & Vendor Portal</div>
           </div>
           <form onSubmit={handleLogin} style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 14, padding: 28 }}>
@@ -99,7 +99,7 @@ export default function Portal() {
       <header style={{ borderBottom: '1px solid #1E1E1E', background: 'rgba(10,10,10,0.97)', padding: '0 20px', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 52 }}>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800 }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
+            <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 28 }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ textAlign: 'right' }}>

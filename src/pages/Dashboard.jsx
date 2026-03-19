@@ -160,7 +160,7 @@ export default function Dashboard() {
       {/* Header */}
       <header style={{ borderBottom: '1px solid #1E1E1E', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(8px)', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 52, padding: '0 12px', maxWidth: 1400, margin: '0 auto' }}>
-          <div style={{ fontSize: 16, fontWeight: 800, flexShrink: 0, letterSpacing: '-0.5px' }}>Studio <span style={{ color: '#E81A1A' }}>65</span></div>
+          <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 32, flexShrink: 0 }} />
           <div style={{ width: 1, height: 20, background: '#333', flexShrink: 0 }} />
           {/* Desktop nav */}
           <div style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'none' }} className="md-nav">
