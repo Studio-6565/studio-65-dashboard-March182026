@@ -397,6 +397,11 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                       <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
                         <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
+                        {c.portal_note && (
+                          <div style={{ marginTop: 5, padding: '5px 9px', background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 6, fontSize: 11, color: '#aaa', lineHeight: 1.4 }}>
+                            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF' }}>NOTE: </span>{c.portal_note}
+                          </div>
+                        )}
                         {/* Availability status + quick Y/N toggle */}
                         <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{
