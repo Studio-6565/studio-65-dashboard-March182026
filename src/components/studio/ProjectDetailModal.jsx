@@ -659,6 +659,26 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
         </div>
       )}
 
+      {/* Setup & Shot List */}
+      {tab === 'setup' && (
+        <SetupTab project={p} onUpdate={update} />
+      )}
+
+      {/* Reminders */}
+      {tab === 'reminders' && (
+        <RemindersTab project={p} />
+      )}
+
+      {/* Call Sheet */}
+      {tab === 'call sheet' && (
+        <CallSheetTab project={p} onUpdate={update} />
+      )}
+
+      {/* Crew Ratings */}
+      {tab === 'ratings' && (
+        <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />
+      )}
+
       {/* Activity */}
       {tab === 'activity' && (
         <div>
