@@ -199,6 +199,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                   {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
                   {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}</div>}
                   {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
+                  {c.portal_password && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA', marginTop: 2 }}>🔑 Code: {c.portal_password}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {c.phone && (
