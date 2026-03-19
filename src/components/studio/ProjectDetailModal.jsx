@@ -316,7 +316,11 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
           <div style={{ maxHeight: 300, overflowY: 'auto', marginBottom: 16 }}>
             {!(p.crew || []).length ? <div style={{ color: '#666', fontSize: 13, padding: '8px 0' }}>No crew added yet.</div> :
               (p.crew || []).map((c, i) => (
-                <div key={i} style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 12px', marginBottom: 6 }}>
+                <div key={i} style={{
+                  background: c.avail === 'yes' ? 'rgba(123,200,83,0.06)' : c.avail === 'no' ? 'rgba(232,26,26,0.06)' : '#2A2A2A',
+                  borderRadius: 8, padding: '10px 12px', marginBottom: 6,
+                  border: `1px solid ${c.avail === 'yes' ? 'rgba(123,200,83,0.2)' : c.avail === 'no' ? 'rgba(232,26,26,0.18)' : 'transparent'}`,
+                }}>
                   {editingCrewIdx === i ? (
                     // Inline edit mode
                     <div>
