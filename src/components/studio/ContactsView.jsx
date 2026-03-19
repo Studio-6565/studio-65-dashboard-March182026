@@ -20,7 +20,7 @@ const WaSvg = () => (
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
-const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '' };
+const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '', portal_password: '' };
 
 export default function ContactsView({ contacts, onContactsChange, projects, onProjectsChange }) {
   const [search, setSearch] = useState('');
