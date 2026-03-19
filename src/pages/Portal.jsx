@@ -93,6 +93,10 @@ export default function Portal() {
   const upcomingProjects = projects.filter(p => !p.archived && p.date >= new Date().toISOString().split('T')[0]);
   const pastProjects = projects.filter(p => p.archived || p.date < new Date().toISOString().split('T')[0]);
 
+  const handleAvailChange = (projectId, newCrew) => {
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, crew: newCrew } : p));
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
       {/* Header */}
