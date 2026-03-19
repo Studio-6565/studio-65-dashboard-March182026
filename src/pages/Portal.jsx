@@ -296,6 +296,33 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
               <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '12px 14px', fontSize: 12, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{p.notes}</div>
             </div>
           )}
+
+          {/* Crew: leave a note/question */}
+          {role.type === 'crew' && (
+            <div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Your Note / Question</div>
+              {myCrewEntry?.portal_note && (
+                <div style={{ background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#ccc', marginBottom: 8, lineHeight: 1.5 }}>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF', display: 'block', marginBottom: 4 }}>YOUR CURRENT NOTE</span>
+                  {myCrewEntry.portal_note}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <textarea
+                  rows={2}
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  placeholder="Ask a question or leave a note for Studio 65..."
+                  style={{ flex: 1, background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, outline: 'none', resize: 'none', fontFamily: 'Syne, sans-serif' }}
+                />
+                <button
+                  onClick={handleSaveNote}
+                  disabled={noteSaving || !noteText.trim()}
+                  style={{ padding: '0 14px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: !noteText.trim() ? 0.5 : 1 }}
+                >{noteSaving ? '...' : 'Send'}</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
