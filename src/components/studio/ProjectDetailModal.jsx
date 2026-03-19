@@ -252,17 +252,21 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{p.name}</div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 2, fontFamily: '"DM Mono", monospace' }}>{p.project_id} · {p.client} · {fmtDateRange(p)}{p.start_time ? ' · ' + p.start_time : ''}{p.end_time ? '–' + p.end_time : ''}</div>
+      <div style={{ marginBottom: 18 }}>
+        {/* Close button row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800 }}>{p.name}</div>
+            <div style={{ fontSize: 11, color: '#666', marginTop: 2, fontFamily: '"DM Mono", monospace' }}>{p.project_id} · {p.client} · {fmtDateRange(p)}{p.start_time ? ' · ' + p.start_time : ''}{p.end_time ? '–' + p.end_time : ''}</div>
+          </div>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: '50%', background: '#2A2A2A', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 8 }}>×</button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-          <button onClick={onDelete} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.3)', color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Delete</button>
-          <button onClick={onDuplicate} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(123,200,83,0.1)', border: '1px solid rgba(123,200,83,0.3)', color: '#7BC853', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Duplicate</button>
-          <button onClick={onSaveAsTemplate} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.3)', color: '#4A9EFF', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Save as Template</button>
+        {/* Action buttons row */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <button onClick={onEdit} style={{ padding: '6px 14px', borderRadius: 8, background: '#2A2A2A', border: '1px solid #333', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
-          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', background: '#2A2A2A', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+          <button onClick={onDuplicate} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(123,200,83,0.1)', border: '1px solid rgba(123,200,83,0.3)', color: '#7BC853', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Duplicate</button>
+          <button onClick={onSaveAsTemplate} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.3)', color: '#4A9EFF', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Template</button>
+          <button onClick={onDelete} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.3)', color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Delete</button>
         </div>
       </div>
 
