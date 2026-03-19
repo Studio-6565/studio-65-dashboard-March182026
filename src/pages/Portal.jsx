@@ -149,12 +149,23 @@ export default function Portal() {
   );
 }
 
-function ProjectCard({ project: p, contact, getMyRole, active, onToggle }) {
+function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvailChange }) {
   const role = getMyRole(p);
   if (!role) return null;
   const st = STATUS_STYLE[p.status] || STATUS_STYLE['Booked'];
   const del = p.deliverables || [];
   const doneDel = del.filter(d => d.done).length;
+  const [saving, setSaving] = useState(false);
+
+  const handleAvail = async (status) => {
+    setSaving(true);
+    const crew = (p.crew || []).map(c =>
+      c.name.toLowerCase() === contact.name.toLowerCase() ? { ...c, avail: status } : c
+    );
+    await base44.entities.Project.update(p.id, { ...p, crew });
+    onAvailChange(p.id, crew);
+    setSaving(false);
+  };
 
   return (
     <div style={{ background: '#1E1E1E', border: `1px solid ${active ? '#444' : '#2A2A2A'}`, borderRadius: 12, marginBottom: 10, overflow: 'hidden', transition: 'border-color 0.2s' }}>
