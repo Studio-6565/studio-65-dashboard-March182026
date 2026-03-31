@@ -35,10 +35,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/Dashboard" element={<Dashboard />} />
       <Route path="/portal" element={<Portal />} />
-      <Route path="*" element={<PageNotFound />} />
+      <Route path="/*" element={<Dashboard />} />
     </Routes>
   );
 };

@@ -1,13 +1,26 @@
 import React, { useEffect } from 'react';
 
-export default function StudioModal({ open, onClose, children, maxWidth = 660 }) {
+export default function StudioModal({ open, onClose, children, maxWidth = 660, inline = false }) {
   useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden';
+    if (!inline && open) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
-  }, [open]);
+  }, [open, inline]);
 
   if (!open) return null;
+
+  // Inline mode: render content directly without overlay (for route-based pages)
+  if (inline) {
+    return (
+      <div style={{
+        background: '#1E1E1E', border: '1px solid #333',
+        borderRadius: 12,
+        width: '100%', padding: '20px 16px 32px',
+      }}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div

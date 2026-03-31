@@ -20,7 +20,8 @@ const DetailTab = ({ label, active, onClick }) => (
   }}>{label}</button>
 );
 
-export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange }) {
+export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange, inline = false }) {
+  // inline=true means rendered inside a route page (no modal overlay, no close button needed)
   const [tab, setTab] = useState('overview');
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
@@ -257,7 +258,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
 
   return (
-    <StudioModal open={open} onClose={onClose} maxWidth={720}>
+    <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
       {/* Header */}
       <div style={{ marginBottom: 18 }}>
         {/* Close button row */}
@@ -266,7 +267,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
             <div style={{ fontSize: 17, fontWeight: 800 }}>{p.name}</div>
             <div style={{ fontSize: 11, color: '#666', marginTop: 2, fontFamily: '"DM Mono", monospace' }}>{p.project_id} · {p.client} · {fmtDateRange(p)}{p.start_time ? ' · ' + p.start_time : ''}{p.end_time ? '–' + p.end_time : ''}</div>
           </div>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: '50%', background: '#2A2A2A', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 8 }}>×</button>
+          {!inline && <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: '50%', background: '#2A2A2A', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 8 }}>×</button>}
         </div>
         {/* Action buttons row */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
