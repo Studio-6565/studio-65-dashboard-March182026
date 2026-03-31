@@ -198,6 +198,21 @@
         }
       }
     },
+    "equipment_checklist": {
+      "type": "array",
+      "description": "Per-project equipment checklist items with checked state",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
     "setup": {
       "type": "object",
       "properties": {

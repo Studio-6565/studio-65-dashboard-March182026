@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import EquipmentChecklist from './EquipmentChecklist';
 
 const SS = { background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -193,6 +194,11 @@ export default function SetupTab({ project, onUpdate }) {
       <button onClick={handleSaveSetup} disabled={saving} style={{ alignSelf: 'flex-start', padding: '8px 20px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
         {saving ? 'Saving...' : 'Save Setup'}
       </button>
+
+      {/* Equipment Checklist */}
+      <div style={{ borderTop: '1px solid #222', paddingTop: 20 }}>
+        <EquipmentChecklist project={project} onUpdate={onUpdate} />
+      </div>
 
       {/* Shot List */}
       <div style={{ borderTop: '1px solid #222', paddingTop: 20 }}>
