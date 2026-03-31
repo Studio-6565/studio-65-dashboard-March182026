@@ -50,10 +50,36 @@
     color: #ffffff;
     font-family: 'Syne', sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   input, textarea, select, button {
     font-family: 'Syne', sans-serif;
+  }
+
+  /* Disable user-select on interactive/decorative elements */
+  button, img, svg, [role="button"], nav, header, footer {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Keep text selectable */
+  p, span, div, h1, h2, h3, h4, h5, h6 {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* 44dp minimum touch targets */
+  button, [role="button"], a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

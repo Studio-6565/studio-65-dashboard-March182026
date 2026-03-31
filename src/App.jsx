@@ -6,7 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard.jsx';
 import Portal from './pages/Portal';
 
 const AuthenticatedApp = () => {

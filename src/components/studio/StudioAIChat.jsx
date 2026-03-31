@@ -104,7 +104,7 @@ export default function StudioAIChat({ projects, contacts }) {
       <button
         onClick={() => setOpen(o => !o)}
         style={{
-          position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
+          position: 'fixed', bottom: 'calc(70px + env(safe-area-inset-bottom))', right: 16, zIndex: 1000,
           width: 52, height: 52, borderRadius: '50%',
           background: open ? '#333' : '#E81A1A',
           border: 'none', cursor: 'pointer',
@@ -120,7 +120,7 @@ export default function StudioAIChat({ projects, contacts }) {
       {/* Chat panel */}
       {open && (
         <div style={{
-          position: 'fixed', bottom: 82, right: 20, zIndex: 999,
+          position: 'fixed', bottom: 'calc(130px + env(safe-area-inset-bottom))', right: 16, zIndex: 999,
           width: 360, maxHeight: '70vh',
           background: '#111', border: '1px solid #2A2A2A', borderRadius: 14,
           display: 'flex', flexDirection: 'column',
