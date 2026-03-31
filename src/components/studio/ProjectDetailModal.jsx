@@ -617,6 +617,25 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
             )}
           </div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Add Rental Item</div>
+          {/* Quick-pick from vendor contacts */}
+          {(contacts || []).some(c => (c.types || []).includes('Vendor') && (c.offerings || []).length > 0) && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={LL}>Quick-add from vendor</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {(contacts || []).filter(c => (c.types || []).includes('Vendor') && (c.offerings || []).length > 0).map(c =>
+                  c.offerings.map((o, oi) => (
+                    <button
+                      key={`${c.id}-${oi}`}
+                      onClick={() => setRentalForm(f => ({ ...f, equipment: o.name, vendor: c.name, cost: o.cost || '', phone: c.phone || '', email: c.email || '' }))}
+                      style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(123,200,83,0.25)', background: 'rgba(123,200,83,0.08)', color: '#7BC853', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}
+                    >
+                      {o.name}{o.cost > 0 ? ` · $${o.cost}` : ''} <span style={{ opacity: 0.5, fontSize: 9 }}>({c.name})</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
           <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
               {[['Equipment', 'equipment', 'e.g. Camera', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text'], ['Cost ($)', 'cost', '0', 'number']].map(([l, k, ph, type]) => (

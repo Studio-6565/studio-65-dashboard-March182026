@@ -20,7 +20,53 @@ const WaSvg = () => (
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
-const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '', portal_password: '' };
+const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '', portal_password: '', offerings: [] };
+
+function VendorOfferingsEditor({ offerings, onChange }) {
+  const [nameInput, setNameInput] = useState('');
+  const [costInput, setCostInput] = useState('');
+
+  const add = () => {
+    if (!nameInput.trim()) return;
+    onChange([...offerings, { name: nameInput.trim(), cost: parseFloat(costInput) || 0 }]);
+    setNameInput(''); setCostInput('');
+  };
+
+  const remove = (i) => onChange(offerings.filter((_, j) => j !== i));
+
+  return (
+    <div>
+      <label style={labelStyle}>What They Offer (gear / services)</label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+        {offerings.map((o, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#2A2A2A', borderRadius: 8, padding: '7px 10px' }}>
+            <div style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{o.name}</div>
+            {o.cost > 0 && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>${o.cost}</div>}
+            <button onClick={() => remove(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 15, padding: '0 3px', lineHeight: 1 }}>×</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8 }}>
+        <input
+          style={{ ...inputStyle, background: '#2A2A2A' }}
+          placeholder="e.g. Sony FX3, Drone, Lighting Kit..."
+          value={nameInput}
+          onChange={e => setNameInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && add()}
+        />
+        <input
+          style={{ ...inputStyle, background: '#2A2A2A', width: 90 }}
+          type="number"
+          placeholder="Cost $"
+          value={costInput}
+          onChange={e => setCostInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && add()}
+        />
+        <button onClick={add} style={{ padding: '0 14px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
+      </div>
+    </div>
+  );
+}
 
 export default function ContactsView({ contacts, onContactsChange, projects, onProjectsChange }) {
   const [search, setSearch] = useState('');
@@ -86,7 +132,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   };
 
   const handleEdit = (c) => {
-    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '', portal_password: c.portal_password || '' });
+    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '', portal_password: c.portal_password || '', offerings: c.offerings || [] });
     setEditingId(c.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -154,6 +200,15 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
               <div><label style={labelStyle}>Default Rate ($/hr or flat)</label><input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder="e.g. 50 or 1200" /></div>
             </div>
             <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
+
+            {/* Vendor offerings — only shown when Vendor type is selected */}
+            {form.types.includes('Vendor') && (
+              <VendorOfferingsEditor
+                offerings={form.offerings || []}
+                onChange={offerings => setForm(f => ({ ...f, offerings }))}
+              />
+            )}
+
             <div>
               <label style={labelStyle}>Portal Access Code</label>
               <input style={inputStyle} value={form.portal_password} onChange={e => setForm(f => ({ ...f, portal_password: e.target.value }))} placeholder="e.g. vithu2025 (they use this to log in)" />
@@ -200,6 +255,15 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                   {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}</div>}
                   {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
                   {c.portal_password && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA', marginTop: 2 }}>🔑 Code: {c.portal_password}</div>}
+                  {(c.offerings || []).length > 0 && (
+                    <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {c.offerings.map((o, i) => (
+                        <span key={i} style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, padding: '2px 7px', borderRadius: 4, background: 'rgba(123,200,83,0.1)', color: '#7BC853', border: '1px solid rgba(123,200,83,0.2)' }}>
+                          {o.name}{o.cost > 0 ? ` · $${o.cost}` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {c.phone && (
