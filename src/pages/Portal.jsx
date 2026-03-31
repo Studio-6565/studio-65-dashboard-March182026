@@ -153,6 +153,138 @@ export default function Portal() {
   );
 }
 
+function downloadCallSheet(p, role, contact) {
+  const { jsPDF } = window.jspdf || {};
+  // Use dynamic import fallback
+  import('jspdf').then(({ jsPDF }) => {
+    const doc = new jsPDF();
+    const MONO = 'courier';
+    const SANS = 'helvetica';
+    let y = 20;
+
+    const line = (text, size = 11, style = 'normal', font = SANS, color = [255,255,255]) => {
+      doc.setFont(font, style);
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.text(text, 20, y);
+      y += size * 0.5 + 3;
+    };
+
+    const divider = () => {
+      doc.setDrawColor(60, 60, 60);
+      doc.line(20, y, 190, y);
+      y += 6;
+    };
+
+    const sectionHeader = (text) => {
+      y += 2;
+      doc.setFillColor(30, 30, 30);
+      doc.roundedRect(18, y - 5, 174, 10, 2, 2, 'F');
+      doc.setFont(MONO, 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(text.toUpperCase(), 20, y + 1);
+      y += 10;
+    };
+
+    // Dark background
+    doc.setFillColor(10, 10, 10);
+    doc.rect(0, 0, 210, 297, 'F');
+
+    // Header
+    doc.setFillColor(232, 26, 26);
+    doc.rect(0, 0, 210, 18, 'F');
+    doc.setFont(SANS, 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text('STUDIO 65 — CALL SHEET', 20, 12);
+    doc.setFont(MONO, 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(255, 180, 180);
+    doc.text(new Date().toLocaleDateString('en-CA'), 170, 12);
+    y = 28;
+
+    // Project
+    sectionHeader('Project');
+    line(p.name, 16, 'bold', SANS, [255, 255, 255]);
+    line(`Client: ${p.client || '—'}`, 10, 'normal', MONO, [180, 180, 180]);
+    if (p.date) line(`Date: ${p.date}${p.end_date && p.end_date !== p.date ? ' – ' + p.end_date : ''}`, 10, 'normal', MONO, [180, 180, 180]);
+    if (p.start_time) line(`Call Time: ${p.start_time}${p.end_time ? '  |  Wrap: ' + p.end_time : ''}`, 10, 'normal', MONO, [245, 158, 11]);
+    if (p.setup?.arrival_time) line(`Arrival Time: ${p.setup.arrival_time}`, 10, 'normal', MONO, [180, 180, 180]);
+    if (p.address) line(`Location: ${p.address}`, 10, 'normal', MONO, [180, 180, 180]);
+    if (p.poc_name) line(`Point of Contact: ${p.poc_name}${p.poc_phone ? '  ·  ' + p.poc_phone : ''}`, 10, 'normal', MONO, [180, 180, 180]);
+    y += 2;
+    divider();
+
+    // Your Details
+    sectionHeader('Your Details');
+    line(`Name: ${contact.name}`, 11, 'bold', SANS, [255, 255, 255]);
+    if (role.entry.role) line(`Role: ${role.entry.role}`, 10, 'normal', MONO, [180, 180, 180]);
+    if (role.entry.cost) line(`Rate: $${role.entry.cost}`, 10, 'normal', MONO, [123, 200, 83]);
+    y += 2;
+    divider();
+
+    // Setup / Camera
+    const s = p.setup || {};
+    const hasSetup = s.camera_orientation || s.frame_rate || s.resolution || s.codec || s.color_profile || s.gear;
+    if (hasSetup) {
+      sectionHeader('Camera Setup');
+      if (s.camera_orientation) line(`Orientation: ${s.camera_orientation}`, 10, 'normal', MONO, [180, 180, 180]);
+      if (s.frame_rate) line(`Frame Rate: ${s.frame_rate}`, 10, 'normal', MONO, [180, 180, 180]);
+      if (s.resolution) line(`Resolution: ${s.resolution}`, 10, 'normal', MONO, [180, 180, 180]);
+      if (s.codec) line(`Codec: ${s.codec}`, 10, 'normal', MONO, [180, 180, 180]);
+      if (s.color_profile) line(`Color Profile: ${s.color_profile}`, 10, 'normal', MONO, [180, 180, 180]);
+      if (s.gear) {
+        y += 2;
+        line('Gear List:', 10, 'bold', SANS, [255, 255, 255]);
+        s.gear.split('\n').forEach(g => g.trim() && line(`  · ${g.trim()}`, 9, 'normal', MONO, [180, 180, 180]));
+      }
+      if (s.notes) { y += 2; line(`Notes: ${s.notes}`, 9, 'normal', MONO, [150, 150, 150]); }
+      y += 2;
+      divider();
+    }
+
+    // Deliverables
+    const dels = p.deliverables || [];
+    if (dels.length) {
+      sectionHeader('Deliverables');
+      dels.forEach(d => {
+        const status = d.done ? '[DONE]' : '[    ]';
+        line(`${status}  ${d.name}${d.due ? '  —  Due: ' + d.due : ''}`, 9, 'normal', MONO, d.done ? [123, 200, 83] : [180, 180, 180]);
+      });
+      y += 2;
+      divider();
+    }
+
+    // Notes
+    if (p.notes) {
+      sectionHeader('Production Notes');
+      const wrapped = doc.splitTextToSize(p.notes, 170);
+      doc.setFont(MONO, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(180, 180, 180);
+      wrapped.forEach(ln => { doc.text(ln, 20, y); y += 5; });
+      y += 2;
+      divider();
+    }
+
+    // Footer — Rathan contact
+    sectionHeader("Director's Contact");
+    line('Rathan — Studio 65', 11, 'bold', SANS, [255, 255, 255]);
+    line('studio65production@gmail.com', 9, 'normal', MONO, [74, 158, 255]);
+
+    // Footer bar
+    doc.setFillColor(30, 30, 30);
+    doc.rect(0, 285, 210, 12, 'F');
+    doc.setFont(MONO, 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(80, 80, 80);
+    doc.text('STUDIO 65 — CONFIDENTIAL — FOR CREW USE ONLY', 20, 292);
+
+    doc.save(`CallSheet_${p.name.replace(/\s+/g, '_')}.pdf`);
+  });
+}
+
 function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvailChange }) {
   const role = getMyRole(p);
   if (!role) return null;
@@ -250,6 +382,13 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
       {/* Expanded details */}
       {active && (
         <div style={{ borderTop: '1px solid #2A2A2A', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Download Call Sheet */}
+          <button
+            onClick={() => downloadCallSheet(p, role, contact)}
+            style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.3)', borderRadius: 8, color: '#4A9EFF', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
+          >
+            📄 Download Call Sheet
+          </button>
           {/* Shoot details */}
           {(p.address || p.poc_name || p.client) && (
             <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '12px 14px' }}>
