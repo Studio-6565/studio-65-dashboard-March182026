@@ -172,7 +172,11 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
     const crew = (p.crew || []).map(c =>
       c.name.toLowerCase() === contact.name.toLowerCase() ? { ...c, avail: status } : c
     );
-    await base44.entities.Project.update(p.id, { ...p, crew });
+    const logMsg = status === 'yes'
+      ? `${contact.name} confirmed availability via portal`
+      : `${contact.name} declined via portal`;
+    const activity = [...(p.activity || []), { msg: logMsg, ts: new Date().toISOString() }];
+    await base44.entities.Project.update(p.id, { ...p, crew, activity });
     onAvailChange(p.id, crew);
     setSaving(false);
   };
@@ -229,8 +233,8 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
                 <button
                   disabled={saving}
                   onClick={() => handleAvail('yes')}
-                  style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}
-                >✓ Confirm</button>
+                  style={{ padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}
+                >{saving ? '...' : '✓ Confirm Availability'}</button>
                 <button
                   disabled={saving}
                   onClick={() => handleAvail('no')}
