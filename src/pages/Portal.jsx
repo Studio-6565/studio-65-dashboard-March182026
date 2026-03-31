@@ -401,6 +401,44 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
             </div>
           )}
 
+          {/* Setup */}
+          {p.setup && (p.setup.arrival_time || p.setup.camera_orientation || p.setup.frame_rate || p.setup.resolution || p.setup.codec || p.setup.color_profile || p.setup.gear || p.setup.notes) && (
+            <div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Camera Setup</div>
+              <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  ['🕐 Arrival Time', p.setup.arrival_time],
+                  ['🎥 Orientation', p.setup.camera_orientation],
+                  ['⏱ Frame Rate', p.setup.frame_rate],
+                  ['📐 Resolution', p.setup.resolution],
+                  ['🗜 Codec', p.setup.codec],
+                  ['🎨 Color Profile', p.setup.color_profile],
+                ].filter(([, v]) => v).map(([label, value]) => (
+                  <div key={label} style={{ display: 'flex', gap: 10, fontSize: 12 }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', minWidth: 110, flexShrink: 0 }}>{label}</span>
+                    <span style={{ color: '#ddd' }}>{value}</span>
+                  </div>
+                ))}
+                {p.setup.gear && (
+                  <div style={{ marginTop: 4 }}>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginBottom: 6 }}>🎒 Gear / Kit</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {p.setup.gear.split('\n').filter(g => g.trim()).map((g, i) => (
+                        <div key={i} style={{ fontSize: 12, color: '#ddd', paddingLeft: 10 }}>· {g.trim()}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {p.setup.notes && (
+                  <div style={{ marginTop: 4, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 6, fontSize: 11, color: '#aaa', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#555', display: 'block', marginBottom: 4 }}>SETUP NOTES</span>
+                    {p.setup.notes}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Deliverables */}
           {del.length > 0 && (
             <div>
