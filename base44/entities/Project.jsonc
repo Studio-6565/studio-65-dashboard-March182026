@@ -73,6 +73,19 @@
       "type": "boolean",
       "default": false
     },
+    "invoice_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date invoice was sent"
+    },
+    "invoice_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Invoice payment due date"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
     "track_hours": {
       "type": "boolean",
       "default": false
@@ -160,6 +173,35 @@
           },
           "paid": {
             "type": "boolean"
+          }
+        }
+      }
+    },
+    "expenses": {
+      "type": "array",
+      "description": "Miscellaneous project expenses",
+      "items": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Travel",
+              "Food",
+              "Props",
+              "Software",
+              "Printing",
+              "Other"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string"
           }
         }
       }

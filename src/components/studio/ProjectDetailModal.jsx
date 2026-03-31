@@ -8,6 +8,8 @@ import SetupTab from './tabs/SetupTab';
 import CallSheetTab from './tabs/CallSheetTab';
 import RemindersTab from './tabs/RemindersTab';
 import CrewRatingsTab from './tabs/CrewRatingsTab';
+import ExpensesTab from './tabs/ExpensesTab';
+import InvoiceGenerator from './InvoiceGenerator';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -255,7 +257,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     showToast(`${name} saved to Contacts`, 'green');
   };
 
-  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
+  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'expenses', 'invoice', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'activity'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -744,6 +746,16 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
             </div>
           </div>
         </div>
+      )}
+
+      {/* Expenses */}
+      {tab === 'expenses' && (
+        <ExpensesTab project={p} onUpdate={update} />
+      )}
+
+      {/* Invoice */}
+      {tab === 'invoice' && (
+        <InvoiceGenerator project={p} onUpdate={onUpdate} />
       )}
 
       {/* Setup & Shot List */}
