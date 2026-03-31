@@ -8,8 +8,6 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
 import Dashboard from './pages/Dashboard.jsx';
 import Portal from './pages/Portal';
-import GearPage from './pages/GearPage.jsx';
-import OperationsPage from './pages/OperationsPage.jsx';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,8 +36,6 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/portal" element={<Portal />} />
-      <Route path="/gear" element={<GearPage />} />
-      <Route path="/operations" element={<OperationsPage />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
