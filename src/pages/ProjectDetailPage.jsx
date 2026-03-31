@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import ProjectDetailModal from '@/components/studio/ProjectDetailModal';
 import ProjectModal from '@/components/studio/ProjectModal';
 import { showToast } from '@/components/studio/StudioToast';
 import { addLog, nextProjectId } from '@/lib/studio';
 
-export default function ProjectDetailPage({ projects, contacts, templates, onUpdate, onDelete, onContactsChange, onProjectsChange }) {
+const slideIn = {
+  initial: { opacity: 0, x: 40 },
+  animate: { opacity: 1, x: 0, transition: { duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] } },
+  exit: { opacity: 0, x: 40, transition: { duration: 0.16, ease: 'easeIn' } },
+};
+
+export default function ProjectDetailPage({ projects, contacts, templates, onUpdate, onDelete, onDuplicate, onSaveAsTemplate, onContactsChange, onProjectsChange, onEdit }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -51,35 +58,24 @@ export default function ProjectDetailPage({ projects, contacts, templates, onUpd
   };
 
   const handleDuplicate = async () => {
-    const newId = nextProjectId(projects);
-    const copy = {
-      ...project, id: undefined, project_id: newId,
-      name: project.name + ' (Copy)', paid: false,
-      crew: (project.crew || []).map(c => ({ ...c, paid: false })),
-      rentals: (project.rentals || []).map(r => ({ ...r, paid: false })),
-      deliverables: (project.deliverables || []).map(d => ({ ...d, done: false })),
-      hours: [],
-      activity: [{ msg: 'Duplicated from ' + project.name, ts: new Date().toISOString() }],
-    };
-    navigate('/projects');
-    showToast(copy.name + ' created!');
-    const created = await base44.entities.Project.create(copy);
-    onProjectsChange(prev => [created, ...prev]);
+    await onDuplicate(project);
   };
 
   const handleSaveAsTemplate = async () => {
-    const name = prompt('Template name:', project.name);
-    if (!name) return;
-    await base44.entities.Template.create({
-      name,
-      crew: (project.crew || []).map(c => ({ name: c.name, role: c.role, cost: c.cost, phone: c.phone })),
-      deliverables: (project.deliverables || []).map(d => ({ name: d.name, due: '' })),
-    });
-    showToast('Template saved!', 'blue');
+    await onSaveAsTemplate(project);
+  };
+
+  const handleEdit = () => {
+    // If parent provided an onEdit (to open the shared modal), use it; otherwise open local
+    if (onEdit) {
+      onEdit(project);
+    } else {
+      setEditModalOpen(true);
+    }
   };
 
   return (
-    <div style={{ animation: 'fadeTab 0.18s ease' }}>
+    <motion.div {...slideIn}>
       <ProjectDetailModal
         open={true}
         onClose={() => navigate('/projects')}
@@ -87,21 +83,23 @@ export default function ProjectDetailPage({ projects, contacts, templates, onUpd
         contacts={contacts}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
-        onEdit={() => setEditModalOpen(true)}
+        onEdit={handleEdit}
         onDuplicate={handleDuplicate}
         onSaveAsTemplate={handleSaveAsTemplate}
         onContactsChange={onContactsChange}
         inline={true}
       />
-      <ProjectModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        editingProject={project}
-        templates={templates}
-        projects={projects}
-        onSave={handleEditSave}
-      />
-      <style>{`@keyframes fadeTab { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-    </div>
+      {/* Fallback local edit modal (used when no onEdit prop) */}
+      {!onEdit && (
+        <ProjectModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          editingProject={project}
+          templates={templates}
+          projects={projects}
+          onSave={handleEditSave}
+        />
+      )}
+    </motion.div>
   );
 }

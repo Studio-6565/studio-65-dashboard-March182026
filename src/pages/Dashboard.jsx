@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+
 import StatsBar from '@/components/studio/StatsBar';
 import ProjectCard from '@/components/studio/ProjectCard';
 import AnalyticsView from '@/components/studio/AnalyticsView';
@@ -8,7 +10,7 @@ import TimelineView from '@/components/studio/TimelineView';
 import CalendarView from '@/components/studio/CalendarView';
 import ContactsView from '@/components/studio/ContactsView';
 import ProjectModal from '@/components/studio/ProjectModal';
-import ProjectDetailModal from '@/components/studio/ProjectDetailModal';
+import ProjectDetailPage from './ProjectDetailPage';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import StudioAIChat from '@/components/studio/StudioAIChat';
 import BottomTabBar from '@/components/studio/BottomTabBar';
@@ -40,43 +42,32 @@ const chipStyle = (active) => ({
   userSelect: 'none',
 });
 
-export default function Dashboard() {
-  const [projects, setProjects] = useState([]);
-  const [contacts, setContacts] = useState([]);
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
+// ── Tab label for the mobile header ──────────────────────────────────────────
+const TAB_LABELS = {
+  '/projects': 'Projects',
+  '/analytics': 'Analytics',
+  '/calendar': 'Calendar',
+  '/crew': 'Crew',
+  '/timeline': 'Timeline',
+  '/contacts': 'Contacts',
+};
 
-  const [tab, setTab] = useState('Projects');
+function useTabLabel() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/projects/')) return null; // detail page shows back button
+  return TAB_LABELS[pathname] || 'Projects';
+}
+
+// ── Projects list view ────────────────────────────────────────────────────────
+function ProjectsView({ projects, onOpenDetail, onNewProject, containerRef, isRefreshing, pullProgress }) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [clientFilter, setClientFilter] = useState('All');
-
-  const [projectModalOpen, setProjectModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
-  const [detailProject, setDetailProject] = useState(null);
-
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [clientSheetOpen, setClientSheetOpen] = useState(false);
   const [statusSheetOpen, setStatusSheetOpen] = useState(false);
-
-  const loadData = useCallback(async () => {
-    const [ps, cs, ts] = await Promise.all([
-      base44.entities.Project.list('-date', 200),
-      base44.entities.Contact.list('name', 200),
-      base44.entities.Template.list('name', 50),
-    ]);
-    setProjects(ps);
-    setContacts(cs);
-    setTemplates(ts);
-  }, []);
-
-  useEffect(() => {
-    loadData().finally(() => setLoading(false));
-  }, [loadData]);
-
-  const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
 
   const clientList = ['All', ...Array.from(new Set(projects.map(p => p.client).filter(Boolean))).sort()];
   const clientOptions = clientList.map(c => ({ value: c, label: c === 'All' ? 'All Clients' : c }));
@@ -108,7 +99,96 @@ export default function Dashboard() {
       return 0;
     });
 
-  // Optimistic create
+  const sortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Sort';
+  const clientLabel = clientFilter === 'All' ? 'All Clients' : clientFilter;
+  const statusLabel = statusFilter === 'All' ? 'All Status' : statusFilter;
+
+  return (
+    <div ref={containerRef}>
+      <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <StatsBar projects={projects} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search projects..."
+          style={{
+            background: '#1E1E1E', border: '1px solid #2A2A2A',
+            borderRadius: 10, padding: '12px 14px',
+            color: '#fff', fontSize: 14, outline: 'none', width: '100%',
+            fontFamily: 'Syne, sans-serif',
+          }}
+        />
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={() => setSortSheetOpen(true)} style={chipStyle(sortBy !== 'newest')}>↕ {sortLabel}</button>
+          <button onClick={() => setClientSheetOpen(true)} style={chipStyle(clientFilter !== 'All')}>🏢 {clientLabel}</button>
+          <button onClick={() => setStatusSheetOpen(true)} style={chipStyle(statusFilter !== 'All')}>● {statusLabel}</button>
+          <button onClick={() => setShowArchived(v => !v)} style={chipStyle(showArchived)}>
+            {showArchived ? '✓ ' : ''}Archived
+          </button>
+        </div>
+      </div>
+
+      {!filtered.length ? (
+        <div style={{ textAlign: 'center', padding: '80px 20px', color: '#666' }}>
+          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>🎬</div>
+          <div style={{ fontSize: 15, marginBottom: 8, color: '#888' }}>
+            {projects.length === 0 ? 'No projects yet.' : 'No projects match your filters.'}
+          </div>
+          {projects.length === 0 && (
+            <button
+              onClick={onNewProject}
+              style={{ marginTop: 12, padding: '14px 28px', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 48 }}
+            >+ Create First Project</button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+          {filtered.map(p => (
+            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} />
+          ))}
+        </div>
+      )}
+
+      <BottomSheet open={sortSheetOpen} onClose={() => setSortSheetOpen(false)} title="Sort By" options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
+      <BottomSheet open={clientSheetOpen} onClose={() => setClientSheetOpen(false)} title="Filter by Client" options={clientOptions} value={clientFilter} onChange={setClientFilter} />
+      <BottomSheet open={statusSheetOpen} onClose={() => setStatusSheetOpen(false)} title="Filter by Status" options={statusOptions} value={statusFilter} onChange={setStatusFilter} />
+    </div>
+  );
+}
+
+// ── Main Dashboard shell ──────────────────────────────────────────────────────
+export default function Dashboard() {
+  const [projects, setProjects] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const tabLabel = useTabLabel();
+  const isDetailPage = location.pathname.startsWith('/projects/');
+
+  const loadData = useCallback(async () => {
+    const [ps, cs, ts] = await Promise.all([
+      base44.entities.Project.list('-date', 200),
+      base44.entities.Contact.list('name', 200),
+      base44.entities.Template.list('name', 50),
+    ]);
+    setProjects(ps);
+    setContacts(cs);
+    setTemplates(ts);
+  }, []);
+
+  useEffect(() => {
+    loadData().finally(() => setLoading(false));
+  }, [loadData]);
+
+  const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
+
+  // ── Project CRUD ────────────────────────────────────────────────────────────
   const handleCreateProject = async (form) => {
     const id = nextProjectId(projects);
     const optimistic = {
@@ -124,76 +204,61 @@ export default function Dashboard() {
     setProjects(prev => prev.map(p => p.id === optimistic.id ? created : p));
   };
 
-  // Optimistic edit
   const handleEditProject = async (form) => {
     const updated = { ...editingProject, ...form, activity: addLog(editingProject, 'Project details updated') };
     setProjects(prev => prev.map(p => p.id === editingProject.id ? updated : p));
-    if (detailProject?.id === editingProject.id) setDetailProject(updated);
     setProjectModalOpen(false);
     setEditingProject(null);
     showToast('Project updated', 'blue');
     await base44.entities.Project.update(editingProject.id, updated);
   };
 
-  // Optimistic delete
-  const handleDeleteProject = async () => {
-    if (!detailProject || !confirm('Delete "' + detailProject.name + '"? This cannot be undone.')) return;
-    const id = detailProject.id;
-    setProjects(prev => prev.filter(p => p.id !== id));
-    setDetailProject(null);
-    showToast('Project deleted', 'red');
-    await base44.entities.Project.delete(id);
+  const handleProjectUpdate = (updated) => {
+    setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
-  const handleDuplicate = async () => {
-    if (!detailProject) return;
+  const handleProjectDelete = (id) => {
+    setProjects(prev => prev.filter(p => p.id !== id));
+  };
+
+  const handleDuplicate = async (project) => {
     const id = nextProjectId(projects);
     const copy = {
-      ...detailProject, id: undefined, project_id: id,
-      name: detailProject.name + ' (Copy)', paid: false,
-      crew: (detailProject.crew || []).map(c => ({ ...c, paid: false })),
-      rentals: (detailProject.rentals || []).map(r => ({ ...r, paid: false })),
-      deliverables: (detailProject.deliverables || []).map(d => ({ ...d, done: false })),
+      ...project, id: undefined, project_id: id,
+      name: project.name + ' (Copy)', paid: false,
+      crew: (project.crew || []).map(c => ({ ...c, paid: false })),
+      rentals: (project.rentals || []).map(r => ({ ...r, paid: false })),
+      deliverables: (project.deliverables || []).map(d => ({ ...d, done: false })),
       hours: [],
-      activity: [{ msg: 'Duplicated from ' + detailProject.name, ts: new Date().toISOString() }],
+      activity: [{ msg: 'Duplicated from ' + project.name, ts: new Date().toISOString() }],
     };
-    setDetailProject(null);
+    navigate('/projects');
     showToast(copy.name + ' created!');
     const created = await base44.entities.Project.create(copy);
     setProjects(prev => [created, ...prev]);
   };
 
-  const handleSaveAsTemplate = async () => {
-    if (!detailProject) return;
-    const name = prompt('Template name:', detailProject.name);
+  const handleSaveAsTemplate = async (project) => {
+    const name = prompt('Template name:', project.name);
     if (!name) return;
     const tpl = await base44.entities.Template.create({
       name,
-      crew: (detailProject.crew || []).map(c => ({ name: c.name, role: c.role, cost: c.cost, phone: c.phone })),
-      deliverables: (detailProject.deliverables || []).map(d => ({ name: d.name, due: '' })),
+      crew: (project.crew || []).map(c => ({ name: c.name, role: c.role, cost: c.cost, phone: c.phone })),
+      deliverables: (project.deliverables || []).map(d => ({ name: d.name, due: '' })),
     });
     setTemplates(prev => [...prev, tpl]);
     showToast('Template saved!', 'blue');
-  };
-
-  const handleProjectUpdate = (updated) => {
-    setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
-    setDetailProject(updated);
-  };
-
-  const openDetail = (p) => setDetailProject(p);
-
-  const openEdit = () => {
-    if (!detailProject) return;
-    setEditingProject(detailProject);
-    setDetailProject(null);
-    setProjectModalOpen(true);
   };
 
   const handleDeleteAccount = () => {
     if (!confirm('Delete your account? This is permanent and cannot be undone.')) return;
     if (!confirm('Are you absolutely sure? All your data will be lost.')) return;
     showToast('Account deletion requested — contact support to complete.', 'red');
+  };
+
+  const openEdit = (project) => {
+    setEditingProject(project);
+    setProjectModalOpen(true);
   };
 
   if (loading) return (
@@ -206,18 +271,11 @@ export default function Dashboard() {
     </div>
   );
 
-  const sortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Sort';
-  const clientLabel = clientFilter === 'All' ? 'All Clients' : clientFilter;
-  const statusLabel = statusFilter === 'All' ? 'All Status' : statusFilter;
-
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0A0A0A', color: '#fff',
-      fontFamily: 'Syne, sans-serif',
-    }}>
+    <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
       <StudioToast />
 
-      {/* Compact top header */}
+      {/* ── Sticky top header ── */}
       <header style={{
         borderBottom: '1px solid #1E1E1E',
         position: 'sticky', top: 0, zIndex: 100,
@@ -231,30 +289,68 @@ export default function Dashboard() {
           height: 52, padding: '0 16px',
           maxWidth: 1400, margin: '0 auto',
         }}>
-          <img
-            src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png"
-            alt="Studio 65" style={{ height: 28, flexShrink: 0 }}
-            draggable="false"
-          />
-          {/* Desktop nav — hidden on mobile via CSS */}
+          {/* Back button on detail page (mobile) */}
+          {isDetailPage ? (
+            <button
+              onClick={() => navigate('/projects')}
+              className="mobile-only"
+              style={{
+                background: 'none', border: 'none', color: '#E81A1A',
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '6px 0', minHeight: 44,
+                fontFamily: 'Syne, sans-serif',
+              }}
+            >
+              ← Back
+            </button>
+          ) : (
+            <img
+              src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png"
+              alt="Studio 65" style={{ height: 28, flexShrink: 0 }}
+              draggable="false"
+            />
+          )}
+
+          {/* Desktop nav */}
           <nav className="desktop-nav" style={{ flex: 1, display: 'flex', gap: 2 }}>
-            {['Projects','Analytics','Calendar','Crew','Timeline','Contacts'].map(t => (
-              <button key={t} onClick={() => setTab(t)} style={{
-                padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                cursor: 'pointer',
-                background: tab === t ? '#1E1E1E' : 'transparent',
-                color: tab === t ? '#fff' : '#555',
-                border: tab === t ? '1px solid #333' : '1px solid transparent',
-                minHeight: 36, whiteSpace: 'nowrap',
-              }}>{t}</button>
-            ))}
+            {[
+              { label: 'Projects', path: '/projects' },
+              { label: 'Analytics', path: '/analytics' },
+              { label: 'Calendar', path: '/calendar' },
+              { label: 'Crew', path: '/crew' },
+              { label: 'Timeline', path: '/timeline' },
+              { label: 'Contacts', path: '/contacts' },
+            ].map(({ label, path }) => {
+              const active = location.pathname === path || (path === '/projects' && location.pathname.startsWith('/projects/'));
+              return (
+                <Link key={path} to={path} style={{ textDecoration: 'none' }}>
+                  <button style={{
+                    padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer',
+                    background: active ? '#1E1E1E' : 'transparent',
+                    color: active ? '#fff' : '#555',
+                    border: active ? '1px solid #333' : '1px solid transparent',
+                    minHeight: 36, whiteSpace: 'nowrap',
+                  }}>{label}</button>
+                </Link>
+              );
+            })}
           </nav>
+
           {/* Mobile: current tab title */}
-          <div className="mobile-tab-title" style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#fff' }}>
-            {tab}
-          </div>
+          {!isDetailPage && (
+            <div className="mobile-tab-title" style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#fff' }}>
+              {tabLabel}
+            </div>
+          )}
+          {isDetailPage && (
+            <div className="mobile-tab-title" style={{ flex: 1 }} />
+          )}
+
+          {/* Right actions */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            {tab === 'Projects' && (
+            {(location.pathname === '/projects' || location.pathname === '/') && (
               <button
                 onClick={() => { setEditingProject(null); setProjectModalOpen(true); }}
                 style={{
@@ -273,110 +369,73 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Scrollable main */}
-      <main
-        ref={containerRef}
-        style={{
-          maxWidth: 1400, margin: '0 auto',
-          padding: '16px 16px',
-          paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
-
-        {/* Fade-in on tab change */}
-        <div key={tab} style={{ animation: 'fadeTab 0.18s ease' }}>
-
-          {/* ── Projects ── */}
-          {tab === 'Projects' && (
-            <div>
-              <StatsBar projects={projects} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search projects..."
-                  style={{
-                    background: '#1E1E1E', border: '1px solid #2A2A2A',
-                    borderRadius: 10, padding: '12px 14px',
-                    color: '#fff', fontSize: 14, outline: 'none', width: '100%',
-                    fontFamily: 'Syne, sans-serif',
-                  }}
-                />
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button onClick={() => setSortSheetOpen(true)} style={chipStyle(sortBy !== 'newest')}>↕ {sortLabel}</button>
-                  <button onClick={() => setClientSheetOpen(true)} style={chipStyle(clientFilter !== 'All')}>🏢 {clientLabel}</button>
-                  <button onClick={() => setStatusSheetOpen(true)} style={chipStyle(statusFilter !== 'All')}>● {statusLabel}</button>
-                  <button onClick={() => setShowArchived(v => !v)} style={chipStyle(showArchived)}>
-                    {showArchived ? '✓ ' : ''}Archived
-                  </button>
-                </div>
-              </div>
-
-              {!filtered.length ? (
-                <div style={{ textAlign: 'center', padding: '80px 20px', color: '#666' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>🎬</div>
-                  <div style={{ fontSize: 15, marginBottom: 8, color: '#888', userSelect: 'text' }}>
-                    {projects.length === 0 ? 'No projects yet.' : 'No projects match your filters.'}
-                  </div>
-                  {projects.length === 0 && (
-                    <button
-                      onClick={() => setProjectModalOpen(true)}
-                      style={{ marginTop: 12, padding: '14px 28px', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 48 }}
-                    >+ Create First Project</button>
-                  )}
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-                  {filtered.map(p => (
-                    <ProjectCard key={p.id} project={p} onClick={() => openDetail(p)} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {tab === 'Analytics' && <AnalyticsView projects={projects} />}
-          {tab === 'Calendar' && <CalendarView projects={projects} onOpenDetail={openDetail} />}
-          {tab === 'Crew' && (
+      {/* ── Scrollable main content ── */}
+      <main style={{
+        maxWidth: 1400, margin: '0 auto',
+        padding: '16px 16px',
+        paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        <Routes>
+          <Route index element={<Navigate to="/projects" replace />} />
+          <Route path="projects" element={
+            <ProjectsView
+              projects={projects}
+              onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
+              onNewProject={() => setProjectModalOpen(true)}
+              containerRef={containerRef}
+              isRefreshing={isRefreshing}
+              pullProgress={pullProgress}
+            />
+          } />
+          <Route path="projects/:id" element={
+            <ProjectDetailPage
+              projects={projects}
+              contacts={contacts}
+              templates={templates}
+              onUpdate={handleProjectUpdate}
+              onDelete={handleProjectDelete}
+              onDuplicate={handleDuplicate}
+              onSaveAsTemplate={handleSaveAsTemplate}
+              onContactsChange={setContacts}
+              onProjectsChange={setProjects}
+              onEdit={openEdit}
+            />
+          } />
+          <Route path="analytics" element={<AnalyticsView projects={projects} />} />
+          <Route path="calendar" element={<CalendarView projects={projects} onOpenDetail={(p) => navigate(`/projects/${p.id}`)} />} />
+          <Route path="crew" element={
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Crew Spend Tracker</div>
-              <CrewSpendView projects={projects} />
+              <CrewSpendView projects={projects.filter(p => !p.archived)} />
             </div>
-          )}
-          {tab === 'Timeline' && <TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={openDetail} />}
-          {tab === 'Contacts' && (
-            <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />
-          )}
-        </div>
-
-        {/* Account panel (shown in Contacts tab) */}
-        {tab === 'Contacts' && (
-          <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
-            <button
-              onClick={() => base44.auth.logout()}
-              style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48, userSelect: 'none' }}
-            >Sign Out</button>
-            <button
-              onClick={handleDeleteAccount}
-              style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48, userSelect: 'none' }}
-            >Delete Account</button>
-          </div>
-        )}
+          } />
+          <Route path="timeline" element={<TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={(p) => navigate(`/projects/${p.id}`)} />} />
+          <Route path="contacts" element={
+            <div>
+              <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />
+              {/* Account panel */}
+              <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
+                <button
+                  onClick={() => base44.auth.logout()}
+                  style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48 }}
+                >Sign Out</button>
+                <button
+                  onClick={handleDeleteAccount}
+                  style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48 }}
+                >Delete Account</button>
+              </div>
+            </div>
+          } />
+        </Routes>
       </main>
 
-      {/* Fixed bottom navigation */}
-      <BottomTabBar tab={tab} setTab={setTab} />
+      {/* ── Bottom tab bar (mobile) ── */}
+      <BottomTabBar />
 
-      {/* Bottom Sheets (mobile-native dropdowns) */}
-      <BottomSheet open={sortSheetOpen} onClose={() => setSortSheetOpen(false)} title="Sort By" options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
-      <BottomSheet open={clientSheetOpen} onClose={() => setClientSheetOpen(false)} title="Filter by Client" options={clientOptions} value={clientFilter} onChange={setClientFilter} />
-      <BottomSheet open={statusSheetOpen} onClose={() => setStatusSheetOpen(false)} title="Filter by Status" options={statusOptions} value={statusFilter} onChange={setStatusFilter} />
-
-      {/* Modals */}
+      {/* ── Create / Edit project modal ── */}
       <ProjectModal
         open={projectModalOpen}
         onClose={() => { setProjectModalOpen(false); setEditingProject(null); }}
@@ -384,18 +443,6 @@ export default function Dashboard() {
         templates={templates}
         projects={projects}
         onSave={editingProject ? handleEditProject : handleCreateProject}
-      />
-      <ProjectDetailModal
-        open={!!detailProject}
-        onClose={() => setDetailProject(null)}
-        project={detailProject}
-        contacts={contacts}
-        onUpdate={handleProjectUpdate}
-        onDelete={handleDeleteProject}
-        onEdit={openEdit}
-        onDuplicate={handleDuplicate}
-        onSaveAsTemplate={handleSaveAsTemplate}
-        onContactsChange={setContacts}
       />
 
       <StudioAIChat projects={projects} contacts={contacts} />
@@ -408,11 +455,13 @@ export default function Dashboard() {
         @media (min-width: 768px) {
           .desktop-nav { display: flex !important; }
           .mobile-tab-title { display: none !important; }
+          .mobile-only { display: none !important; }
           nav[data-bottom-tab] { display: none !important; }
         }
         @media (max-width: 767px) {
           .desktop-nav { display: none !important; }
           .mobile-tab-title { display: block !important; }
+          .mobile-only { display: flex !important; }
         }
         button:active { opacity: 0.72; transform: scale(0.97); }
       `}</style>
