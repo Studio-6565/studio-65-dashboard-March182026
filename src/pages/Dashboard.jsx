@@ -202,6 +202,10 @@ export default function Dashboard() {
                 color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
               }}>+ New</button>
             )}
+            <button onClick={() => base44.auth.logout()} className="md-nav" style={{
+              padding: '5px 10px', background: 'transparent', border: '1px solid #333', borderRadius: 6,
+              color: '#666', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'none',
+            }}>Sign Out</button>
             {/* Hamburger */}
             <button onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'center' }}>
               <span style={{ display: 'block', width: 20, height: 2, background: menuOpen ? '#E81A1A' : '#fff', borderRadius: 2, transition: 'all 0.2s', transform: menuOpen ? 'translateY(6px) rotate(45deg)' : 'none' }} />
@@ -212,17 +216,23 @@ export default function Dashboard() {
         </div>
         {/* Dropdown menu */}
         {menuOpen && (
-          <div style={{ background: '#0F0F0F', borderTop: '1px solid #1E1E1E', borderBottom: '1px solid #1E1E1E' }}>
-            {TABS.map(t => (
-              <button key={t} onClick={() => { setTab(t); setMenuOpen(false); }} style={{
-                display: 'block', width: '100%', padding: '13px 16px', textAlign: 'left',
-                background: tab === t ? '#1E1E1E' : 'transparent',
-                color: tab === t ? '#fff' : '#888', fontSize: 14, fontWeight: 600,
-                border: 'none', borderBottom: '1px solid #1A1A1A', cursor: 'pointer',
-                borderLeft: tab === t ? '3px solid #E81A1A' : '3px solid transparent',
-              }}>{t}</button>
-            ))}
-          </div>
+        <div style={{ background: '#0F0F0F', borderTop: '1px solid #1E1E1E', borderBottom: '1px solid #1E1E1E' }}>
+          {TABS.map(t => (
+            <button key={t} onClick={() => { setTab(t); setMenuOpen(false); }} style={{
+              display: 'block', width: '100%', padding: '13px 16px', textAlign: 'left',
+              background: tab === t ? '#1E1E1E' : 'transparent',
+              color: tab === t ? '#fff' : '#888', fontSize: 14, fontWeight: 600,
+              border: 'none', borderBottom: '1px solid #1A1A1A', cursor: 'pointer',
+              borderLeft: tab === t ? '3px solid #E81A1A' : '3px solid transparent',
+            }}>{t}</button>
+          ))}
+          <button onClick={() => base44.auth.logout()} style={{
+            display: 'block', width: '100%', padding: '13px 16px', textAlign: 'left',
+            background: 'transparent', color: '#E81A1A', fontSize: 14, fontWeight: 600,
+            border: 'none', cursor: 'pointer',
+            borderLeft: '3px solid transparent',
+          }}>Sign Out</button>
+        </div>
         )}
       </header>
 
