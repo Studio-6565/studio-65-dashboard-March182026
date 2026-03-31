@@ -4,13 +4,16 @@ import { base44 } from '@/api/base44Client';
 
 import StatsBar from '@/components/studio/StatsBar';
 import ProjectCard from '@/components/studio/ProjectCard';
-import AnalyticsView from '@/components/studio/AnalyticsView';
+import AnalyticsView from '@/components/studio/AnalyticsView.jsx';
+import UpcomingReminders from '@/components/studio/UpcomingReminders';
 import CrewSpendView from '@/components/studio/CrewSpendView';
 import TimelineView from '@/components/studio/TimelineView';
 import CalendarView from '@/components/studio/CalendarView';
 import ContactsView from '@/components/studio/ContactsView';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectDetailPage from './ProjectDetailPage';
+import GearPage from './GearPage';
+import OperationsPage from './OperationsPage';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import StudioAIChat from '@/components/studio/StudioAIChat';
 import BottomTabBar from '@/components/studio/BottomTabBar';
@@ -50,6 +53,8 @@ const TAB_LABELS = {
   '/crew': 'Crew',
   '/timeline': 'Timeline',
   '/contacts': 'Contacts',
+  '/gear': 'Gear',
+  '/operations': 'Operations',
 };
 
 function useTabLabel() {
@@ -106,6 +111,7 @@ function ProjectsView({ projects, onOpenDetail, onNewProject, containerRef, isRe
   return (
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <UpcomingReminders projects={projects} />
       <StatsBar projects={projects} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <input
@@ -321,6 +327,8 @@ export default function Dashboard() {
               { label: 'Crew', path: '/crew' },
               { label: 'Timeline', path: '/timeline' },
               { label: 'Contacts', path: '/contacts' },
+              { label: 'Gear', path: '/gear' },
+              { label: 'Operations', path: '/operations' },
             ].map(({ label, path }) => {
               const active = location.pathname === path || (path === '/projects' && location.pathname.startsWith('/projects/'));
               return (
@@ -412,6 +420,8 @@ export default function Dashboard() {
             </div>
           } />
           <Route path="timeline" element={<TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={(p) => navigate(`/projects/${p.id}`)} />} />
+          <Route path="gear" element={<GearPage />} />
+          <Route path="operations" element={<OperationsPage />} />
           <Route path="contacts" element={
             <div>
               <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />

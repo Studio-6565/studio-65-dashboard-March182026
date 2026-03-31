@@ -1,0 +1,77 @@
+{
+  "name": "GearItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Camera",
+        "Lens",
+        "Audio",
+        "Lighting",
+        "Drone",
+        "Stabilizer",
+        "Storage",
+        "Accessories",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "Excellent",
+        "Good",
+        "Fair",
+        "Needs Repair"
+      ],
+      "default": "Good"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "purchase_price": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

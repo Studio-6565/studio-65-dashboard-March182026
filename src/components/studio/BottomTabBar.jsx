@@ -8,6 +8,8 @@ const TABS = [
   { path: '/crew', icon: '👥', label: 'Crew' },
   { path: '/timeline', icon: '⏱', label: 'Timeline' },
   { path: '/contacts', icon: '📋', label: 'Contacts' },
+  { path: '/gear', icon: '🎒', label: 'Gear' },
+  { path: '/operations', icon: '✅', label: 'Ops' },
 ];
 
 export default function BottomTabBar() {
