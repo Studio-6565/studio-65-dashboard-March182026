@@ -25,6 +25,8 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+  const [clientFilter, setClientFilter] = useState('All');
 
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
@@ -45,16 +47,33 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // Filtered projects for the grid
-  const filtered = projects.filter(p => {
-    if (!showArchived && p.archived) return false;
-    if (statusFilter !== 'All' && p.status !== statusFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return (p.name || '').toLowerCase().includes(q) || (p.client || '').toLowerCase().includes(q) || (p.project_id || '').toLowerCase().includes(q);
-    }
-    return true;
-  });
+  // Derive unique clients from projects
+  const clientList = ['All', ...Array.from(new Set(projects.map(p => p.client).filter(Boolean))).sort()];
+
+  // Filtered + sorted projects for the grid
+  const filtered = projects
+    .filter(p => {
+      if (!showArchived && p.archived) return false;
+      if (statusFilter !== 'All' && p.status !== statusFilter) return false;
+      if (clientFilter !== 'All' && p.client !== clientFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (p.name || '').toLowerCase().includes(q) || (p.client || '').toLowerCase().includes(q) || (p.project_id || '').toLowerCase().includes(q);
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'newest') return new Date(b.date || 0) - new Date(a.date || 0);
+      if (sortBy === 'oldest') return new Date(a.date || 0) - new Date(b.date || 0);
+      if (sortBy === 'rev_high') return (b.revenue || 0) - (a.revenue || 0);
+      if (sortBy === 'rev_low') return (a.revenue || 0) - (b.revenue || 0);
+      if (sortBy === 'margin') {
+        const ma = (a.revenue || 0) > 0 ? (a.net || 0) / a.revenue : 0;
+        const mb = (b.revenue || 0) > 0 ? (b.net || 0) / b.revenue : 0;
+        return mb - ma;
+      }
+      return 0;
+    });
 
   // --- Project CRUD ---
   const handleCreateProject = async (form) => {
@@ -217,13 +236,31 @@ export default function Dashboard() {
 
             {/* Filters row */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search projects..."
-                  style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: '#fff', fontSize: 12, outline: 'none', flex: 1 }}
+                  style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: '#fff', fontSize: 12, outline: 'none', flex: 1, minWidth: 140 }}
                 />
+                <select
+                  value={clientFilter}
+                  onChange={e => setClientFilter(e.target.value)}
+                  style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 10px', color: clientFilter === 'All' ? '#666' : '#fff', fontSize: 12, outline: 'none', cursor: 'pointer', flexShrink: 0 }}
+                >
+                  {clientList.map(c => <option key={c} value={c}>{c === 'All' ? 'All Clients' : c}</option>)}
+                </select>
+                <select
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value)}
+                  style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 10px', color: '#fff', fontSize: 12, outline: 'none', cursor: 'pointer', flexShrink: 0 }}
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="rev_high">Highest Revenue</option>
+                  <option value="rev_low">Lowest Revenue</option>
+                  <option value="margin">Highest Margin</option>
+                </select>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#666', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} style={{ accentColor: '#E81A1A' }} />
                   Archived
