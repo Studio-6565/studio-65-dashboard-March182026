@@ -29,6 +29,14 @@
     "rate": {
       "type": "string"
     },
+    "rate_type": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "hourly"
+      ],
+      "default": "flat"
+    },
     "notes": {
       "type": "string"
     },

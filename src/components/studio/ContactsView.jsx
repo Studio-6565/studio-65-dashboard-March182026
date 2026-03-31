@@ -20,7 +20,7 @@ const WaSvg = () => (
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
-const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', notes: '', portal_password: '', offerings: [] };
+const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat', notes: '', portal_password: '', offerings: [] };
 
 function VendorOfferingsEditor({ offerings, onChange }) {
   const [nameInput, setNameInput] = useState('');
@@ -132,7 +132,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   };
 
   const handleEdit = (c) => {
-    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', notes: c.notes || '', portal_password: c.portal_password || '', offerings: c.offerings || [] });
+    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', rate_type: c.rate_type || 'flat', notes: c.notes || '', portal_password: c.portal_password || '', offerings: c.offerings || [] });
     setEditingId(c.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -197,7 +197,20 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
               <div><label style={labelStyle}>Role / Company</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" /></div>
               <div><label style={labelStyle}>WhatsApp / Phone</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
               <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" /></div>
-              <div><label style={labelStyle}>Default Rate ($/hr or flat)</label><input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder="e.g. 50 or 1200" /></div>
+              <div>
+                <label style={labelStyle}>Default Rate</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 0, background: '#1E1E1E', borderRadius: 8, border: '1px solid #333', overflow: 'hidden', flexShrink: 0 }}>
+                    {['flat', 'hourly'].map(rt => (
+                      <button key={rt} type="button" onClick={() => setForm(f => ({ ...f, rate_type: rt }))}
+                        style={{ padding: '9px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: form.rate_type === rt ? '#E81A1A' : 'transparent', color: form.rate_type === rt ? '#fff' : '#666', transition: 'all 0.15s' }}>
+                        {rt === 'flat' ? 'Flat' : '$/hr'}
+                      </button>
+                    ))}
+                  </div>
+                  <input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder={form.rate_type === 'hourly' ? 'Rate per hour' : 'Flat fee'} />
+                </div>
+              </div>
             </div>
             <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
 
@@ -252,7 +265,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
                   {c.phone && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888' }}>📱 {c.phone}</div>}
                   {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
-                  {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}</div>}
+                  {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}{c.rate_type === 'hourly' ? '/hr' : ' flat'}</div>}
                   {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
                   {c.portal_password && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA', marginTop: 2 }}>🔑 Code: {c.portal_password}</div>}
                   {(c.offerings || []).length > 0 && (
