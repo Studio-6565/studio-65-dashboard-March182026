@@ -16,7 +16,18 @@ export default function StudioModal({ open, onClose, children, maxWidth = 660, i
         background: '#1E1E1E', border: '1px solid #333',
         borderRadius: 12,
         width: '100%', padding: '20px 16px 32px',
+        position: 'relative',
       }}>
+        {onClose && (
+          <button onClick={onClose} style={{
+            position: 'absolute', top: 12, right: 12,
+            width: 30, height: 30, borderRadius: '50%',
+            background: '#2A2A2A', border: 'none',
+            color: '#666', fontSize: 18, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            lineHeight: 1,
+          }}>×</button>
+        )}
         {children}
       </div>
     );
