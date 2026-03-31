@@ -11,6 +11,7 @@ import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectDetailModal from '@/components/studio/ProjectDetailModal';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import { nextProjectId, addLog } from '@/lib/studio';
+import AiChat from '@/components/studio/AiChat';
 
 const TABS = ['Projects', 'Analytics', 'Calendar', 'Crew', 'Timeline', 'Contacts'];
 const STATUS_FILTERS = ['All', 'Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
@@ -153,6 +154,7 @@ export default function Dashboard() {
   const openDetail = (p) => setDetailProject(p);
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const openEdit = () => {
     if (!detailProject) return;
@@ -348,6 +350,25 @@ export default function Dashboard() {
         projects={projects}
         onSave={editingProject ? handleEditProject : handleCreateProject}
       />
+
+      {/* AI Chat */}
+      {aiOpen && <AiChat projects={projects} contacts={contacts} onClose={() => setAiOpen(false)} />}
+
+      {/* AI FAB */}
+      <button
+        onClick={() => setAiOpen(o => !o)}
+        title="Ask Studio 65 AI"
+        style={{
+          position: 'fixed', bottom: 20, right: 20, zIndex: 9998,
+          width: 52, height: 52, borderRadius: '50%',
+          background: '#E81A1A', border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(232,26,26,0.4)',
+          fontSize: 22, transition: 'transform 0.2s, box-shadow 0.2s',
+        }}
+        onMouseEnter={e => { e.target.style.transform = 'scale(1.08)'; }}
+        onMouseLeave={e => { e.target.style.transform = 'scale(1)'; }}
+      >✦</button>
 
       <ProjectDetailModal
         open={!!detailProject}
