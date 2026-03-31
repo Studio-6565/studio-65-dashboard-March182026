@@ -38,12 +38,15 @@ export default function Portal() {
     setLoading(false);
   };
 
-  const getMyRole = (project) => {
-    const crewEntry = (project.crew || []).find(m => m.name.toLowerCase() === contact.name.toLowerCase());
-    if (crewEntry) return { type: 'crew', entry: crewEntry };
-    const rentalEntry = (project.rentals || []).find(r => (r.vendor || '').toLowerCase() === contact.name.toLowerCase());
-    if (rentalEntry) return { type: 'rental', entry: rentalEntry };
-    return null;
+  const getMyRoles = (project) => {
+    const crewEntries = (project.crew || [])
+      .map((m, i) => m.name.toLowerCase() === contact.name.toLowerCase() ? { type: 'crew', entry: m, index: i } : null)
+      .filter(Boolean);
+    const rentalEntries = (project.rentals || [])
+      .map((r, i) => (r.vendor || '').toLowerCase() === contact.name.toLowerCase() ? { type: 'rental', entry: r, index: i } : null)
+      .filter(Boolean);
+    const all = [...crewEntries, ...rentalEntries];
+    return all.length ? all : null;
   };
 
   // Login screen
@@ -137,13 +140,13 @@ export default function Portal() {
             {upcomingProjects.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Upcoming</div>
-                {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
+                {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRoles={getMyRoles} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
               </div>
             )}
             {pastProjects.length > 0 && (
               <div>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Past</div>
-                {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRole={getMyRole} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
+                {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} getMyRoles={getMyRoles} active={activeProject?.id === p.id} onToggle={() => setActiveProject(activeProject?.id === p.id ? null : p)} onAvailChange={handleAvailChange} />)}
               </div>
             )}
           </>
@@ -285,40 +288,39 @@ function downloadCallSheet(p, role, contact) {
   });
 }
 
-function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvailChange }) {
-  const role = getMyRole(p);
-  if (!role) return null;
+function ProjectCard({ project: p, contact, getMyRoles, active, onToggle, onAvailChange }) {
+  const roles = getMyRoles(p);
+  if (!roles) return null;
   const st = STATUS_STYLE[p.status] || STATUS_STYLE['Booked'];
   const del = p.deliverables || [];
   const doneDel = del.filter(d => d.done).length;
-  const [saving, setSaving] = useState(false);
+  const [savingIdx, setSavingIdx] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [noteSaving, setNoteSaving] = useState(false);
   const [delLinks, setDelLinks] = useState({});
   const [delLinkSaving, setDelLinkSaving] = useState({});
 
-  const myCrewEntry = (p.crew || []).find(c => c.name.toLowerCase() === contact.name.toLowerCase());
+  const crewRoles = roles.filter(r => r.type === 'crew');
+  const hasAnyCrew = crewRoles.length > 0;
 
-  const handleAvail = async (status) => {
-    setSaving(true);
-    const crew = (p.crew || []).map(c =>
-      c.name.toLowerCase() === contact.name.toLowerCase() ? { ...c, avail: status } : c
-    );
+  const handleAvail = async (crewIndex, status) => {
+    setSavingIdx(crewIndex);
+    const crew = (p.crew || []).map((c, i) => i === crewIndex ? { ...c, avail: status } : c);
     const logMsg = status === 'yes'
       ? `${contact.name} confirmed availability via portal`
       : `${contact.name} declined via portal`;
     const activity = [...(p.activity || []), { msg: logMsg, ts: new Date().toISOString() }];
     await base44.entities.Project.update(p.id, { ...p, crew, activity });
     onAvailChange(p.id, crew);
-    setSaving(false);
+    setSavingIdx(null);
   };
 
   const handleSaveNote = async () => {
     if (!noteText.trim()) return;
     setNoteSaving(true);
-    const crew = (p.crew || []).map(c =>
-      c.name.toLowerCase() === contact.name.toLowerCase() ? { ...c, portal_note: noteText.trim() } : c
-    );
+    // Apply note to the first crew entry for this contact
+    const firstCrewIdx = crewRoles[0]?.index;
+    const crew = (p.crew || []).map((c, i) => i === firstCrewIdx ? { ...c, portal_note: noteText.trim() } : c);
     await base44.entities.Project.update(p.id, { ...p, crew });
     onAvailChange(p.id, crew);
     setNoteSaving(false);
@@ -333,9 +335,23 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
     setDelLinkSaving(s => ({ ...s, [i]: false }));
   };
 
+  // Summary line for header: list all roles/entries
+  const roleSummary = roles.map(r =>
+    r.type === 'crew' ? (r.entry.role || 'Crew') : `Vendor — ${r.entry.equipment}`
+  ).join(' · ');
+
+  const totalEarnings = crewRoles.reduce((sum, r) => {
+    if (r.entry.rate_type === 'hourly') return sum + (r.entry.cost || 0) * (r.entry.hours || 0);
+    return sum + (r.entry.cost || 0);
+  }, 0);
+
+  const allConfirmed = crewRoles.length > 0 && crewRoles.every(r => r.entry.avail === 'yes');
+  const anyDeclined = crewRoles.some(r => r.entry.avail === 'no');
+  const anyPending = crewRoles.some(r => !r.entry.avail || r.entry.avail === 'pending');
+
   return (
     <div style={{ background: '#1E1E1E', border: `1px solid ${active ? '#444' : '#2A2A2A'}`, borderRadius: 12, marginBottom: 10, overflow: 'hidden', transition: 'border-color 0.2s' }}>
-      {/* Card header — always visible, clickable */}
+      {/* Card header */}
       <div onClick={onToggle} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
@@ -345,35 +361,17 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             <span>📅 {fmtDateRange(p)}</span>
             {p.start_time && <span>⏰ {p.start_time}{p.end_time ? '–' + p.end_time : ''}</span>}
-            <span>👤 {role.type === 'crew' ? role.entry.role || 'Crew' : `Vendor — ${role.entry.equipment}`}</span>
-            {role.type === 'crew' && <span style={{ color: '#aaa' }}>💰 {fmt(role.entry.cost)}</span>}
-            {role.type === 'crew' && (
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 8px', borderRadius: 4, fontWeight: 700, background: role.entry.paid ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)', color: role.entry.paid ? '#7BC853' : '#E81A1A' }}>
-                {role.entry.paid ? '✓ Paid' : 'Awaiting Payment'}
-              </span>
-            )}
+            <span>👤 {roleSummary}</span>
+            {hasAnyCrew && totalEarnings > 0 && <span style={{ color: '#aaa' }}>💰 {fmt(totalEarnings)}</span>}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {role.type === 'crew' && (
-            role.entry.avail === 'yes' || role.entry.avail === 'no' ? (
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700, background: role.entry.avail === 'yes' ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)', color: role.entry.avail === 'yes' ? '#7BC853' : '#E81A1A' }}>
-                {role.entry.avail === 'yes' ? '✓ Confirmed' : '✗ Declined'}
-              </span>
-            ) : (
-              <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-                <button
-                  disabled={saving}
-                  onClick={() => handleAvail('yes')}
-                  style={{ padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}
-                >{saving ? '...' : '✓ Confirm Availability'}</button>
-                <button
-                  disabled={saving}
-                  onClick={() => handleAvail('no')}
-                  style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}
-                >✗ Decline</button>
-              </div>
-            )
+          {hasAnyCrew && (
+            allConfirmed ? (
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700, background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}>✓ Confirmed</span>
+            ) : anyDeclined && !anyPending ? (
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700, background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}>✗ Declined</span>
+            ) : null
           )}
           <span style={{ color: '#555', fontSize: 12 }}>{active ? '▲' : '▼'}</span>
         </div>
@@ -384,11 +382,85 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
         <div style={{ borderTop: '1px solid #2A2A2A', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Download Call Sheet */}
           <button
-            onClick={() => downloadCallSheet(p, role, contact)}
+            onClick={() => downloadCallSheet(p, roles[0], contact)}
             style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.3)', borderRadius: 8, color: '#4A9EFF', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
           >
             📄 Download Call Sheet
           </button>
+
+          {/* All roles/services for this person */}
+          <div>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>
+              Your Role{roles.length > 1 ? 's' : ''} on This Project
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {roles.map((r, ri) => {
+                const isCrew = r.type === 'crew';
+                const computedCost = isCrew && r.entry.rate_type === 'hourly'
+                  ? (r.entry.cost || 0) * (r.entry.hours || 0)
+                  : (r.entry.cost || 0);
+                return (
+                  <div key={ri} style={{ background: '#2A2A2A', borderRadius: 10, padding: '12px 14px', border: '1px solid #333' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
+                          {isCrew ? (r.entry.role || 'Crew') : `Vendor — ${r.entry.equipment}`}
+                        </div>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {isCrew && r.entry.cost > 0 && (
+                            r.entry.rate_type === 'hourly'
+                              ? <span>{fmt(r.entry.cost)}/hr × {r.entry.hours || 0}h = <span style={{ color: '#fff' }}>{fmt(computedCost)}</span></span>
+                              : <span style={{ color: '#fff' }}>{fmt(r.entry.cost)}</span>
+                          )}
+                          {!isCrew && r.entry.cost > 0 && <span style={{ color: '#fff' }}>{fmt(r.entry.cost)}</span>}
+                          {isCrew && (
+                            <span style={{ padding: '1px 7px', borderRadius: 4, fontWeight: 700, fontSize: 10,
+                              background: r.entry.paid ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)',
+                              color: r.entry.paid ? '#7BC853' : '#E81A1A' }}>
+                              {r.entry.paid ? '✓ Paid' : 'Awaiting Payment'}
+                            </span>
+                          )}
+                        </div>
+                        {isCrew && r.entry.portal_note && (
+                          <div style={{ marginTop: 6, padding: '6px 10px', background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 6, fontSize: 11, color: '#ccc' }}>
+                            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF', display: 'block', marginBottom: 2 }}>YOUR NOTE</span>
+                            {r.entry.portal_note}
+                          </div>
+                        )}
+                      </div>
+                      {/* Per-entry availability for crew */}
+                      {isCrew && (
+                        <div onClick={e => e.stopPropagation()}>
+                          {r.entry.avail === 'yes' || r.entry.avail === 'no' ? (
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '3px 9px', borderRadius: 4, fontWeight: 700,
+                                background: r.entry.avail === 'yes' ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)',
+                                color: r.entry.avail === 'yes' ? '#7BC853' : '#E81A1A' }}>
+                                {r.entry.avail === 'yes' ? '✓ Confirmed' : '✗ Declined'}
+                              </span>
+                              <button onClick={() => handleAvail(r.index, 'pending')} style={{ background: 'none', border: '1px solid #444', borderRadius: 4, color: '#666', fontSize: 10, cursor: 'pointer', padding: '2px 7px', fontFamily: '"DM Mono", monospace' }}>Change</button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button disabled={savingIdx === r.index} onClick={() => handleAvail(r.index, 'yes')}
+                                style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}>
+                                {savingIdx === r.index ? '...' : '✓ Confirm'}
+                              </button>
+                              <button disabled={savingIdx === r.index} onClick={() => handleAvail(r.index, 'no')}
+                                style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}>
+                                ✗
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Shoot details */}
           {(p.address || p.poc_name || p.client) && (
             <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '12px 14px' }}>
@@ -454,7 +526,7 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
                     {d.link && (
                       <a href={d.link} target="_blank" rel="noreferrer" style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF', marginLeft: 18 }}>📎 {d.link}</a>
                     )}
-                    {role.type === 'crew' && (
+                    {hasAnyCrew && (
                       <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
                         <input
                           value={delLinks[i] !== undefined ? delLinks[i] : (d.link || '')}
@@ -483,16 +555,10 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
             </div>
           )}
 
-          {/* Crew: leave a note/question */}
-          {role.type === 'crew' && (
+          {/* Leave a note (crew only) */}
+          {hasAnyCrew && (
             <div>
               <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 8 }}>Your Note / Question</div>
-              {myCrewEntry?.portal_note && (
-                <div style={{ background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#ccc', marginBottom: 8, lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF', display: 'block', marginBottom: 4 }}>YOUR CURRENT NOTE</span>
-                  {myCrewEntry.portal_note}
-                </div>
-              )}
               <div style={{ display: 'flex', gap: 8 }}>
                 <textarea
                   rows={2}
