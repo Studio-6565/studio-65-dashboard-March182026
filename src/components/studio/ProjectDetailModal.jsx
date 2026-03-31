@@ -22,7 +22,7 @@ const DetailTab = ({ label, active, onClick }) => (
 
 export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange }) {
   const [tab, setTab] = useState('overview');
-  const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', phone: '', email: '' });
+  const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
   const [editingCrewForm, setEditingCrewForm] = useState({});
   const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
@@ -78,14 +78,21 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     await update({ deliverables, _logMsg: `Deliverable "${deliverables[i].name}" ${deliverables[i].done ? 'complete' : 'incomplete'}` });
   };
 
+  const crewTotal = (c) => {
+    if (c.rate_type === 'hourly') return (parseFloat(c.cost) || 0) * (parseFloat(c.hours) || 0);
+    return parseFloat(c.cost) || 0;
+  };
+
   const handleAddCrew = async () => {
     if (!crewForm.name.trim()) { showToast('Enter a name', 'red'); return; }
-    const cost = parseFloat(crewForm.cost) || 0;
-    const crew = [...(p.crew || []), { name: crewForm.name.trim(), role: crewForm.role.trim(), cost, phone: crewForm.phone.trim(), email: (crewForm.email || '').trim(), paid: false }];
-    const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
+    const rate = parseFloat(crewForm.cost) || 0;
+    const hours = crewForm.rate_type === 'hourly' ? (parseFloat(crewForm.hours) || 0) : undefined;
+    const newMember = { name: crewForm.name.trim(), role: crewForm.role.trim(), rate_type: crewForm.rate_type || 'flat', cost: rate, ...(hours !== undefined ? { hours } : {}), phone: crewForm.phone.trim(), email: (crewForm.email || '').trim(), paid: false };
+    const crew = [...(p.crew || []), newMember];
+    const crew_cost = crew.reduce((s, c) => s + crewTotal(c), 0);
     const net = p.revenue - crew_cost - p.rental_cost;
     await update({ crew, crew_cost, net, _logMsg: `${crewForm.name} added to crew` });
-    setCrewForm({ name: '', role: '', cost: '', phone: '', email: '' });
+    setCrewForm({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
     showToast(crewForm.name + ' added to crew');
   };
 
@@ -102,8 +109,8 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
 
   const handleEditCrewSave = async () => {
     const crew = [...p.crew];
-    crew[editingCrewIdx] = { ...crew[editingCrewIdx], ...editingCrewForm, cost: parseFloat(editingCrewForm.cost) || 0 };
-    const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
+    crew[editingCrewIdx] = { ...crew[editingCrewIdx], ...editingCrewForm, cost: parseFloat(editingCrewForm.cost) || 0, hours: parseFloat(editingCrewForm.hours) || undefined };
+    const crew_cost = crew.reduce((s, c) => s + crewTotal(c), 0);
     await update({ crew, crew_cost, net: p.revenue - crew_cost - p.rental_cost, _logMsg: `${crew[editingCrewIdx].name} crew info updated` });
     setEditingCrewIdx(null);
     showToast('Crew updated', 'blue');
@@ -378,13 +385,38 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                     // Inline edit mode
                     <div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
-                        {[['Name', 'name', 'text'], ['Role', 'role', 'text'], ['Cost ($)', 'cost', 'number'], ['WhatsApp #', 'phone', 'text']].map(([l, k, type]) => (
+                        {[['Name', 'name', 'text'], ['Role', 'role', 'text'], ['WhatsApp #', 'phone', 'text']].map(([l, k, type]) => (
                           <div key={k}>
                             <label style={LL}>{l}</label>
                             <input style={{ ...SS, background: '#1E1E1E', padding: '7px 10px' }} type={type} value={editingCrewForm[k] || ''} onChange={e => setEditingCrewForm(f => ({ ...f, [k]: e.target.value }))} />
                           </div>
                         ))}
+                        <div>
+                          <label style={LL}>Rate Type</label>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {['flat', 'hourly'].map(rt => (
+                              <button key={rt} onClick={() => setEditingCrewForm(f => ({ ...f, rate_type: rt }))} style={{ flex: 1, padding: '7px 0', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: (editingCrewForm.rate_type || 'flat') === rt ? '#4A9EFF' : '#2A2A2A', color: (editingCrewForm.rate_type || 'flat') === rt ? '#fff' : '#666' }}>{rt === 'flat' ? 'Flat' : 'Hourly'}</button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                      <div>
+                        <label style={LL}>{(editingCrewForm.rate_type || 'flat') === 'hourly' ? 'Rate ($/hr)' : 'Flat Fee ($)'}</label>
+                        <input style={{ ...SS, background: '#1E1E1E', padding: '7px 10px' }} type="number" value={editingCrewForm.cost || ''} onChange={e => setEditingCrewForm(f => ({ ...f, cost: e.target.value }))} />
+                      </div>
+                      {(editingCrewForm.rate_type || 'flat') === 'hourly' && (
+                        <div>
+                          <label style={LL}>Hours</label>
+                          <input style={{ ...SS, background: '#1E1E1E', padding: '7px 10px' }} type="number" value={editingCrewForm.hours || ''} onChange={e => setEditingCrewForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. 8" />
+                        </div>
+                      )}
+                      {(editingCrewForm.rate_type || 'flat') === 'hourly' && editingCrewForm.cost && editingCrewForm.hours && (
+                        <div style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', background: 'rgba(123,200,83,0.08)', border: '1px solid rgba(123,200,83,0.2)', borderRadius: 8 }}>
+                          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#7BC853' }}>Total: {fmt((parseFloat(editingCrewForm.cost) || 0) * (parseFloat(editingCrewForm.hours) || 0))}</span>
+                        </div>
+                      )}
+                    </div>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={handleEditCrewSave} style={{ padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: '#4A9EFF', color: '#fff' }}>Save</button>
                         <button onClick={() => setEditingCrewIdx(null)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: '#333', border: 'none', color: '#aaa', fontFamily: '"DM Mono", monospace' }}>Cancel</button>
@@ -400,7 +432,13 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
                       <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
-                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{c.role} · {fmt(c.cost)}</div>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>
+                          {c.role} ·{' '}
+                          {c.rate_type === 'hourly'
+                            ? <span>{fmt(c.cost)}/hr × {c.hours || 0}h = <span style={{ color: '#fff' }}>{fmt(crewTotal(c))}</span></span>
+                            : <span>{fmt(c.cost)}</span>
+                          }
+                        </div>
                         {c.portal_note && (
                           <div style={{ marginTop: 5, padding: '5px 9px', background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 6, fontSize: 11, color: '#aaa', lineHeight: 1.4 }}>
                             <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF' }}>NOTE: </span>{c.portal_note}
@@ -473,7 +511,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
             {(p.crew || []).length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderTop: '1px solid #333' }}>
                 <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#666' }}>Total owed</span>
-                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, fontWeight: 500, color: '#E81A1A' }}>{fmt(crewOwed(p))}</span>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, fontWeight: 500, color: '#E81A1A' }}>{fmt((p.crew || []).filter(c => !c.paid).reduce((s, c) => s + crewTotal(c), 0))}</span>
               </div>
             )}
           </div>
@@ -496,21 +534,40 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                 </select>
               </div>
               {crewForm.name && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 10, alignItems: 'end' }}>
+                <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                   <div>
                     <label style={LL}>Role</label>
                     <input style={{ ...SS, background: '#1E1E1E' }} value={crewForm.role} onChange={e => setCrewForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" />
                   </div>
                   <div>
-                    <label style={LL}>Rate / Flat Cost ($)</label>
+                    <label style={LL}>Rate Type</label>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {['flat', 'hourly'].map(rt => (
+                        <button key={rt} onClick={() => setCrewForm(f => ({ ...f, rate_type: rt }))} style={{ flex: 1, height: 36, borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: crewForm.rate_type === rt ? '#4A9EFF' : '#1E1E1E', color: crewForm.rate_type === rt ? '#fff' : '#666' }}>{rt === 'flat' ? 'Flat Fee' : 'Hourly'}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: crewForm.rate_type === 'hourly' ? '1fr 1fr auto auto' : '1fr auto', gap: 10, alignItems: 'end' }}>
+                  <div>
+                    <label style={LL}>{crewForm.rate_type === 'hourly' ? 'Rate ($/hr)' : 'Flat Fee ($)'}</label>
                     <input style={{ ...SS, background: '#1E1E1E' }} type="number" value={crewForm.cost} onChange={e => setCrewForm(f => ({ ...f, cost: e.target.value }))} placeholder="0" />
                   </div>
-                  <div>
-                    <label style={LL}>Hours</label>
-                    <input style={{ ...SS, background: '#1E1E1E' }} type="number" value={crewForm.hours || ''} onChange={e => setCrewForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. 8" />
-                  </div>
+                  {crewForm.rate_type === 'hourly' && (
+                    <div>
+                      <label style={LL}>Hours</label>
+                      <input style={{ ...SS, background: '#1E1E1E' }} type="number" value={crewForm.hours} onChange={e => setCrewForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. 8" />
+                    </div>
+                  )}
+                  {crewForm.rate_type === 'hourly' && crewForm.cost && crewForm.hours && (
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', background: 'rgba(123,200,83,0.08)', border: '1px solid rgba(123,200,83,0.2)', borderRadius: 8, height: 36 }}>
+                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#7BC853', whiteSpace: 'nowrap' }}>{fmt((parseFloat(crewForm.cost) || 0) * (parseFloat(crewForm.hours) || 0))}</span>
+                    </div>
+                  )}
                   <button onClick={handleAddCrew} style={{ height: 38, padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
                 </div>
+                </>
               )}
             </div>
           )}

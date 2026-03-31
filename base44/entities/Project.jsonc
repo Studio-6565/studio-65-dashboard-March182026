@@ -1,0 +1,286 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "client": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "extra_dates": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date"
+      },
+      "description": "Additional shoot dates for multi-day/non-consecutive shoots"
+    },
+    "start_time": {
+      "type": "string"
+    },
+    "end_time": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "poc_name": {
+      "type": "string"
+    },
+    "poc_phone": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Booked",
+        "In Production",
+        "In Edit",
+        "Delivered",
+        "Invoiced"
+      ],
+      "default": "Booked"
+    },
+    "revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "crew_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "rental_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "net": {
+      "type": "number",
+      "default": 0
+    },
+    "paid": {
+      "type": "boolean",
+      "default": false
+    },
+    "track_hours": {
+      "type": "boolean",
+      "default": false
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string",
+      "default": ""
+    },
+    "call_sheet_url": {
+      "type": "string",
+      "description": "Uploaded call sheet PDF URL"
+    },
+    "crew": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "rate_type": {
+            "type": "string",
+            "enum": [
+              "flat",
+              "hourly"
+            ],
+            "default": "flat"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "hours": {
+            "type": "number"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "paid": {
+            "type": "boolean"
+          },
+          "avail": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "yes",
+              "no"
+            ],
+            "default": "pending"
+          },
+          "portal_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rentals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "equipment": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "paid": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "due": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "shot_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shot": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "setup": {
+      "type": "object",
+      "properties": {
+        "arrival_time": {
+          "type": "string"
+        },
+        "camera_orientation": {
+          "type": "string"
+        },
+        "frame_rate": {
+          "type": "string"
+        },
+        "resolution": {
+          "type": "string"
+        },
+        "codec": {
+          "type": "string"
+        },
+        "color_profile": {
+          "type": "string"
+        },
+        "gear": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "hours": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "desc": {
+            "type": "string"
+          },
+          "person": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "client"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
