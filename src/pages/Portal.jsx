@@ -210,7 +210,12 @@ function ProjectCard({ project: p, contact, getMyRole, active, onToggle, onAvail
             <span>📅 {fmtDateRange(p)}</span>
             {p.start_time && <span>⏰ {p.start_time}{p.end_time ? '–' + p.end_time : ''}</span>}
             <span>👤 {role.type === 'crew' ? role.entry.role || 'Crew' : `Vendor — ${role.entry.equipment}`}</span>
-            {role.type === 'crew' && <span style={{ color: '#7BC853' }}>💰 {fmt(role.entry.cost)}{role.entry.paid ? ' ✓ Paid' : ''}</span>}
+            {role.type === 'crew' && <span style={{ color: '#aaa' }}>💰 {fmt(role.entry.cost)}</span>}
+            {role.type === 'crew' && (
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, padding: '2px 8px', borderRadius: 4, fontWeight: 700, background: role.entry.paid ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)', color: role.entry.paid ? '#7BC853' : '#E81A1A' }}>
+                {role.entry.paid ? '✓ Paid' : 'Awaiting Payment'}
+              </span>
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
