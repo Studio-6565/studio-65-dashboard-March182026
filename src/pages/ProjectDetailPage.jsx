@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import ProjectDetailModal from '@/components/studio/ProjectDetailModal.jsx';
+import ProjectDetailModal from '@/components/studio/ProjectDetailModal';
 import ProjectModal from '@/components/studio/ProjectModal';
 import { showToast } from '@/components/studio/StudioToast';
 import { addLog, nextProjectId } from '@/lib/studio';
