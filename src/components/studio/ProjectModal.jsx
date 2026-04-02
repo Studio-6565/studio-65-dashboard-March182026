@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import StudioModal from './StudioModal';
+import BottomSheet from './BottomSheet';
 import { fmt, nextProjectId } from '@/lib/studio';
 
 export default function ProjectModal({ open, onClose, editingProject, templates, projects, onSave }) {
@@ -67,8 +68,11 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
     onSave({ ...form, revenue: rev, crew_cost: crew, rental_cost: rental, net, deliverables, extra_dates: form.extra_dates || [] });
   };
 
+  const [statusSheetOpen, setStatusSheetOpen] = useState(false);
+
   const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
   const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
+  const selectBtnStyle = { ...inputStyle, textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #333' };
 
   return (
     <StudioModal open={open} onClose={onClose}>
@@ -154,9 +158,18 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
         </div>
         <div>
           <label style={labelStyle}>Status</label>
-          <select style={{ ...inputStyle }} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-            {['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <button type="button" style={selectBtnStyle} onClick={() => setStatusSheetOpen(true)}>
+            <span>{form.status || 'Select status'}</span>
+            <span style={{ color: '#555', fontSize: 10 }}>▼</span>
+          </button>
+          <BottomSheet
+            open={statusSheetOpen}
+            onClose={() => setStatusSheetOpen(false)}
+            title="Project Status"
+            options={['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'].map(s => ({ value: s, label: s }))}
+            value={form.status}
+            onChange={v => setForm(f => ({ ...f, status: v }))}
+          />
         </div>
         <div>
           <label style={labelStyle}>Revenue ($)</label>

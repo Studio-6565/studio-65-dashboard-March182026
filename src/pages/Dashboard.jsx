@@ -2,49 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
-import StatsBar from '@/components/studio/StatsBar';
-import ProjectCard from '@/components/studio/ProjectCard';
-import AnalyticsView from '@/components/studio/AnalyticsView.jsx';
-import UpcomingReminders from '@/components/studio/UpcomingReminders';
-import CrewSpendView from '@/components/studio/CrewSpendView';
-import TimelineView from '@/components/studio/TimelineView';
-import CalendarView from '@/components/studio/CalendarView';
-import ContactsView from '@/components/studio/ContactsView';
-import ClientInbox from '@/components/studio/ClientInbox';
+import TabPanels from '@/components/studio/TabPanels';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectDetailPage from './ProjectDetailPage';
-import GearPage from './GearPage';
-import OperationsPage from './OperationsPage';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import StudioAIChat from '@/components/studio/StudioAIChat';
 import BottomTabBar from '@/components/studio/BottomTabBar';
-import BottomSheet from '@/components/studio/BottomSheet';
-import PullRefreshIndicator from '@/components/studio/PullRefreshIndicator';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { nextProjectId, addLog } from '@/lib/studio';
 
-const STATUS_FILTERS = ['All', 'Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'rev_high', label: 'Highest Revenue' },
-  { value: 'rev_low', label: 'Lowest Revenue' },
-  { value: 'margin', label: 'Highest Margin' },
-];
 
-const chipStyle = (active) => ({
-  padding: '9px 14px',
-  borderRadius: 20, fontSize: 12, fontWeight: 600,
-  cursor: 'pointer',
-  border: active ? '1px solid rgba(232,26,26,0.5)' : '1px solid #2A2A2A',
-  background: active ? 'rgba(232,26,26,0.1)' : '#1A1A1A',
-  color: active ? '#E81A1A' : '#888',
-  fontFamily: '"DM Mono", monospace',
-  minHeight: 36, whiteSpace: 'nowrap',
-  transition: 'all 0.15s',
-  WebkitTapHighlightColor: 'transparent',
-  userSelect: 'none',
-});
 
 // ── Tab label for the mobile header ──────────────────────────────────────────
 const TAB_LABELS = {
@@ -62,106 +29,6 @@ function useTabLabel() {
   const { pathname } = useLocation();
   if (pathname.startsWith('/projects/')) return null; // detail page shows back button
   return TAB_LABELS[pathname] || 'Projects';
-}
-
-// ── Projects list view ────────────────────────────────────────────────────────
-function ProjectsView({ projects, onOpenDetail, onNewProject, containerRef, isRefreshing, pullProgress }) {
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [search, setSearch] = useState('');
-  const [showArchived, setShowArchived] = useState(false);
-  const [sortBy, setSortBy] = useState('newest');
-  const [clientFilter, setClientFilter] = useState('All');
-  const [sortSheetOpen, setSortSheetOpen] = useState(false);
-  const [clientSheetOpen, setClientSheetOpen] = useState(false);
-  const [statusSheetOpen, setStatusSheetOpen] = useState(false);
-
-  const clientList = ['All', ...Array.from(new Set(projects.map(p => p.client).filter(Boolean))).sort()];
-  const clientOptions = clientList.map(c => ({ value: c, label: c === 'All' ? 'All Clients' : c }));
-  const statusOptions = STATUS_FILTERS.map(s => ({ value: s, label: s }));
-
-  const filtered = projects
-    .filter(p => {
-      if (!showArchived && p.archived) return false;
-      if (statusFilter !== 'All' && p.status !== statusFilter) return false;
-      if (clientFilter !== 'All' && p.client !== clientFilter) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        return (p.name || '').toLowerCase().includes(q) ||
-          (p.client || '').toLowerCase().includes(q) ||
-          (p.project_id || '').toLowerCase().includes(q);
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'newest') return new Date(b.date || 0) - new Date(a.date || 0);
-      if (sortBy === 'oldest') return new Date(a.date || 0) - new Date(b.date || 0);
-      if (sortBy === 'rev_high') return (b.revenue || 0) - (a.revenue || 0);
-      if (sortBy === 'rev_low') return (a.revenue || 0) - (b.revenue || 0);
-      if (sortBy === 'margin') {
-        const ma = (a.revenue || 0) > 0 ? (a.net || 0) / a.revenue : 0;
-        const mb = (b.revenue || 0) > 0 ? (b.net || 0) / b.revenue : 0;
-        return mb - ma;
-      }
-      return 0;
-    });
-
-  const sortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Sort';
-  const clientLabel = clientFilter === 'All' ? 'All Clients' : clientFilter;
-  const statusLabel = statusFilter === 'All' ? 'All Status' : statusFilter;
-
-  return (
-    <div ref={containerRef}>
-      <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
-      <UpcomingReminders projects={projects} />
-      <StatsBar projects={projects} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search projects..."
-          style={{
-            background: '#1E1E1E', border: '1px solid #2A2A2A',
-            borderRadius: 10, padding: '12px 14px',
-            color: '#fff', fontSize: 14, outline: 'none', width: '100%',
-            fontFamily: 'Syne, sans-serif',
-          }}
-        />
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={() => setSortSheetOpen(true)} style={chipStyle(sortBy !== 'newest')}>↕ {sortLabel}</button>
-          <button onClick={() => setClientSheetOpen(true)} style={chipStyle(clientFilter !== 'All')}>🏢 {clientLabel}</button>
-          <button onClick={() => setStatusSheetOpen(true)} style={chipStyle(statusFilter !== 'All')}>● {statusLabel}</button>
-          <button onClick={() => setShowArchived(v => !v)} style={chipStyle(showArchived)}>
-            {showArchived ? '✓ ' : ''}Archived
-          </button>
-        </div>
-      </div>
-
-      {!filtered.length ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', color: '#666' }}>
-          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>🎬</div>
-          <div style={{ fontSize: 15, marginBottom: 8, color: '#888' }}>
-            {projects.length === 0 ? 'No projects yet.' : 'No projects match your filters.'}
-          </div>
-          {projects.length === 0 && (
-            <button
-              onClick={onNewProject}
-              style={{ marginTop: 12, padding: '14px 28px', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 48 }}
-            >+ Create First Project</button>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-          {filtered.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} />
-          ))}
-        </div>
-      )}
-
-      <BottomSheet open={sortSheetOpen} onClose={() => setSortSheetOpen(false)} title="Sort By" options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
-      <BottomSheet open={clientSheetOpen} onClose={() => setClientSheetOpen(false)} title="Filter by Client" options={clientOptions} value={clientFilter} onChange={setClientFilter} />
-      <BottomSheet open={statusSheetOpen} onClose={() => setStatusSheetOpen(false)} title="Filter by Status" options={statusOptions} value={statusFilter} onChange={setStatusFilter} />
-    </div>
-  );
 }
 
 // ── Main Dashboard shell ──────────────────────────────────────────────────────
@@ -388,16 +255,6 @@ export default function Dashboard() {
       }}>
         <Routes>
           <Route index element={<Navigate to="/projects" replace />} />
-          <Route path="projects" element={
-            <ProjectsView
-              projects={projects}
-              onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
-              onNewProject={() => setProjectModalOpen(true)}
-              containerRef={containerRef}
-              isRefreshing={isRefreshing}
-              pullProgress={pullProgress}
-            />
-          } />
           <Route path="projects/:id" element={
             <ProjectDetailPage
               projects={projects}
@@ -412,36 +269,21 @@ export default function Dashboard() {
               onEdit={openEdit}
             />
           } />
-          <Route path="analytics" element={<AnalyticsView projects={projects} />} />
-          <Route path="calendar" element={<CalendarView projects={projects} onOpenDetail={(p) => navigate(`/projects/${p.id}`)} />} />
-          <Route path="crew" element={
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Crew Spend Tracker</div>
-              <CrewSpendView projects={projects.filter(p => !p.archived)} />
-            </div>
-          } />
-          <Route path="timeline" element={<TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={(p) => navigate(`/projects/${p.id}`)} />} />
-          <Route path="gear" element={<GearPage />} />
-          <Route path="operations" element={<OperationsPage />} />
-          <Route path="contacts" element={
-            <div>
-              <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />
-              <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
-                <ClientInbox projects={projects} contacts={contacts} />
-              </div>
-              {/* Account panel */}
-              <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
-                <button
-                  onClick={() => base44.auth.logout()}
-                  style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48 }}
-                >Sign Out</button>
-                <button
-                  onClick={handleDeleteAccount}
-                  style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48 }}
-                >Delete Account</button>
-              </div>
-            </div>
+          <Route path="*" element={
+            <TabPanels
+              projects={projects}
+              contacts={contacts}
+              templates={templates}
+              containerRef={containerRef}
+              isRefreshing={isRefreshing}
+              pullProgress={pullProgress}
+              onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
+              onNewProject={() => setProjectModalOpen(true)}
+              onContactsChange={setContacts}
+              onProjectsChange={setProjects}
+              onLogout={() => base44.auth.logout()}
+              onDeleteAccount={handleDeleteAccount}
+            />
           } />
         </Routes>
       </main>

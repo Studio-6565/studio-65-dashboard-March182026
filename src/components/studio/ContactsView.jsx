@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BottomSheet from './BottomSheet';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 import { waLink } from '@/lib/studio';
@@ -71,6 +72,7 @@ function VendorOfferingsEditor({ offerings, onChange }) {
 export default function ContactsView({ contacts, onContactsChange, projects, onProjectsChange }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -158,13 +160,20 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
           placeholder="Search contacts..."
           style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 0 }}
         />
-        <select
-          value={filter} onChange={e => setFilter(e.target.value)}
-          style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 10px', color: '#666', fontFamily: '"DM Mono", monospace', fontSize: 11, outline: 'none' }}
+        <button
+          onClick={() => setFilterSheetOpen(true)}
+          style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '7px 12px', color: filter !== 'all' ? '#fff' : '#666', fontFamily: '"DM Mono", monospace', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', minHeight: 36 }}
         >
-          <option value="all">All types</option>
-          {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
+          {filter === 'all' ? 'All types' : filter} <span style={{ fontSize: 9, color: '#555' }}>▼</span>
+        </button>
+        <BottomSheet
+          open={filterSheetOpen}
+          onClose={() => setFilterSheetOpen(false)}
+          title="Filter by Type"
+          options={[{ value: 'all', label: 'All Types' }, ...TYPES.map(t => ({ value: t, label: t }))]}
+          value={filter}
+          onChange={setFilter}
+        />
         <button
           onClick={() => { setForm(emptyForm); setEditingId(null); setShowForm(s => !s); }}
           style={{ padding: '7px 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}

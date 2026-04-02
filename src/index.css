@@ -6,6 +6,70 @@
 
 @layer base {
   :root {
+    --background: 0 0% 96%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 84% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 88%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 80%;
+    --input: 0 0% 88%;
+    --ring: 0 84% 51%;
+    --radius: 0.5rem;
+    --studio-black: #F5F5F5;
+    --studio-charcoal: #EBEBEB;
+    --studio-mid: #E0E0E0;
+    --studio-border: #CCCCCC;
+    --studio-muted: #999999;
+    --studio-gray: #333333;
+    --studio-red: #E81A1A;
+    --studio-green: #7BC853;
+    --studio-amber: #F59E0B;
+    --studio-blue: #4A9EFF;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 84% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 17%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 17%;
+    --ring: 0 84% 51%;
+    --radius: 0.5rem;
+    --studio-black: #0A0A0A;
+    --studio-charcoal: #1E1E1E;
+    --studio-mid: #2A2A2A;
+    --studio-border: #333;
+    --studio-muted: #666;
+    --studio-gray: #D9D9D9;
+    --studio-red: #E81A1A;
+    --studio-green: #7BC853;
+    --studio-amber: #F59E0B;
+    --studio-blue: #4A9EFF;
+  } }
+  .dark:root, :root.dark {
     --background: 0 0% 4%;
     --foreground: 0 0% 100%;
     --card: 0 0% 12%;
@@ -47,7 +111,7 @@
 
   body {
     background: var(--studio-black);
-    color: #ffffff;
+    color: var(--studio-gray);
     font-family: 'Syne', sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;

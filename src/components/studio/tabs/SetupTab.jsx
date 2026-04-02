@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EquipmentChecklist from './EquipmentChecklist';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
+import BottomSheet from '@/components/studio/BottomSheet';
 
 const SS = { background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -104,6 +105,8 @@ export default function SetupTab({ project, onUpdate }) {
     showToast(`"${preset.name}" deleted`, 'red');
   };
 
+  const [openSheet, setOpenSheet] = useState(null); // key of which sheet is open
+
   const { hasVideo, hasPhoto } = detectCrewTypes(project.crew);
 
   const set = (key, val) => setLocalSetup(s => ({ ...s, [key]: val }));
@@ -143,10 +146,13 @@ export default function SetupTab({ project, onUpdate }) {
           </div>
           <div>
             <label style={LL}>Orientation</label>
-            <select style={SS} value={localSetup.camera_orientation || ''} onChange={e => set('camera_orientation', e.target.value)}>
-              <option value="">— select —</option>
-              {ORIENTATIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
+            <button type="button" onClick={() => setOpenSheet('orientation')} style={{ ...SS, textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: localSetup.camera_orientation ? '#fff' : '#555' }}>{localSetup.camera_orientation || '— select —'}</span>
+              <span style={{ color: '#555', fontSize: 10 }}>▼</span>
+            </button>
+            <BottomSheet open={openSheet === 'orientation'} onClose={() => setOpenSheet(null)} title="Orientation"
+              options={[{ value: '', label: '— none —' }, ...ORIENTATIONS.map(o => ({ value: o, label: o }))]}
+              value={localSetup.camera_orientation || ''} onChange={v => { set('camera_orientation', v); setOpenSheet(null); }} />
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
@@ -164,34 +170,23 @@ export default function SetupTab({ project, onUpdate }) {
         <div style={{ borderTop: '1px solid #222', paddingTop: 20 }}>
           <SectionLabel icon="🎥" title="Video Camera Settings" color="#4A9EFF" />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginBottom: 14 }}>
-            <div>
-              <label style={LL}>Frame Rate</label>
-              <select style={SS} value={localSetup.frame_rate || ''} onChange={e => set('frame_rate', e.target.value)}>
-                <option value="">— select —</option>
-                {FRAME_RATES.map(f => <option key={f} value={f}>{f} fps</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={LL}>Resolution</label>
-              <select style={SS} value={localSetup.resolution || ''} onChange={e => set('resolution', e.target.value)}>
-                <option value="">— select —</option>
-                {RESOLUTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={LL}>Codec</label>
-              <select style={SS} value={localSetup.codec || ''} onChange={e => set('codec', e.target.value)}>
-                <option value="">— select —</option>
-                {CODECS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={LL}>Color Profile</label>
-              <select style={SS} value={localSetup.color_profile || ''} onChange={e => set('color_profile', e.target.value)}>
-                <option value="">— select —</option>
-                {COLOR_PROFILES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+            {[
+              { key: 'frame_rate', label: 'Frame Rate', sheet: 'frame_rate', opts: FRAME_RATES.map(f => ({ value: f, label: f + ' fps' })) },
+              { key: 'resolution', label: 'Resolution', sheet: 'resolution', opts: RESOLUTIONS.map(r => ({ value: r, label: r })) },
+              { key: 'codec', label: 'Codec', sheet: 'codec', opts: CODECS.map(c => ({ value: c, label: c })) },
+              { key: 'color_profile', label: 'Color Profile', sheet: 'color_profile', opts: COLOR_PROFILES.map(c => ({ value: c, label: c })) },
+            ].map(({ key, label, sheet, opts }) => (
+              <div key={key}>
+                <label style={LL}>{label}</label>
+                <button type="button" onClick={() => setOpenSheet(sheet)} style={{ ...SS, textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: localSetup[key] ? '#fff' : '#555' }}>{localSetup[key] || '— select —'}</span>
+                  <span style={{ color: '#555', fontSize: 10 }}>▼</span>
+                </button>
+                <BottomSheet open={openSheet === sheet} onClose={() => setOpenSheet(null)} title={label}
+                  options={[{ value: '', label: '— none —' }, ...opts]}
+                  value={localSetup[key] || ''} onChange={v => { set(key, v); setOpenSheet(null); }} />
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -201,20 +196,21 @@ export default function SetupTab({ project, onUpdate }) {
         <div style={{ borderTop: '1px solid #222', paddingTop: 20 }}>
           <SectionLabel icon="📷" title="Photo Settings" color="#A78BFA" />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginBottom: 14 }}>
-            <div>
-              <label style={LL}>File Format</label>
-              <select style={SS} value={localSetup.photo_format || ''} onChange={e => set('photo_format', e.target.value)}>
-                <option value="">— select —</option>
-                {PHOTO_FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={LL}>Aspect Ratio</label>
-              <select style={SS} value={localSetup.photo_aspect || ''} onChange={e => set('photo_aspect', e.target.value)}>
-                <option value="">— select —</option>
-                {PHOTO_ASPECTS.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
+            {[
+              { key: 'photo_format', label: 'File Format', sheet: 'photo_format', opts: PHOTO_FORMATS.map(f => ({ value: f, label: f })) },
+              { key: 'photo_aspect', label: 'Aspect Ratio', sheet: 'photo_aspect', opts: PHOTO_ASPECTS.map(a => ({ value: a, label: a })) },
+            ].map(({ key, label, sheet, opts }) => (
+              <div key={key}>
+                <label style={LL}>{label}</label>
+                <button type="button" onClick={() => setOpenSheet(sheet)} style={{ ...SS, textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: localSetup[key] ? '#fff' : '#555' }}>{localSetup[key] || '— select —'}</span>
+                  <span style={{ color: '#555', fontSize: 10 }}>▼</span>
+                </button>
+                <BottomSheet open={openSheet === sheet} onClose={() => setOpenSheet(null)} title={label}
+                  options={[{ value: '', label: '— none —' }, ...opts]}
+                  value={localSetup[key] || ''} onChange={v => { set(key, v); setOpenSheet(null); }} />
+              </div>
+            ))}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Toggle
