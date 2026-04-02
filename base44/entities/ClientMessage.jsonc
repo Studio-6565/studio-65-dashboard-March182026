@@ -1,0 +1,83 @@
+{
+  "name": "ClientMessage",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "from": {
+      "type": "string",
+      "enum": [
+        "studio",
+        "client"
+      ],
+      "description": "Who sent this message/item"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "message",
+        "file",
+        "script",
+        "idea",
+        "approval_request"
+      ],
+      "default": "message"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "revision_requested"
+      ],
+      "description": "Only used when type is approval_request or script"
+    },
+    "approval_note": {
+      "type": "string",
+      "description": "Client's note when approving/rejecting"
+    },
+    "read_by_client": {
+      "type": "boolean",
+      "default": false
+    },
+    "read_by_studio": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "project_id",
+    "client_name",
+    "from",
+    "type"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {}
+  }
+}

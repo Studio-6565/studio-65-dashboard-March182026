@@ -10,6 +10,7 @@ import CrewSpendView from '@/components/studio/CrewSpendView';
 import TimelineView from '@/components/studio/TimelineView';
 import CalendarView from '@/components/studio/CalendarView';
 import ContactsView from '@/components/studio/ContactsView';
+import ClientInbox from '@/components/studio/ClientInbox';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectDetailPage from './ProjectDetailPage';
 import GearPage from './GearPage';
@@ -425,6 +426,9 @@ export default function Dashboard() {
           <Route path="contacts" element={
             <div>
               <ContactsView contacts={contacts} onContactsChange={setContacts} projects={projects} onProjectsChange={setProjects} />
+              <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
+                <ClientInbox projects={projects} contacts={contacts} />
+              </div>
               {/* Account panel */}
               <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
