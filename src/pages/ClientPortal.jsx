@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
+import BookingRequestForm from '@/components/portal/BookingRequestForm';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: '12px 14px', color: '#fff', fontSize: 14, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -323,6 +324,7 @@ export default function ClientPortal() {
   const [messages, setMessages]         = useState([]);
   const [tab, setTab]                   = useState('inbox');
   const [showCompose, setShowCompose]   = useState(false);
+  const [showBooking, setShowBooking]   = useState(false);
   const [projectFilter, setProjectFilter] = useState(null);
 
   const handleLogin = (c, projs, msgs) => { setContact(c); setProjects(projs); setMessages(msgs); };
@@ -348,6 +350,7 @@ export default function ClientPortal() {
   const TABS = [
     { key: 'inbox',    label: 'Inbox' },
     { key: 'projects', label: 'Projects' },
+    { key: 'book',     label: '📅 Book a Shoot' },
   ];
 
   return (
@@ -474,14 +477,35 @@ export default function ClientPortal() {
             })}
           </div>
         )}
+        {/* ── BOOK ── */}
+        {tab === 'book' && (
+          <div style={{ paddingTop: 8 }}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>Book a Shoot</div>
+              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
+                Submit a booking request and Studio 65 will get back to you to confirm availability and details.
+              </div>
+            </div>
+            <button
+              onClick={() => setShowBooking(true)}
+              style={{ width: '100%', padding: '16px 0', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
+            >
+              📅 Submit a Booking Request →
+            </button>
+          </div>
+        )}
       </main>
 
-      {/* Floating compose button */}
-      <button
-        onClick={() => setShowCompose(true)}
-        style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 150, width: 56, height: 56, borderRadius: '50%', background: '#E81A1A', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(232,26,26,0.4)' }}
-        title="Message Studio 65"
-      >✏</button>
+      {showBooking && <BookingRequestForm contact={contact} onSent={() => setShowBooking(false)} onClose={() => setShowBooking(false)} />}
+
+      {/* Floating compose button — only on inbox */}
+      {tab !== 'book' && (
+        <button
+          onClick={() => setShowCompose(true)}
+          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 150, width: 56, height: 56, borderRadius: '50%', background: '#E81A1A', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(232,26,26,0.4)' }}
+          title="Message Studio 65"
+        >✏</button>
+      )}
 
       {showCompose && <ComposeForm projects={projects} contact={contact} onSent={handleSent} onClose={() => setShowCompose(false)} />}
     </div>

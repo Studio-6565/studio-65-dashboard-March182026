@@ -1,0 +1,42 @@
+{
+  "name": "DirectMessage",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "from_name": {
+      "type": "string"
+    },
+    "from_role": {
+      "type": "string",
+      "enum": [
+        "studio",
+        "crew"
+      ],
+      "default": "studio"
+    },
+    "body": {
+      "type": "string"
+    },
+    "read_by_crew": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "project_id",
+    "from_name",
+    "body"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

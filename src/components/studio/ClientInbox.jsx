@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
+import BookingRequestsInbox from './BookingRequestsInbox';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -223,6 +224,7 @@ export default function ClientInbox({ projects, contacts }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map(msg => {
+
             const isFromClient = msg.from === 'client';
             const tb = TYPE_BADGE[msg.type] || TYPE_BADGE.message;
             const ap = msg.approval_status ? APPROVAL_STYLE[msg.approval_status] : null;
@@ -261,6 +263,11 @@ export default function ClientInbox({ projects, contacts }) {
           })}
         </div>
       )}
+
+      {/* Booking Requests */}
+      <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
+        <BookingRequestsInbox />
+      </div>
     </div>
   );
 }

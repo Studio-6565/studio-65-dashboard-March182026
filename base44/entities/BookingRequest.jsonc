@@ -1,0 +1,57 @@
+{
+  "name": "BookingRequest",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "shoot_type": {
+      "type": "string"
+    },
+    "preferred_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "preferred_date_alt": {
+      "type": "string",
+      "format": "date"
+    },
+    "location": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "budget": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewing",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending"
+    },
+    "studio_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {}
+  }
+}

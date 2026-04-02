@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 
@@ -63,6 +63,98 @@ function LoginScreen({ onLogin }) {
         <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: '#444' }}>
           No code? Contact Studio 65.
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Project Card ───────────────────────────────────────────────────────────
+
+// ── Crew Chat ─────────────────────────────────────────────────────────────
+
+function CrewProjectChat({ project, contact }) {
+  const MONO = '"DM Mono", monospace';
+  const [messages, setMessages] = useState([]);
+  const [input, setInput]       = useState('');
+  const [sending, setSending]   = useState(false);
+  const [loaded, setLoaded]     = useState(false);
+  const bottomRef = useRef(null);
+
+  const load = async () => {
+    const msgs = await base44.entities.DirectMessage.filter({ project_id: project.id });
+    setMessages(msgs.sort((a, b) => new Date(a.created_date) - new Date(b.created_date)));
+    setLoaded(true);
+    // mark read
+    msgs.filter(m => m.from_role === 'studio' && !m.read_by_crew)
+        .forEach(m => base44.entities.DirectMessage.update(m.id, { ...m, read_by_crew: true }));
+  };
+
+  useEffect(() => { load(); }, [project.id]);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  // real-time
+  useEffect(() => {
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.data?.project_id !== project.id) return;
+      if (event.type === 'create') setMessages(prev => [...prev, event.data]);
+    });
+    return unsub;
+  }, [project.id]);
+
+  const handleSend = async () => {
+    if (!input.trim() || sending) return;
+    setSending(true);
+    const msg = await base44.entities.DirectMessage.create({
+      project_id: project.id,
+      project_name: project.name,
+      from_name: contact.name,
+      from_role: 'crew',
+      body: input.trim(),
+      read_by_crew: true,
+    });
+    setMessages(prev => [...prev, msg]);
+    setInput('');
+    setSending(false);
+  };
+
+  const unread = messages.filter(m => m.from_role === 'studio' && !m.read_by_crew).length;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: 340, background: '#111', border: '1px solid #252525', borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ padding: '10px 14px', borderBottom: '1px solid #1E1E1E', background: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#7BC853' }} />
+        <div style={{ fontSize: 12, fontWeight: 700 }}>Chat with Studio 65</div>
+        {unread > 0 && <span style={{ fontFamily: MONO, fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(74,158,255,0.15)', color: '#4A9EFF' }}>{unread} new</span>}
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {!loaded ? <div style={{ color: '#444', fontFamily: MONO, fontSize: 11, textAlign: 'center', paddingTop: 20 }}>Loading...</div>
+        : messages.length === 0 ? <div style={{ color: '#333', fontFamily: MONO, fontSize: 11, textAlign: 'center', paddingTop: 20 }}>No messages yet. Say hi!</div>
+        : messages.map(msg => {
+          const isMe = msg.from_role === 'crew';
+          return (
+            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
+              <div style={{ maxWidth: '78%' }}>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', marginBottom: 2, textAlign: isMe ? 'right' : 'left' }}>
+                  {msg.from_name} · {new Date(msg.created_date).toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+                <div style={{ padding: '9px 12px', borderRadius: 10, fontSize: 13, lineHeight: 1.6, background: isMe ? '#E81A1A' : '#1E1E1E', color: isMe ? '#fff' : '#ddd', border: isMe ? 'none' : '1px solid #2A2A2A' }}>
+                  {msg.body}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+      <div style={{ padding: '10px 12px', borderTop: '1px solid #1E1E1E', background: '#1A1A1A', display: 'flex', gap: 8 }}>
+        <input
+          value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+          placeholder="Type a message..."
+          style={{ flex: 1, background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'Syne, sans-serif' }}
+        />
+        <button onClick={handleSend} disabled={sending || !input.trim()} style={{ padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: (!input.trim() || sending) ? 0.5 : 1 }}>Send</button>
       </div>
     </div>
   );
@@ -295,6 +387,12 @@ function ProjectCard({ project: p, contact }) {
               </div>
             </div>
           )}
+
+          {/* Crew Chat */}
+          <div>
+            <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Chat with Studio 65</div>
+            <CrewProjectChat project={p} contact={contact} />
+          </div>
 
           {/* Call sheet download */}
           <button
