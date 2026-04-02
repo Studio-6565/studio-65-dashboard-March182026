@@ -225,7 +225,16 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
             <div>
               <label style={labelStyle}>Portal Access Code</label>
               <input style={inputStyle} value={form.portal_password} onChange={e => setForm(f => ({ ...f, portal_password: e.target.value }))} placeholder="e.g. vithu2025 (they use this to log in)" />
-              <div style={{ fontSize: 10, color: '#555', marginTop: 4, fontFamily: '"DM Mono", monospace' }}>Share: {window.location.origin}/portal</div>
+              <div style={{ fontSize: 10, color: '#555', marginTop: 4, fontFamily: '"DM Mono", monospace', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                Share:{' '}
+                <span style={{ color: '#4A9EFF' }}>{window.location.origin}/portal{form.portal_password ? `?code=${form.portal_password}` : ''}</span>
+                {form.portal_password && (
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/portal?code=${form.portal_password}`); }} style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.2)', color: '#4A9EFF', fontSize: 10, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Copy Link</button>
+                )}
+                {form.types.includes('Client') && form.portal_password && (
+                  <span style={{ color: '#444' }}>· Client portal: {window.location.origin}/client-portal?code={form.portal_password}</span>
+                )}
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleSave} style={{ flex: 1, padding: '10px 20px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
@@ -267,7 +276,15 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                   {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
                   {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}{c.rate_type === 'hourly' ? '/hr' : ' flat'}</div>}
                   {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
-                  {c.portal_password && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA', marginTop: 2 }}>🔑 Code: {c.portal_password}</div>}
+                  {c.portal_password && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA' }}>🔑 {c.portal_password}</span>
+                      <button
+                        onClick={e => { e.stopPropagation(); const portal = types.includes('Client') ? 'client-portal' : 'portal'; navigator.clipboard.writeText(`${window.location.origin}/${portal}?code=${c.portal_password}`); }}
+                        style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)', color: '#A78BFA', fontSize: 10, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
+                      >Copy Link</button>
+                    </div>
+                  )}
                   {(c.offerings || []).length > 0 && (
                     <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                       {c.offerings.map((o, i) => (

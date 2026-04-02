@@ -23,7 +23,8 @@ const APPROVAL_STYLE = {
 // ── Login ──────────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }) {
-  const [password, setPassword] = useState('');
+  const urlCode = new URLSearchParams(window.location.search).get('code') || '';
+  const [password, setPassword] = useState(urlCode);
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
 
