@@ -1,0 +1,66 @@
+{
+  "name": "GearPreset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "gear": {
+      "type": "string",
+      "description": "Gear/kit list text"
+    },
+    "camera_orientation": {
+      "type": "string"
+    },
+    "frame_rate": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "string"
+    },
+    "codec": {
+      "type": "string"
+    },
+    "color_profile": {
+      "type": "string"
+    },
+    "photo_format": {
+      "type": "string"
+    },
+    "photo_aspect": {
+      "type": "string"
+    },
+    "photo_raw": {
+      "type": "boolean"
+    },
+    "photo_dual_camera": {
+      "type": "boolean"
+    },
+    "photo_flash": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
