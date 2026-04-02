@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     }[msg.approval_status] || msg.approval_status;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: 'studio65production@gmail.com',
+      to: 'contact@studio65.ca',
       subject: `${msg.client_name} ${statusLabel} — ${msg.title || msg.project_name || 'a request'}`,
       body: `Client: ${msg.client_name}\nProject: ${msg.project_name || '—'}\nStatus: ${statusLabel}\n\n${msg.approval_note ? `Their note:\n"${msg.approval_note}"\n\n` : ''}Log in to view: https://app.base44.app`,
       from_name: 'Studio 65 Portal',
