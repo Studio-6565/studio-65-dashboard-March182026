@@ -38,6 +38,7 @@ function LoginScreen({ onLogin }) {
       setError('Invalid code. Please check with Studio 65.');
       setLoading(false); return;
     }
+    // Accept any contact regardless of type — crew, vendor, or multi-role
     const c = contacts[0];
     const myProjects = await loadContactProjects(c);
     onLogin(c, myProjects);

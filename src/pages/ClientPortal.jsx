@@ -34,12 +34,11 @@ function LoginScreen({ onLogin }) {
     if (!password.trim()) return;
     setLoading(true); setError('');
     const contacts = await base44.entities.Contact.filter({ portal_password: password.trim() });
-    const clients  = contacts.filter(c => (c.types || []).includes('Client'));
-    if (!clients.length) {
+    if (!contacts.length) {
       setError('Invalid access code. Please check with Studio 65.');
       setLoading(false); return;
     }
-    const c = clients[0];
+    const c = contacts[0];
     const [allProjects, allMsgs] = await Promise.all([
       base44.entities.Project.list('-date', 200),
       base44.entities.ClientMessage.filter({ client_name: c.name }),
