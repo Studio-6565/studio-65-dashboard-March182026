@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-r
 import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
+import AIAgents from './AIAgents';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
@@ -24,6 +25,7 @@ const TAB_LABELS = {
   '/contacts': 'Contacts',
   '/gear': 'Gear',
   '/operations': 'Operations',
+  '/agents': 'AI Agents',
 };
 
 function useTabLabel() {
@@ -196,6 +198,7 @@ export default function Dashboard() {
               { label: 'Contacts', path: '/contacts' },
               { label: 'Gear', path: '/gear' },
               { label: 'Operations', path: '/operations' },
+              { label: '✦ AI Agents', path: '/agents' },
             ].map(({ label, path }) => {
               const active = location.pathname === path || (path === '/projects' && location.pathname.startsWith('/projects/'));
               return (

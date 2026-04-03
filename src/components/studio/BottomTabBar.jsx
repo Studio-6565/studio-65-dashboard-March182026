@@ -10,6 +10,7 @@ const TABS = [
   { path: '/contacts', icon: '📋', label: 'Contacts' },
   { path: '/gear', icon: '🎒', label: 'Gear' },
   { path: '/operations', icon: '✅', label: 'Ops' },
+  { path: '/agents', icon: '✦', label: 'AI' },
 ];
 
 export default function BottomTabBar() {
