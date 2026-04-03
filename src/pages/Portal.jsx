@@ -8,11 +8,28 @@ const MONO = '"DM Mono", monospace';
 
 function LoginScreen({ onLogin }) {
   const urlCode = new URLSearchParams(window.location.search).get('code') || '';
+  const [mode, setMode]         = useState(urlCode ? 'code' : 'email');
   const [password, setPassword] = useState(urlCode);
+  const [email, setEmail]       = useState('');
+  const [otp, setOtp]           = useState('');
+  const [otpSent, setOtpSent]   = useState(false);
+  const [pendingContact, setPendingContact] = useState(null);
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
+  const [otpStore, setOtpStore] = useState(null); // { code, expires }
 
-  const handleSubmit = async (e) => {
+  const loadContactProjects = async (c) => {
+    const allProjects = await base44.entities.Project.list('-date', 200);
+    const myProjects  = allProjects.filter(p => {
+      const inCrew    = (p.crew || []).some(m => m.name.toLowerCase() === c.name.toLowerCase());
+      const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === c.name.toLowerCase());
+      return inCrew || inRentals;
+    });
+    return myProjects;
+  };
+
+  // ── Code login ──
+  const handleCodeSubmit = async (e) => {
     e.preventDefault();
     if (!password.trim()) return;
     setLoading(true); setError('');
@@ -22,15 +39,58 @@ function LoginScreen({ onLogin }) {
       setLoading(false); return;
     }
     const c = contacts[0];
-    const allProjects = await base44.entities.Project.list('-date', 200);
-    const myProjects  = allProjects.filter(p => {
-      const inCrew    = (p.crew || []).some(m => m.name.toLowerCase() === c.name.toLowerCase());
-      const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === c.name.toLowerCase());
-      return inCrew || inRentals;
-    });
+    const myProjects = await loadContactProjects(c);
     onLogin(c, myProjects);
     setLoading(false);
   };
+
+  // ── Email login: step 1 — send OTP ──
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true); setError('');
+    const contacts = await base44.entities.Contact.filter({ email: email.trim().toLowerCase() });
+    if (!contacts.length) {
+      setError('No account found with that email. Please check with Studio 65.');
+      setLoading(false); return;
+    }
+    const c = contacts[0];
+    // Generate a 6-digit OTP
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = Date.now() + 10 * 60 * 1000; // 10 min
+    setOtpStore({ code, expires });
+    setPendingContact(c);
+    // Send OTP via email integration
+    await base44.integrations.Core.SendEmail({
+      to: email.trim().toLowerCase(),
+      subject: 'Your Studio 65 Portal Code',
+      body: `Hi ${c.name},\n\nYour one-time login code for the Studio 65 Crew Portal is:\n\n${code}\n\nThis code expires in 10 minutes.\n\n— Studio 65`,
+    });
+    setOtpSent(true);
+    setLoading(false);
+  };
+
+  // ── Email login: step 2 — verify OTP ──
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) return;
+    setError('');
+    if (!otpStore || Date.now() > otpStore.expires) {
+      setError('Code expired. Please request a new one.');
+      setOtpSent(false); setOtpStore(null); setOtp('');
+      return;
+    }
+    if (otp.trim() !== otpStore.code) {
+      setError('Incorrect code. Please try again.');
+      return;
+    }
+    setLoading(true);
+    const myProjects = await loadContactProjects(pendingContact);
+    onLogin(pendingContact, myProjects);
+    setLoading(false);
+  };
+
+  const IS = { background: '#2A2A2A', border: '1px solid #444', borderRadius: 10, padding: '14px 16px', color: '#fff', fontSize: 16, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', marginBottom: 16 };
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', padding: 20 }}>
@@ -41,27 +101,59 @@ function LoginScreen({ onLogin }) {
           <div style={{ fontSize: 13, color: '#555' }}>Your shoots, schedule & pay — all in one place</div>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16, padding: 32 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>Access Code</label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="Enter your personal code"
-            autoFocus
-            style={{ background: '#2A2A2A', border: '1px solid #444', borderRadius: 10, padding: '14px 16px', color: '#fff', fontSize: 16, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', marginBottom: 16, letterSpacing: '0.08em' }}
-          />
-          {error && (
-            <div style={{ marginBottom: 16, padding: '12px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, fontSize: 13, color: '#E81A1A' }}>
-              {error}
-            </div>
+        {/* Mode toggle */}
+        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 16 }}>
+          {[{ key: 'email', label: '✉ Email' }, { key: 'code', label: '🔑 Access Code' }].map(m => (
+            <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s' }}>{m.label}</button>
+          ))}
+        </div>
+
+        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16, padding: 32 }}>
+          {/* ── Access Code ── */}
+          {mode === 'code' && (
+            <form onSubmit={handleCodeSubmit}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>Access Code</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your personal code" autoFocus style={{ ...IS, letterSpacing: '0.08em' }} />
+              {error && <div style={{ marginBottom: 16, padding: '12px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, fontSize: 13, color: '#E81A1A' }}>{error}</div>}
+              <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Loading...' : 'Enter Portal →'}
+              </button>
+            </form>
           )}
-          <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Loading your portal...' : 'Enter Portal →'}
-          </button>
-        </form>
+
+          {/* ── Email OTP ── */}
+          {mode === 'email' && !otpSent && (
+            <form onSubmit={handleEmailSubmit}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>Your Email Address</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" autoFocus style={IS} />
+              {error && <div style={{ marginBottom: 16, padding: '12px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, fontSize: 13, color: '#E81A1A' }}>{error}</div>}
+              <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Sending code...' : 'Send Login Code →'}
+              </button>
+            </form>
+          )}
+
+          {/* ── OTP verify ── */}
+          {mode === 'email' && otpSent && (
+            <form onSubmit={handleOtpVerify}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📬</div>
+                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Check your email</div>
+                <div style={{ fontSize: 12, color: '#555' }}>We sent a 6-digit code to <span style={{ color: '#4A9EFF' }}>{email}</span></div>
+              </div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>6-Digit Code</label>
+              <input type="text" inputMode="numeric" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} placeholder="000000" autoFocus style={{ ...IS, letterSpacing: '0.3em', textAlign: 'center', fontSize: 22 }} />
+              {error && <div style={{ marginBottom: 16, padding: '12px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, fontSize: 13, color: '#E81A1A' }}>{error}</div>}
+              <button type="submit" disabled={loading || otp.length < 6} style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', opacity: (loading || otp.length < 6) ? 0.7 : 1 }}>
+                {loading ? 'Verifying...' : 'Verify & Enter Portal →'}
+              </button>
+              <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setError(''); }} style={{ width: '100%', marginTop: 10, padding: '10px 0', background: 'transparent', border: 'none', color: '#555', fontSize: 13, cursor: 'pointer' }}>← Back</button>
+            </form>
+          )}
+        </div>
+
         <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: '#444' }}>
-          No code? Contact Studio 65.
+          No access? Contact Studio 65.
         </div>
       </div>
     </div>
