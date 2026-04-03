@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Dashboard from './pages/Dashboard.jsx';
 import Portal from './pages/Portal';
 import ClientPortal from './pages/ClientPortal';
+import Onboarding from './pages/Onboarding';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,6 +39,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/portal" element={<Portal />} />
       <Route path="/client-portal" element={<ClientPortal />} />
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>

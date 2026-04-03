@@ -1,0 +1,123 @@
+{
+  "name": "OnboardingRequest",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "denied"
+      ],
+      "default": "pending"
+    },
+    "contact_type": {
+      "type": "string",
+      "enum": [
+        "Crew",
+        "Client",
+        "Vendor",
+        "Other"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "portal_password": {
+      "type": "string"
+    },
+    "crew_skills": {
+      "type": "string",
+      "description": "Crew: comma-separated skills/roles"
+    },
+    "crew_rate": {
+      "type": "string"
+    },
+    "crew_rate_type": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "hourly"
+      ],
+      "default": "flat"
+    },
+    "crew_experience": {
+      "type": "string"
+    },
+    "crew_equipment": {
+      "type": "string",
+      "description": "Crew: gear they own"
+    },
+    "crew_availability": {
+      "type": "string"
+    },
+    "crew_instagram": {
+      "type": "string"
+    },
+    "crew_portfolio": {
+      "type": "string"
+    },
+    "client_company": {
+      "type": "string"
+    },
+    "client_project_type": {
+      "type": "string"
+    },
+    "client_budget": {
+      "type": "string"
+    },
+    "client_timeline": {
+      "type": "string"
+    },
+    "client_how_found": {
+      "type": "string"
+    },
+    "client_brief": {
+      "type": "string"
+    },
+    "vendor_company": {
+      "type": "string"
+    },
+    "vendor_offerings": {
+      "type": "string",
+      "description": "What they offer (gear, services)"
+    },
+    "vendor_service_area": {
+      "type": "string"
+    },
+    "vendor_website": {
+      "type": "string"
+    },
+    "other_reason": {
+      "type": "string"
+    },
+    "studio_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "contact_type"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {}
+  }
+}

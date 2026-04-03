@@ -21,7 +21,14 @@ const WaSvg = () => (
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
-const emptyForm = { name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat', notes: '', portal_password: '', offerings: [] };
+const emptyForm = {
+  name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat',
+  notes: '', portal_password: '', offerings: [],
+  crew_skills: '', crew_experience: '', crew_equipment: '', crew_availability: '',
+  crew_instagram: '', crew_portfolio: '',
+  client_company: '', client_project_type: '', client_budget: '', client_how_found: '',
+  vendor_company: '', vendor_service_area: '', vendor_website: '',
+};
 
 function VendorOfferingsEditor({ offerings, onChange }) {
   const [nameInput, setNameInput] = useState('');
@@ -134,7 +141,18 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   };
 
   const handleEdit = (c) => {
-    setForm({ name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '', phone: c.phone || '', email: c.email || '', rate: c.rate || '', rate_type: c.rate_type || 'flat', notes: c.notes || '', portal_password: c.portal_password || '', offerings: c.offerings || [] });
+    setForm({
+      name: c.name || '', types: c.types || (c.type ? [c.type] : []), role: c.role || '',
+      phone: c.phone || '', email: c.email || '', rate: c.rate || '', rate_type: c.rate_type || 'flat',
+      notes: c.notes || '', portal_password: c.portal_password || '', offerings: c.offerings || [],
+      crew_skills: c.crew_skills || '', crew_experience: c.crew_experience || '',
+      crew_equipment: c.crew_equipment || '', crew_availability: c.crew_availability || '',
+      crew_instagram: c.crew_instagram || '', crew_portfolio: c.crew_portfolio || '',
+      client_company: c.client_company || '', client_project_type: c.client_project_type || '',
+      client_budget: c.client_budget || '', client_how_found: c.client_how_found || '',
+      vendor_company: c.vendor_company || '', vendor_service_area: c.vendor_service_area || '',
+      vendor_website: c.vendor_website || '',
+    });
     setEditingId(c.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -202,34 +220,77 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                 })}
               </div>
             </div>
+            {/* Universal fields */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div><label style={labelStyle}>Role / Company</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Videographer" /></div>
               <div><label style={labelStyle}>WhatsApp / Phone</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
               <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" /></div>
-              <div>
-                <label style={labelStyle}>Default Rate</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <div style={{ display: 'flex', gap: 0, background: '#1E1E1E', borderRadius: 8, border: '1px solid #333', overflow: 'hidden', flexShrink: 0 }}>
-                    {['flat', 'hourly'].map(rt => (
-                      <button key={rt} type="button" onClick={() => setForm(f => ({ ...f, rate_type: rt }))}
-                        style={{ padding: '9px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: form.rate_type === rt ? '#E81A1A' : 'transparent', color: form.rate_type === rt ? '#fff' : '#666', transition: 'all 0.15s' }}>
-                        {rt === 'flat' ? 'Flat' : '$/hr'}
-                      </button>
-                    ))}
+            </div>
+
+            {/* ── Crew fields ── */}
+            {form.types.includes('Crew') && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 14px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 10 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#F59E0B', textTransform: 'uppercase', marginBottom: 4 }}>🎥 Crew Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div><label style={labelStyle}>Primary Role</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. DP, Sound, Editor" /></div>
+                  <div><label style={labelStyle}>Availability</label><input style={inputStyle} value={form.crew_availability} onChange={e => setForm(f => ({ ...f, crew_availability: e.target.value }))} placeholder="e.g. Weekends" /></div>
+                  <div><label style={labelStyle}>Skills</label><input style={inputStyle} value={form.crew_skills} onChange={e => setForm(f => ({ ...f, crew_skills: e.target.value }))} placeholder="e.g. Color grading, drone" /></div>
+                  <div><label style={labelStyle}>Experience</label><input style={inputStyle} value={form.crew_experience} onChange={e => setForm(f => ({ ...f, crew_experience: e.target.value }))} placeholder="e.g. 5 years" /></div>
+                  <div><label style={labelStyle}>Instagram</label><input style={inputStyle} value={form.crew_instagram} onChange={e => setForm(f => ({ ...f, crew_instagram: e.target.value }))} placeholder="@handle" /></div>
+                  <div><label style={labelStyle}>Portfolio</label><input style={inputStyle} value={form.crew_portfolio} onChange={e => setForm(f => ({ ...f, crew_portfolio: e.target.value }))} placeholder="https://..." /></div>
+                </div>
+                <div><label style={labelStyle}>Gear Owned</label><input style={inputStyle} value={form.crew_equipment} onChange={e => setForm(f => ({ ...f, crew_equipment: e.target.value }))} placeholder="e.g. Sony FX3, Rode NTG" /></div>
+                <div>
+                  <label style={labelStyle}>Rate</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 0, background: '#1E1E1E', borderRadius: 8, border: '1px solid #333', overflow: 'hidden', flexShrink: 0 }}>
+                      {['flat', 'hourly'].map(rt => (
+                        <button key={rt} type="button" onClick={() => setForm(f => ({ ...f, rate_type: rt }))}
+                          style={{ padding: '9px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: form.rate_type === rt ? '#E81A1A' : 'transparent', color: form.rate_type === rt ? '#fff' : '#666' }}>
+                          {rt === 'flat' ? 'Flat' : '$/hr'}
+                        </button>
+                      ))}
+                    </div>
+                    <input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder={form.rate_type === 'hourly' ? 'Hourly rate' : 'Day rate'} />
                   </div>
-                  <input style={inputStyle} type="number" value={form.rate} onChange={e => setForm(f => ({ ...f, rate: e.target.value }))} placeholder={form.rate_type === 'hourly' ? 'Rate per hour' : 'Flat fee'} />
                 </div>
               </div>
-            </div>
-            <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
-
-            {/* Vendor offerings — only shown when Vendor type is selected */}
-            {form.types.includes('Vendor') && (
-              <VendorOfferingsEditor
-                offerings={form.offerings || []}
-                onChange={offerings => setForm(f => ({ ...f, offerings }))}
-              />
             )}
+
+            {/* ── Client fields ── */}
+            {form.types.includes('Client') && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 14px', background: 'rgba(74,158,255,0.04)', border: '1px solid rgba(74,158,255,0.15)', borderRadius: 10 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#4A9EFF', textTransform: 'uppercase', marginBottom: 4 }}>🏢 Client Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div><label style={labelStyle}>Company / Brand</label><input style={inputStyle} value={form.client_company} onChange={e => setForm(f => ({ ...f, client_company: e.target.value }))} placeholder="e.g. Acme Corp" /></div>
+                  <div><label style={labelStyle}>Project Type</label><input style={inputStyle} value={form.client_project_type} onChange={e => setForm(f => ({ ...f, client_project_type: e.target.value }))} placeholder="e.g. Brand video" /></div>
+                  <div><label style={labelStyle}>Budget Range</label><input style={inputStyle} value={form.client_budget} onChange={e => setForm(f => ({ ...f, client_budget: e.target.value }))} placeholder="e.g. $2k–$5k" /></div>
+                  <div><label style={labelStyle}>How Did They Find Us</label><input style={inputStyle} value={form.client_how_found} onChange={e => setForm(f => ({ ...f, client_how_found: e.target.value }))} placeholder="e.g. Instagram, referral" /></div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Vendor fields ── */}
+            {form.types.includes('Vendor') && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 14px', background: 'rgba(123,200,83,0.04)', border: '1px solid rgba(123,200,83,0.15)', borderRadius: 10 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#7BC853', textTransform: 'uppercase', marginBottom: 4 }}>🛒 Vendor Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div><label style={labelStyle}>Company Name</label><input style={inputStyle} value={form.vendor_company} onChange={e => setForm(f => ({ ...f, vendor_company: e.target.value }))} placeholder="e.g. Toronto Lens Rentals" /></div>
+                  <div><label style={labelStyle}>Service Area</label><input style={inputStyle} value={form.vendor_service_area} onChange={e => setForm(f => ({ ...f, vendor_service_area: e.target.value }))} placeholder="e.g. GTA" /></div>
+                  <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Website</label><input style={inputStyle} value={form.vendor_website} onChange={e => setForm(f => ({ ...f, vendor_website: e.target.value }))} placeholder="https://..." /></div>
+                </div>
+                <VendorOfferingsEditor
+                  offerings={form.offerings || []}
+                  onChange={offerings => setForm(f => ({ ...f, offerings }))}
+                />
+              </div>
+            )}
+
+            {/* ── Other / universal role field if no specific type selected ── */}
+            {!form.types.includes('Crew') && !form.types.includes('Client') && !form.types.includes('Vendor') && (
+              <div><label style={labelStyle}>Role</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Partner, Collaborator" /></div>
+            )}
+
+            <div><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 60 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
 
             <div>
               <label style={labelStyle}>Portal Access Code</label>

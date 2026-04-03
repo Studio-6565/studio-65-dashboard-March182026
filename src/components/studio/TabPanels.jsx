@@ -6,6 +6,7 @@ import CrewSpendView from './CrewSpendView';
 import TimelineView from './TimelineView';
 import ContactsView from './ContactsView';
 import ClientInbox from './ClientInbox';
+import OnboardingInbox from './OnboardingInbox';
 import PullRefreshIndicator from './PullRefreshIndicator';
 import StatsBar from './StatsBar';
 import UpcomingReminders from './UpcomingReminders';
@@ -150,6 +151,9 @@ function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, o
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
       <ContactsView contacts={contacts} onContactsChange={onContactsChange} projects={projects} onProjectsChange={onProjectsChange} />
+      <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
+        <OnboardingInbox />
+      </div>
       <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
         <ClientInbox projects={projects} contacts={contacts} />
       </div>

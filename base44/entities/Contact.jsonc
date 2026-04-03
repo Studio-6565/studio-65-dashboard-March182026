@@ -58,6 +58,45 @@
         }
       }
     },
+    "crew_skills": {
+      "type": "string"
+    },
+    "crew_experience": {
+      "type": "string"
+    },
+    "crew_equipment": {
+      "type": "string"
+    },
+    "crew_availability": {
+      "type": "string"
+    },
+    "crew_instagram": {
+      "type": "string"
+    },
+    "crew_portfolio": {
+      "type": "string"
+    },
+    "client_company": {
+      "type": "string"
+    },
+    "client_project_type": {
+      "type": "string"
+    },
+    "client_budget": {
+      "type": "string"
+    },
+    "client_how_found": {
+      "type": "string"
+    },
+    "vendor_company": {
+      "type": "string"
+    },
+    "vendor_service_area": {
+      "type": "string"
+    },
+    "vendor_website": {
+      "type": "string"
+    },
     "ratings": {
       "type": "array",
       "items": {
