@@ -26,7 +26,9 @@ const AuthenticatedApp = () => {
   // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
+      // Redirect unregistered users to the onboarding page
+      window.location.href = '/onboarding';
+      return null;
     } else if (authError.type === 'auth_required') {
       // Redirect to login automatically
       navigateToLogin();
