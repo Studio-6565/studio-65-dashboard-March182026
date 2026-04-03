@@ -53,6 +53,10 @@
       "type": "string",
       "description": "Name of owner if borrowed/rental"
     },
+    "vendor_contact_id": {
+      "type": "string",
+      "description": "Contact ID of the rental vendor"
+    },
     "purchase_date": {
       "type": "string",
       "format": "date"

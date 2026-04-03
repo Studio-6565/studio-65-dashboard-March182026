@@ -14,11 +14,12 @@ const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Repair'];
 const CONDITION_COLOR = { Excellent: '#7BC853', Good: '#4A9EFF', Fair: '#F59E0B', 'Needs Repair': '#E81A1A' };
 const CAT_ICON = { Camera, Lens: Eye, Audio: Mic2, Lighting: Lightbulb, Drone: Radio, Stabilizer: Maximize2, Storage: HardDrive, Accessories: Plug, Other: Package };
 
-const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', purchase_date: '', purchase_price: '', notes: '' };
+const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', vendor_contact_id: '', purchase_date: '', purchase_price: '', notes: '' };
 
 export default function GearPage() {
   const [tab, setTab] = useState('inventory');
   const [gear, setGear] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -31,9 +32,17 @@ export default function GearPage() {
   const [formCatSheetOpen, setFormCatSheetOpen] = useState(false);
   const [formCondSheetOpen, setFormCondSheetOpen] = useState(false);
   const [formOwnershipSheetOpen, setFormOwnershipSheetOpen] = useState(false);
+  const [formVendorSheetOpen, setFormVendorSheetOpen] = useState(false);
 
   useEffect(() => {
-    base44.entities.GearItem.list('name', 200).then(g => { setGear(g); setLoading(false); });
+    Promise.all([
+      base44.entities.GearItem.list('name', 200),
+      base44.entities.Contact.list('name', 200),
+    ]).then(([g, c]) => {
+      setGear(g);
+      setContacts(c);
+      setLoading(false);
+    });
   }, []);
 
   const activeGear = gear.filter(g => !g.archived);
@@ -59,6 +68,10 @@ export default function GearPage() {
   const handleSave = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'red'); return; }
     const data = { ...form, purchase_price: parseFloat(form.purchase_price) || 0 };
+    if (form.ownership === 'Rental' && !form.vendor_contact_id) {
+      showToast('Please select a rental vendor', 'amber');
+      return;
+    }
     if (editingId) {
       await base44.entities.GearItem.update(editingId, data);
       setGear(g => g.map(x => x.id === editingId ? { ...x, ...data } : x));
@@ -72,7 +85,20 @@ export default function GearPage() {
   };
 
   const handleEdit = (item) => {
-    setForm({ name: item.name || '', category: item.category || 'Camera', brand: item.brand || '', model: item.model || '', serial_number: item.serial_number || '', condition: item.condition || 'Good', ownership: item.ownership || 'Mine', owner_name: item.owner_name || '', purchase_date: item.purchase_date || '', purchase_price: item.purchase_price || '', notes: item.notes || '' });
+    setForm({ 
+      name: item.name || '', 
+      category: item.category || 'Camera', 
+      brand: item.brand || '', 
+      model: item.model || '', 
+      serial_number: item.serial_number || '', 
+      condition: item.condition || 'Good', 
+      ownership: item.ownership || 'Mine', 
+      owner_name: item.owner_name || '', 
+      vendor_contact_id: item.vendor_contact_id || '',
+      purchase_date: item.purchase_date || '', 
+      purchase_price: item.purchase_price || '', 
+      notes: item.notes || '' 
+    });
     setEditingId(item.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -194,7 +220,15 @@ export default function GearPage() {
                 <span>{form.ownership}</span><span style={{ fontSize: 10, color: '#555' }}>▼</span>
               </button>
             </div>
-            {(form.ownership === 'Borrowed' || form.ownership === 'Rental') && (
+            {form.ownership === 'Rental' && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={LS}>Rental Vendor</label>
+                <button onClick={() => setFormVendorSheetOpen(true)} style={{ ...IS, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{form.vendor_contact_id ? contacts.find(c => c.id === form.vendor_contact_id)?.name || 'Select vendor' : 'Select vendor'}</span><span style={{ fontSize: 10, color: '#555' }}>▼</span>
+                </button>
+              </div>
+            )}
+            {form.ownership === 'Borrowed' && (
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={LS}>Owner Name</label>
                 <input style={IS} value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} placeholder="Name of owner" />
@@ -225,7 +259,8 @@ export default function GearPage() {
               <textarea style={{ ...IS, resize: 'none', minHeight: 52 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Accessories, quirks, storage location..." />
             </div>
           </div>
-          <BottomSheet open={formOwnershipSheetOpen} onClose={() => setFormOwnershipSheetOpen(false)} title="Select Ownership" options={[{ value: 'Mine', label: 'Mine' }, { value: 'Borrowed', label: 'Borrowed' }, { value: 'Rental', label: 'Rental' }]} value={form.ownership} onChange={v => setForm(f => ({ ...f, ownership: v }))} />
+          <BottomSheet open={formOwnershipSheetOpen} onClose={() => setFormOwnershipSheetOpen(false)} title="Select Ownership" options={[{ value: 'Mine', label: 'Mine' }, { value: 'Borrowed', label: 'Borrowed' }, { value: 'Rental', label: 'Rental' }]} value={form.ownership} onChange={v => setForm(f => ({ ...f, ownership: v, vendor_contact_id: v !== 'Rental' ? '' : f.vendor_contact_id }))} />
+          <BottomSheet open={formVendorSheetOpen} onClose={() => setFormVendorSheetOpen(false)} title="Select Rental Vendor" options={contacts.filter(c => c.types && c.types.includes('Vendor')).map(c => ({ value: c.id, label: c.name }))} value={form.vendor_contact_id} onChange={v => setForm(f => ({ ...f, vendor_contact_id: v }))} />
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={handleSave} style={{ flex: 1, padding: '10px 0', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
               {editingId ? 'Save Changes' : 'Add to Inventory'}
@@ -304,9 +339,11 @@ export default function GearPage() {
                       <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'rgba(74,158,255,0.15)', color: '#4A9EFF' }}>
                         {item.ownership || 'Mine'}
                       </span>
-                      {item.owner_name && (
+                      {item.ownership === 'Rental' && item.vendor_contact_id ? (
+                        <span style={{ fontFamily: MONO, fontSize: 10, color: '#888' }}>({contacts.find(c => c.id === item.vendor_contact_id)?.name})</span>
+                      ) : item.owner_name ? (
                         <span style={{ fontFamily: MONO, fontSize: 10, color: '#888' }}>({item.owner_name})</span>
-                      )}
+                      ) : null}
                       {item.purchase_price > 0 && (
                         <span style={{ fontFamily: MONO, fontSize: 10, color: '#F59E0B' }}>${item.purchase_price.toLocaleString()}</span>
                       )}
