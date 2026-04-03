@@ -23,15 +23,15 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered' || authError.type === 'auth_required') {
-      // Point all unauthorised/unregistered users to onboarding
-      if (window.location.pathname !== '/onboarding') {
-        window.location.href = '/onboarding';
-      }
-      return null;
-    }
+  // Handle authentication errors — unregistered/unauthenticated users go to onboarding
+  if (authError && (authError.type === 'user_not_registered' || authError.type === 'auth_required')) {
+    return (
+      <Routes>
+        <Route path="/portal" element={<Portal />} />
+        <Route path="/client-portal" element={<ClientPortal />} />
+        <Route path="*" element={<Onboarding />} />
+      </Routes>
+    );
   }
 
   // Render the main app
