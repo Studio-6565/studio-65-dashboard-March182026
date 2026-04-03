@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 
 const TABS = [
   { path: '/projects', icon: '🎬', label: 'Projects' },
@@ -13,6 +13,18 @@ const TABS = [
 ];
 
 export default function BottomTabBar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleTabPress = (path, isActive) => {
+    if (isActive) {
+      // Already on this tab — navigate to its root
+      navigate(path, { replace: true });
+    } else {
+      navigate(path);
+    }
+  };
+
   return (
     <nav data-bottom-tab="true" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -26,14 +38,14 @@ export default function BottomTabBar() {
       paddingBottom: 'env(safe-area-inset-bottom)',
       userSelect: 'none',
     }}>
-      {TABS.map(t => (
-        <NavLink
-          key={t.path}
-          to={t.path}
-          end={false}
-          style={{ flex: 1, textDecoration: 'none', minWidth: 44 }}
-        >
-          {({ isActive }) => (
+      {TABS.map(t => {
+        const isActive = location.pathname === t.path || location.pathname.startsWith(t.path + '/');
+        return (
+          <div
+            key={t.path}
+            onClick={() => handleTabPress(t.path, isActive)}
+            style={{ flex: 1, textDecoration: 'none', minWidth: 44, cursor: 'pointer' }}
+          >
             <div style={{
               minHeight: 54,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -41,7 +53,6 @@ export default function BottomTabBar() {
               padding: '8px 2px',
               position: 'relative',
               WebkitTapHighlightColor: 'transparent',
-              cursor: 'pointer',
             }}>
               {isActive && (
                 <div style={{
@@ -59,9 +70,9 @@ export default function BottomTabBar() {
                 transition: 'color 0.15s',
               }}>{t.label}</span>
             </div>
-          )}
-        </NavLink>
-      ))}
+          </div>
+        );
+      })}
     </nav>
   );
 }

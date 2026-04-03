@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import AnalyticsView from './AnalyticsView';
 import CalendarView from './CalendarView';
@@ -14,7 +14,7 @@ import BottomSheet from './BottomSheet';
 import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import { base44 } from '@/api/base44Client';
-import { useState } from 'react';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -144,13 +144,54 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
 
 const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations'];
 
+function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, onLogout, onDeleteAccount, loadData }) {
+  const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
+  return (
+    <div ref={containerRef}>
+      <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <ContactsView contacts={contacts} onContactsChange={onContactsChange} projects={projects} onProjectsChange={onProjectsChange} />
+      <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
+        <ClientInbox projects={projects} contacts={contacts} />
+      </div>
+      <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
+        <button onClick={onLogout} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48 }}>Sign Out</button>
+        <button onClick={onDeleteAccount} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48 }}>Delete Account</button>
+      </div>
+    </div>
+  );
+}
+
+function GearTab({ loadData }) {
+  const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
+  return (
+    <div ref={containerRef}>
+      <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <GearPage />
+    </div>
+  );
+}
+
+function OperationsTab({ loadData }) {
+  const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
+  return (
+    <div ref={containerRef}>
+      <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <OperationsPage />
+    </div>
+  );
+}
+
 export default function TabPanels({
   projects, contacts, containerRef, isRefreshing, pullProgress,
   onOpenDetail, onNewProject, onContactsChange, onProjectsChange,
-  onLogout, onDeleteAccount,
+  onLogout, onDeleteAccount, loadData,
 }) {
   const { pathname } = useLocation();
   const activeTab = TABS.find(t => pathname === '/' + t) || 'projects';
+
+  // Stable no-op for tabs that don't need their own refresh
+  const noopRefresh = useCallback(async () => {}, []);
 
   return (
     <div>
@@ -177,20 +218,18 @@ export default function TabPanels({
           {tab === 'timeline' && (
             <TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={onOpenDetail} />
           )}
-          {tab === 'gear' && <GearPage />}
-          {tab === 'operations' && <OperationsPage />}
+          {tab === 'gear' && <GearTab loadData={loadData || noopRefresh} />}
+          {tab === 'operations' && <OperationsTab loadData={loadData || noopRefresh} />}
           {tab === 'contacts' && (
-            <div>
-              <ContactsView contacts={contacts} onContactsChange={onContactsChange} projects={projects} onProjectsChange={onProjectsChange} />
-              <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
-                <ClientInbox projects={projects} contacts={contacts} />
-              </div>
-              <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
-                <button onClick={onLogout} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48 }}>Sign Out</button>
-                <button onClick={onDeleteAccount} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48 }}>Delete Account</button>
-              </div>
-            </div>
+            <ContactsTab
+              contacts={contacts}
+              onContactsChange={onContactsChange}
+              projects={projects}
+              onProjectsChange={onProjectsChange}
+              onLogout={onLogout}
+              onDeleteAccount={onDeleteAccount}
+              loadData={loadData || noopRefresh}
+            />
           )}
         </div>
       ))}

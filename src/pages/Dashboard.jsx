@@ -282,6 +282,7 @@ export default function Dashboard() {
               onProjectsChange={setProjects}
               onLogout={() => base44.auth.logout()}
               onDeleteAccount={handleDeleteAccount}
+              loadData={loadData}
             />
           } />
         </Routes>

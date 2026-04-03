@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
+import BottomSheet from '@/components/studio/BottomSheet';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -22,6 +23,10 @@ export default function GearPage() {
   const [filterCat, setFilterCat] = useState('All');
   const [filterCond, setFilterCond] = useState('All');
   const [search, setSearch] = useState('');
+  const [catSheetOpen, setCatSheetOpen] = useState(false);
+  const [condSheetOpen, setCondSheetOpen] = useState(false);
+  const [formCatSheetOpen, setFormCatSheetOpen] = useState(false);
+  const [formCondSheetOpen, setFormCondSheetOpen] = useState(false);
 
   useEffect(() => {
     base44.entities.GearItem.list('name', 200).then(g => { setGear(g); setLoading(false); });
@@ -112,15 +117,17 @@ export default function GearPage() {
             </div>
             <div>
               <label style={LS}>Category</label>
-              <select style={IS} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <button onClick={() => setFormCatSheetOpen(true)} style={{ ...IS, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{form.category}</span><span style={{ fontSize: 10, color: '#555' }}>▼</span>
+              </button>
+              <BottomSheet open={formCatSheetOpen} onClose={() => setFormCatSheetOpen(false)} title="Select Category" options={CATEGORIES.map(c => ({ value: c, label: c }))} value={form.category} onChange={v => setForm(f => ({ ...f, category: v }))} />
             </div>
             <div>
               <label style={LS}>Condition</label>
-              <select style={IS} value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))}>
-                {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <button onClick={() => setFormCondSheetOpen(true)} style={{ ...IS, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{form.condition}</span><span style={{ fontSize: 10, color: '#555' }}>▼</span>
+              </button>
+              <BottomSheet open={formCondSheetOpen} onClose={() => setFormCondSheetOpen(false)} title="Select Condition" options={CONDITIONS.map(c => ({ value: c, label: c }))} value={form.condition} onChange={v => setForm(f => ({ ...f, condition: v }))} />
             </div>
             <div>
               <label style={LS}>Brand</label>
@@ -163,14 +170,15 @@ export default function GearPage() {
           placeholder="Search gear..."
           style={{ ...IS, flex: 1, minWidth: 120 }}
         />
-        <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ ...IS, width: 'auto', color: filterCat !== 'All' ? '#fff' : '#555' }}>
-          <option value="All">All Categories</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={filterCond} onChange={e => setFilterCond(e.target.value)} style={{ ...IS, width: 'auto', color: filterCond !== 'All' ? '#fff' : '#555' }}>
-          <option value="All">All Conditions</option>
-          {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <button onClick={() => setCatSheetOpen(true)} style={{ ...IS, width: 'auto', color: filterCat !== 'All' ? '#fff' : '#555', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {filterCat === 'All' ? 'All Categories' : filterCat} <span style={{ fontSize: 10, color: '#555' }}>▼</span>
+        </button>
+        <button onClick={() => setCondSheetOpen(true)} style={{ ...IS, width: 'auto', color: filterCond !== 'All' ? '#fff' : '#555', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {filterCond === 'All' ? 'All Conditions' : filterCond} <span style={{ fontSize: 10, color: '#555' }}>▼</span>
+        </button>
+
+        <BottomSheet open={catSheetOpen} onClose={() => setCatSheetOpen(false)} title="Filter by Category" options={[{ value: 'All', label: 'All Categories' }, ...CATEGORIES.map(c => ({ value: c, label: c }))]} value={filterCat} onChange={setFilterCat} />
+        <BottomSheet open={condSheetOpen} onClose={() => setCondSheetOpen(false)} title="Filter by Condition" options={[{ value: 'All', label: 'All Conditions' }, ...CONDITIONS.map(c => ({ value: c, label: c }))]} value={filterCond} onChange={setFilterCond} />
       </div>
 
       {/* Empty state */}

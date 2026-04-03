@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 import BookingRequestsInbox from './BookingRequestsInbox';
+import BottomSheet from './BottomSheet';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -20,6 +21,19 @@ const APPROVAL_STYLE = {
   rejected: { bg: 'rgba(232,26,26,0.12)', color: '#E81A1A', label: '✗ Rejected' },
   revision_requested: { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', label: '🔄 Revision Req' },
 };
+
+// Inline sheet-trigger button for SendToClientForm selects
+function SendClientSheet({ label, options, value, onChange, title }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} style={{ ...IS, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>{label}</span><span style={{ fontSize: 10, color: '#555' }}>▼</span>
+      </button>
+      <BottomSheet open={open} onClose={() => setOpen(false)} title={title} options={options} value={value} onChange={v => { onChange(v); setOpen(false); }} />
+    </>
+  );
+}
 
 // Studio sends to a specific client / project
 function SendToClientForm({ projects, contacts, onSent }) {
@@ -75,19 +89,23 @@ function SendToClientForm({ projects, contacts, onSent }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
         <div>
           <label style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>Client</label>
-          <select style={IS} value={clientName} onChange={e => { setClientName(e.target.value); setProjectId(''); }}>
-            <option value="">— select client —</option>
-            {clientContacts.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-          </select>
+          <SendClientSheet
+            label={clientName || '— select client —'}
+            options={[{ value: '', label: '— select client —' }, ...clientContacts.map(c => ({ value: c.name, label: c.name }))]}
+            value={clientName}
+            onChange={v => { setClientName(v); setProjectId(''); }}
+            title="Select Client"
+          />
         </div>
         <div>
           <label style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>Project (optional)</label>
-          <select style={IS} value={projectId} onChange={e => setProjectId(e.target.value)}>
-            <option value="">— general —</option>
-            {projects.filter(p => !clientName || p.client?.toLowerCase() === clientName.toLowerCase()).map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          <SendClientSheet
+            label={projects.find(p => p.id === projectId)?.name || '— general —'}
+            options={[{ value: '', label: '— general —' }, ...projects.filter(p => !clientName || p.client?.toLowerCase() === clientName.toLowerCase()).map(p => ({ value: p.id, label: p.name }))]}
+            value={projectId}
+            onChange={setProjectId}
+            title="Select Project"
+          />
         </div>
       </div>
 
@@ -144,6 +162,8 @@ export default function ClientInbox({ projects, contacts }) {
   const [filterClient, setFilterClient] = useState('All');
   const [filterType, setFilterType] = useState('All');
   const [showSendForm, setShowSendForm] = useState(false);
+  const [clientSheetOpen, setClientSheetOpen] = useState(false);
+  const [typeSheetOpen, setTypeSheetOpen] = useState(false);
 
   const clientContacts = contacts.filter(c => (c.types || []).includes('Client'));
 
@@ -206,15 +226,30 @@ export default function ClientInbox({ projects, contacts }) {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        <select style={{ ...IS, width: 'auto', color: filterClient !== 'All' ? '#fff' : '#555' }} value={filterClient} onChange={e => setFilterClient(e.target.value)}>
-          <option value="All">All Clients</option>
-          {clientContacts.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-        </select>
-        <select style={{ ...IS, width: 'auto', color: filterType !== 'All' ? '#fff' : '#555' }} value={filterType} onChange={e => setFilterType(e.target.value)}>
-          <option value="All">All Types</option>
-          {Object.entries(TYPE_BADGE).map(([v, tb]) => <option key={v} value={v}>{tb.label}</option>)}
-        </select>
+        <button onClick={() => setClientSheetOpen(true)} style={{ ...IS, width: 'auto', color: filterClient !== 'All' ? '#fff' : '#555', cursor: 'pointer', textAlign: 'left' }}>
+          {filterClient === 'All' ? 'All Clients' : filterClient} <span style={{ fontSize: 10, color: '#555' }}>▼</span>
+        </button>
+        <button onClick={() => setTypeSheetOpen(true)} style={{ ...IS, width: 'auto', color: filterType !== 'All' ? '#fff' : '#555', cursor: 'pointer', textAlign: 'left' }}>
+          {filterType === 'All' ? 'All Types' : (TYPE_BADGE[filterType]?.label || filterType)} <span style={{ fontSize: 10, color: '#555' }}>▼</span>
+        </button>
       </div>
+
+      <BottomSheet
+        open={clientSheetOpen}
+        onClose={() => setClientSheetOpen(false)}
+        title="Filter by Client"
+        options={[{ value: 'All', label: 'All Clients' }, ...clientContacts.map(c => ({ value: c.name, label: c.name }))]}
+        value={filterClient}
+        onChange={setFilterClient}
+      />
+      <BottomSheet
+        open={typeSheetOpen}
+        onClose={() => setTypeSheetOpen(false)}
+        title="Filter by Type"
+        options={[{ value: 'All', label: 'All Types' }, ...Object.entries(TYPE_BADGE).map(([v, tb]) => ({ value: v, label: tb.label }))]}
+        value={filterType}
+        onChange={setFilterType}
+      />
 
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 20px', color: '#444' }}>
