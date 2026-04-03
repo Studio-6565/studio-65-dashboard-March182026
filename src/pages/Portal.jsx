@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
-import ClientContractsTab from '@/components/portal/ClientContractsTab';
+import CrewContractsTab from '@/components/portal/CrewContractsTab';
 
 const MONO = '"DM Mono", monospace';
 
@@ -502,17 +502,12 @@ function ProjectCard({ project: p, contact }) {
 // ── Main Portal ────────────────────────────────────────────────────────────
 
 export default function Portal() {
-  const [contact, setContact]     = useState(null);
-  const [projects, setProjects]   = useState([]);
-  const [contracts, setContracts] = useState([]);
-  const [tab, setTab]             = useState('projects');
+  const [contact, setContact]   = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [crewTab, setCrewTab]   = useState('projects');
 
-  const handleLogin = async (c, projs) => {
-    setContact(c); setProjects(projs);
-    const crewContracts = await base44.entities.Contract.filter({ contact_name: c.name });
-    setContracts(crewContracts);
-  };
-  const handleSignOut = () => { setContact(null); setProjects([]); setContracts([]); };
+  const handleLogin = (c, projs) => { setContact(c); setProjects(projs); };
+  const handleSignOut = () => { setContact(null); setProjects([]); setCrewTab('projects'); };
 
   if (!contact) return <LoginScreen onLogin={handleLogin} />;
 
@@ -541,45 +536,41 @@ export default function Portal() {
           <div style={{ fontSize: 13, color: '#555' }}>{projects.length} project{projects.length !== 1 ? 's' : ''} on your account</div>
         </div>
 
-        {/* Tabs */}
+        {/* Tab bar */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
-          {[{ key: 'projects', label: 'Projects' }, { key: 'contracts', label: `📝 Contracts${contracts.filter(c => c.status === 'sent').length ? ` (${contracts.filter(c => c.status === 'sent').length})` : ''}` }].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 22px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+          {[{ key: 'projects', label: '🎬 Projects' }, { key: 'contracts', label: '📝 Contracts' }].map(t => (
+            <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666' }}>{t.label}</button>
           ))}
         </div>
 
-        {tab === 'contracts' && (
-          <ClientContractsTab contracts={contracts} contact={contact} onContractsChange={setContracts} />
-        )}
+        {crewTab === 'contracts' && <CrewContractsTab contact={contact} />}
 
-        {tab === 'projects' && (
-          projects.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444' }}>
-              <div style={{ fontSize: 44, marginBottom: 14 }}>🎬</div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: '#666', marginBottom: 6 }}>No projects yet</div>
-              <div style={{ fontSize: 13 }}>Studio 65 will add you to projects soon. Check back later!</div>
-            </div>
-          ) : (
-            <>
-              {upcomingProjects.length > 0 && (
-                <div style={{ marginBottom: 32 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Upcoming</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} />)}
-                  </div>
+        {crewTab === 'projects' && (projects.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444' }}>
+            <div style={{ fontSize: 44, marginBottom: 14 }}>🎬</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#666', marginBottom: 6 }}>No projects yet</div>
+            <div style={{ fontSize: 13 }}>Studio 65 will add you to projects soon. Check back later!</div>
+          </div>
+        ) : (
+          <>
+            {upcomingProjects.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Upcoming</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {upcomingProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} />)}
                 </div>
-              )}
-              {pastProjects.length > 0 && (
-                <div>
-                  <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Past</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} />)}
-                  </div>
+              </div>
+            )}
+            {pastProjects.length > 0 && (
+              <div>
+                <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Past</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {pastProjects.map(p => <ProjectCard key={p.id} project={p} contact={contact} />)}
                 </div>
-              )}
-            </>
-          )
-        )}
+              </div>
+            )}
+          </>
+        ))}
       </main>
     </div>
   );
