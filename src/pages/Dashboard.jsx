@@ -24,9 +24,12 @@ const TAB_LABELS = {
   '/crew': 'Crew',
   '/timeline': 'Timeline',
   '/contacts': 'Contacts',
+  '/inbox': 'Inbox',
   '/gear': 'Gear',
   '/operations': 'Operations',
   '/agents': 'AI Agents',
+  '/contracts': 'Contracts',
+  '/settings': 'Settings',
 };
 
 function useTabLabel() {
@@ -238,7 +241,6 @@ export default function Dashboard() {
                 onNewProject={() => setProjectModalOpen(true)}
                 onContactsChange={setContacts}
                 onProjectsChange={setProjects}
-                onLogout={() => base44.auth.logout()}
                 onDeleteAccount={handleDeleteAccount}
                 loadData={loadData}
               />

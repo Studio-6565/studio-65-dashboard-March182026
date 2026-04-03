@@ -9,9 +9,11 @@ const NAV_ITEMS = [
   { path: '/timeline',   icon: '⏱',  label: 'Timeline' },
   { path: '/crew',       icon: '👥', label: 'Crew' },
   { path: '/contacts',   icon: '📋', label: 'Contacts' },
+  { path: '/inbox',      icon: '📨', label: 'Inbox' },
   { path: '/gear',       icon: '🎒', label: 'Gear' },
   { path: '/operations', icon: '✅', label: 'Operations' },
   { path: '/contracts',  icon: '📝', label: 'Contracts' },
+  { path: '/settings',   icon: '⚙️', label: 'Settings' },
 ];
 
 const AI_ITEM = { path: '/agents', icon: '✦', label: 'AI Agents' };
@@ -204,6 +206,7 @@ export default function SideNav({ onNewProject }) {
           {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
+
     </aside>
   );
 }

@@ -5,8 +5,6 @@ import CalendarView from './CalendarView';
 import CrewSpendView from './CrewSpendView';
 import TimelineView from './TimelineView';
 import ContactsView from './ContactsView';
-import ClientInbox from './ClientInbox';
-import OnboardingInbox from './OnboardingInbox';
 import PullRefreshIndicator from './PullRefreshIndicator';
 import StatsBar from './StatsBar';
 import UpcomingReminders from './UpcomingReminders';
@@ -16,6 +14,8 @@ import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import AIAgents from '@/pages/AIAgents';
 import ContractsPage from '@/pages/ContractsPage';
+import InboxPage from '@/pages/InboxPage';
+import SettingsPage from '@/pages/SettingsPage';
 import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
@@ -145,25 +145,14 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations', 'agents', 'contracts'];
+const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations', 'agents', 'contracts', 'inbox', 'settings'];
 
-function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, onLogout, onDeleteAccount, loadData }) {
+function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
   return (
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
       <ContactsView contacts={contacts} onContactsChange={onContactsChange} projects={projects} onProjectsChange={onProjectsChange} />
-      <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
-        <OnboardingInbox />
-      </div>
-      <div style={{ marginTop: 32, borderTop: '1px solid #1E1E1E', paddingTop: 24 }}>
-        <ClientInbox projects={projects} contacts={contacts} />
-      </div>
-      <div style={{ marginTop: 32, padding: 16, border: '1px solid #1E1E1E', borderRadius: 12, background: '#111' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: '"DM Mono", monospace', marginBottom: 12 }}>Account</div>
-        <button onClick={onLogout} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, textAlign: 'left', minHeight: 48 }}>Sign Out</button>
-        <button onClick={onDeleteAccount} style={{ display: 'block', width: '100%', padding: '14px 16px', background: 'transparent', border: '1px solid rgba(232,26,26,0.3)', borderRadius: 10, color: '#E81A1A', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left', minHeight: 48 }}>Delete Account</button>
-      </div>
     </div>
   );
 }
@@ -191,7 +180,7 @@ function OperationsTab({ loadData }) {
 export default function TabPanels({
   projects, contacts, containerRef, isRefreshing, pullProgress,
   onOpenDetail, onNewProject, onContactsChange, onProjectsChange,
-  onLogout, onDeleteAccount, loadData,
+  onDeleteAccount, loadData,
 }) {
   const { pathname } = useLocation();
   const activeTab = TABS.find(t => pathname === '/' + t) || 'projects';
@@ -228,14 +217,14 @@ export default function TabPanels({
           {tab === 'operations' && <OperationsTab loadData={loadData || noopRefresh} />}
           {tab === 'agents' && <AIAgents projects={projects} contacts={contacts} />}
           {tab === 'contracts' && <ContractsPage />}
+          {tab === 'inbox' && <InboxPage projects={projects} contacts={contacts} />}
+          {tab === 'settings' && <SettingsPage onDeleteAccount={onDeleteAccount} />}
           {tab === 'contacts' && (
             <ContactsTab
               contacts={contacts}
               onContactsChange={onContactsChange}
               projects={projects}
               onProjectsChange={onProjectsChange}
-              onLogout={onLogout}
-              onDeleteAccount={onDeleteAccount}
               loadData={loadData || noopRefresh}
             />
           )}
