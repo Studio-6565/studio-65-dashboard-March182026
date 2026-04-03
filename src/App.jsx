@@ -25,13 +25,11 @@ const AuthenticatedApp = () => {
 
   // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered') {
-      // Redirect unregistered users to the onboarding page
-      window.location.href = '/onboarding';
-      return null;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
+    if (authError.type === 'user_not_registered' || authError.type === 'auth_required') {
+      // Point all unauthorised/unregistered users to onboarding
+      if (window.location.pathname !== '/onboarding') {
+        window.location.href = '/onboarding';
+      }
       return null;
     }
   }
