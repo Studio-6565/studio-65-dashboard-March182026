@@ -309,190 +309,253 @@ function ProjectCard({ project: p, contact }) {
     setDelLinkSaving(s => ({ ...s, [i]: false }));
   };
 
+  // Section label helper
+  const SectionLabel = ({ children }) => (
+    <div style={{ fontSize: 10, fontFamily: MONO, color: '#444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>{children}</div>
+  );
+
+  // Divider
+  const Divider = () => <div style={{ height: 1, background: '#1E1E1E', margin: '4px 0' }} />;
+
   return (
-    <div style={{ background: '#1A1A1A', border: `1px solid ${expanded ? '#333' : '#222'}`, borderRadius: 14, overflow: 'hidden', transition: 'border-color 0.2s' }}>
-      {/* Header */}
-      <div onClick={() => setExpanded(e => !e)} style={{ padding: '18px 20px', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-        {/* Availability dot */}
-        <div style={{ width: 12, height: 12, borderRadius: '50%', background: confirmed ? '#7BC853' : declined ? '#E81A1A' : '#555', flexShrink: 0, marginTop: 4 }} />
+    <div style={{ background: '#141414', border: `1px solid ${expanded ? '#2A2A2A' : '#1E1E1E'}`, borderRadius: 16, overflow: 'hidden', transition: 'border-color 0.2s' }}>
+      {/* ── Header (always visible) ── */}
+      <div onClick={() => setExpanded(e => !e)} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: confirmed ? '#7BC853' : declined ? '#E81A1A' : '#444', flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>{p.name}</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, padding: '2px 9px', borderRadius: 4, fontFamily: MONO, fontWeight: 600, background: st.bg, color: st.clr }}>{p.status || 'Booked'}</span>
-            {p.date && <span style={{ fontSize: 12, color: '#666' }}>📅 {fmtDateRange(p)}</span>}
-            {p.start_time && <span style={{ fontSize: 12, color: '#666' }}>⏰ {p.start_time}{p.end_time ? '–' + p.end_time : ''}</span>}
-            {isCrew && totalEarnings > 0 && <span style={{ fontSize: 12, color: '#F59E0B' }}>💰 {fmt(totalEarnings)}</span>}
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{p.name}</div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            {p.date && <span style={{ fontSize: 12, color: '#555', fontFamily: MONO }}>{fmtDateRange(p)}</span>}
+            {p.start_time && <span style={{ fontSize: 12, color: '#555', fontFamily: MONO }}>{p.start_time}{p.end_time ? '–' + p.end_time : ''}</span>}
+            {isCrew && totalEarnings > 0 && <span style={{ fontSize: 12, color: '#F59E0B', fontFamily: MONO }}>{fmt(totalEarnings)}</span>}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {confirmed && <span style={{ fontFamily: MONO, fontSize: 10, padding: '3px 9px', borderRadius: 5, fontWeight: 700, background: 'rgba(123,200,83,0.15)', color: '#7BC853' }}>✓ Confirmed</span>}
-          {declined  && <span style={{ fontFamily: MONO, fontSize: 10, padding: '3px 9px', borderRadius: 5, fontWeight: 700, background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}>✗ Declined</span>}
-          <span style={{ color: '#444', fontSize: 13 }}>{expanded ? '▲' : '▼'}</span>
+          <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 5, fontFamily: MONO, fontWeight: 700, background: st.bg, color: st.clr }}>{p.status || 'Booked'}</span>
+          <span style={{ color: '#333', fontSize: 12, marginLeft: 2 }}>{expanded ? '▲' : '▼'}</span>
         </div>
       </div>
 
+      {/* ── Expanded Detail ── */}
       {expanded && (
-        <div style={{ borderTop: '1px solid #222', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ borderTop: '1px solid #1E1E1E' }}>
 
-          {/* Your role & pay */}
+          {/* Availability RSVP — only show if pending */}
           {crewRoles.map((r, ri) => {
             const computedCost = r.entry.rate_type === 'hourly'
               ? (r.entry.cost || 0) * (r.entry.hours || 0)
               : (r.entry.cost || 0);
-            return (
-              <div key={ri} style={{ background: '#242424', borderRadius: 10, padding: '14px 16px' }}>
-                <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 6 }}>Your Role</div>
-                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{r.entry.role || 'Crew'}</div>
-                {r.entry.cost > 0 && (
-                  <div style={{ fontSize: 14, color: '#F59E0B', marginBottom: 8 }}>
-                    {r.entry.rate_type === 'hourly'
-                      ? `${fmt(r.entry.cost)}/hr × ${r.entry.hours || 0}h = ${fmt(computedCost)}`
-                      : fmt(computedCost)}
-                    <span style={{ marginLeft: 10, fontSize: 11, padding: '2px 8px', borderRadius: 4, fontFamily: MONO, fontWeight: 700, background: r.entry.paid ? 'rgba(123,200,83,0.15)' : 'rgba(232,26,26,0.12)', color: r.entry.paid ? '#7BC853' : '#E81A1A' }}>
-                      {r.entry.paid ? '✓ Paid' : 'Awaiting Payment'}
-                    </span>
-                  </div>
-                )}
+            const myStatus = r.entry.avail;
+            const isPending = !myStatus || myStatus === 'pending';
 
-                {/* Availability response — large tap targets */}
-                {(pending || r.entry.avail === 'pending') ? (
+            return (
+              <div key={ri}>
+                {/* Role + Pay row */}
+                <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <div>
-                    <div style={{ fontSize: 13, color: '#888', marginBottom: 10 }}>Can you make it? Let the team know.</div>
-                    <div style={{ display: 'flex', gap: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.entry.role || 'Crew'}</div>
+                    {r.entry.cost > 0 && (
+                      <div style={{ fontSize: 12, color: '#F59E0B', marginTop: 2, fontFamily: MONO }}>
+                        {r.entry.rate_type === 'hourly'
+                          ? `${fmt(r.entry.cost)}/hr × ${r.entry.hours || 0}h`
+                          : fmt(computedCost)}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {r.entry.cost > 0 && (
+                      <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 5, fontFamily: MONO, fontWeight: 700, background: r.entry.paid ? 'rgba(123,200,83,0.15)' : 'rgba(255,255,255,0.05)', color: r.entry.paid ? '#7BC853' : '#555' }}>
+                        {r.entry.paid ? '✓ Paid' : 'Unpaid'}
+                      </span>
+                    )}
+                    {!isPending && (
+                      <button onClick={() => handleAvail(r.index, 'pending')} style={{ fontSize: 11, padding: '3px 9px', borderRadius: 5, background: 'none', border: '1px solid #2A2A2A', color: '#444', cursor: 'pointer', fontFamily: MONO }}>Change</button>
+                    )}
+                  </div>
+                </div>
+
+                {/* RSVP */}
+                {isPending ? (
+                  <div style={{ padding: '0 18px 16px' }}>
+                    <div style={{ fontSize: 12, color: '#555', marginBottom: 10 }}>Can you make it?</div>
+                    <div style={{ display: 'flex', gap: 8 }}>
                       <button
                         disabled={savingIdx === r.index}
                         onClick={() => handleAvail(r.index, 'yes')}
-                        style={{ flex: 1, padding: '14px 0', borderRadius: 10, fontSize: 15, fontWeight: 700, cursor: 'pointer', border: 'none', background: '#7BC853', color: '#000' }}
-                      >{savingIdx === r.index ? '...' : '✓  I\'m In'}</button>
+                        style={{ flex: 1, padding: '13px 0', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: 'none', background: '#7BC853', color: '#000' }}
+                      >{savingIdx === r.index ? '…' : "I'm In"}</button>
                       <button
                         disabled={savingIdx === r.index}
                         onClick={() => handleAvail(r.index, 'no')}
-                        style={{ flex: 1, padding: '14px 0', borderRadius: 10, fontSize: 15, fontWeight: 700, cursor: 'pointer', border: 'none', background: 'rgba(232,26,26,0.15)', color: '#E81A1A' }}
-                      >{savingIdx === r.index ? '...' : '✗  Can\'t Make It'}</button>
+                        style={{ flex: 1, padding: '13px 0', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: '1px solid #2A2A2A', background: 'transparent', color: '#555' }}
+                      >{savingIdx === r.index ? '…' : "Can't Make It"}</button>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: confirmed ? '#7BC853' : '#E81A1A' }}>
-                      {confirmed ? '✓ You\'re confirmed!' : '✗ Marked as unavailable'}
+                  <div style={{ padding: '0 18px 16px' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: myStatus === 'yes' ? '#7BC853' : '#E81A1A' }}>
+                      {myStatus === 'yes' ? '✓ You\'re confirmed' : '✗ Marked unavailable'}
                     </span>
-                    <button onClick={() => handleAvail(r.index, 'pending')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, background: 'none', border: '1px solid #333', color: '#555', cursor: 'pointer', fontFamily: MONO }}>Change</button>
                   </div>
                 )}
 
                 {r.entry.portal_note && (
-                  <div style={{ marginTop: 12, padding: '10px 12px', background: 'rgba(74,158,255,0.07)', border: '1px solid rgba(74,158,255,0.15)', borderRadius: 8, fontSize: 12, color: '#ccc' }}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, color: '#4A9EFF', marginBottom: 3 }}>YOUR NOTE ON FILE</div>
-                    {r.entry.portal_note}
+                  <div style={{ margin: '0 18px 14px', padding: '10px 12px', background: 'rgba(74,158,255,0.05)', border: '1px solid rgba(74,158,255,0.12)', borderRadius: 8 }}>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: '#4A9EFF', marginBottom: 4 }}>Your note on file</div>
+                    <div style={{ fontSize: 12, color: '#aaa', lineHeight: 1.6 }}>{r.entry.portal_note}</div>
                   </div>
                 )}
               </div>
             );
           })}
 
-          {/* Shoot details */}
-          {(p.address || p.poc_name) && (
-            <div style={{ background: '#242424', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Shoot Details</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                {p.address  && <div style={{ fontSize: 13, color: '#ccc' }}>📍 {p.address}</div>}
-                {p.poc_name && <div style={{ fontSize: 13, color: '#ccc' }}>👤 {p.poc_name}{p.poc_phone ? ' · ' + p.poc_phone : ''}</div>}
-                {p.notes    && <div style={{ fontSize: 12, color: '#888', marginTop: 4, lineHeight: 1.6 }}>{p.notes}</div>}
-              </div>
-            </div>
-          )}
+          <Divider />
 
-          {/* Camera setup */}
-          {p.setup && (p.setup.camera_orientation || p.setup.frame_rate || p.setup.resolution || p.setup.codec || p.setup.gear) && (
-            <div style={{ background: '#242424', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Camera Setup</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {[['🎥 Orientation', p.setup.camera_orientation], ['⏱ Frame Rate', p.setup.frame_rate], ['📐 Resolution', p.setup.resolution], ['🗜 Codec', p.setup.codec], ['🎨 Color Profile', p.setup.color_profile]].filter(([, v]) => v).map(([label, value]) => (
-                  <div key={label} style={{ display: 'flex', gap: 10, fontSize: 13 }}>
-                    <span style={{ fontFamily: MONO, fontSize: 10, color: '#555', minWidth: 110, flexShrink: 0, paddingTop: 1 }}>{label}</span>
-                    <span style={{ color: '#ddd' }}>{value}</span>
+          {/* Shoot Info */}
+          {(p.date || p.start_time || p.address || p.poc_name || p.notes) && (
+            <div style={{ padding: '16px 18px' }}>
+              <SectionLabel>Shoot Info</SectionLabel>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {p.date && (
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: '#444', width: 60, flexShrink: 0, paddingTop: 1 }}>Date</span>
+                    <span style={{ fontSize: 13, color: '#ccc' }}>{fmtDateRange(p)}</span>
                   </div>
-                ))}
-                {p.setup.gear && (
-                  <div style={{ marginTop: 6 }}>
-                    <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', marginBottom: 6 }}>🎒 Gear / Kit</div>
-                    {p.setup.gear.split('\n').filter(g => g.trim()).map((g, i) => (
-                      <div key={i} style={{ fontSize: 12, color: '#bbb', paddingLeft: 8, marginBottom: 3 }}>· {g.trim()}</div>
-                    ))}
+                )}
+                {p.start_time && (
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: '#444', width: 60, flexShrink: 0, paddingTop: 1 }}>Time</span>
+                    <span style={{ fontSize: 13, color: '#ccc' }}>{p.start_time}{p.end_time ? ' – ' + p.end_time : ''}</span>
                   </div>
+                )}
+                {p.address && (
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: '#444', width: 60, flexShrink: 0, paddingTop: 1 }}>Location</span>
+                    <span style={{ fontSize: 13, color: '#ccc' }}>{p.address}</span>
+                  </div>
+                )}
+                {p.poc_name && (
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: '#444', width: 60, flexShrink: 0, paddingTop: 1 }}>POC</span>
+                    <span style={{ fontSize: 13, color: '#ccc' }}>{p.poc_name}{p.poc_phone ? ' · ' + p.poc_phone : ''}</span>
+                  </div>
+                )}
+                {p.notes && (
+                  <div style={{ marginTop: 4, fontSize: 13, color: '#666', lineHeight: 1.7 }}>{p.notes}</div>
                 )}
               </div>
             </div>
           )}
 
+          {/* Camera Setup */}
+          {p.setup && (p.setup.camera_orientation || p.setup.frame_rate || p.setup.resolution || p.setup.codec || p.setup.gear) && (
+            <>
+              <Divider />
+              <div style={{ padding: '16px 18px' }}>
+                <SectionLabel>Camera Setup</SectionLabel>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {[['Orient.', p.setup.camera_orientation], ['FPS', p.setup.frame_rate], ['Res.', p.setup.resolution], ['Codec', p.setup.codec], ['Color', p.setup.color_profile]].filter(([, v]) => v).map(([label, value]) => (
+                    <div key={label} style={{ display: 'flex', gap: 10 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 11, color: '#444', width: 60, flexShrink: 0, paddingTop: 1 }}>{label}</span>
+                      <span style={{ fontSize: 13, color: '#ccc' }}>{value}</span>
+                    </div>
+                  ))}
+                  {p.setup.gear && (
+                    <div style={{ marginTop: 4 }}>
+                      <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginBottom: 6 }}>Gear</div>
+                      {p.setup.gear.split('\n').filter(g => g.trim()).map((g, i) => (
+                        <div key={i} style={{ fontSize: 12, color: '#888', paddingLeft: 0, marginBottom: 3 }}>· {g.trim()}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Deliverables */}
           {del.length > 0 && (
-            <div>
-              <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Deliverables — {del.filter(d => d.done).length}/{del.length}</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {del.map((d, i) => (
-                  <div key={i} style={{ background: '#242424', borderRadius: 10, padding: '12px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isCrew ? 10 : 0 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${d.done ? '#7BC853' : '#333'}`, background: d.done ? '#7BC853' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {d.done && <span style={{ fontSize: 10, color: '#000' }}>✓</span>}
+            <>
+              <Divider />
+              <div style={{ padding: '16px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <SectionLabel>Deliverables</SectionLabel>
+                  <span style={{ fontFamily: MONO, fontSize: 10, color: del.filter(d => d.done).length === del.length ? '#7BC853' : '#444' }}>
+                    {del.filter(d => d.done).length}/{del.length}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {del.map((d, i) => (
+                    <div key={i}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isCrew ? 8 : 0 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', border: `1.5px solid ${d.done ? '#7BC853' : '#2A2A2A'}`, background: d.done ? '#7BC853' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {d.done && <span style={{ fontSize: 9, color: '#000', fontWeight: 800 }}>✓</span>}
+                        </div>
+                        <span style={{ fontSize: 13, flex: 1, textDecoration: d.done ? 'line-through' : 'none', color: d.done ? '#444' : '#ccc' }}>{d.name}</span>
+                        {d.due && <span style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>{d.due}</span>}
                       </div>
-                      <span style={{ fontSize: 13, flex: 1, textDecoration: d.done ? 'line-through' : 'none', color: d.done ? '#555' : '#ddd' }}>{d.name}</span>
-                      {d.due && <span style={{ fontFamily: MONO, fontSize: 11, color: '#555' }}>{d.due}</span>}
+                      {d.link && <a href={d.link} target="_blank" rel="noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: '#4A9EFF', marginLeft: 26, display: 'block', marginBottom: 4 }}>{d.link}</a>}
+                      {isCrew && (
+                        <div style={{ display: 'flex', gap: 8, marginLeft: 26 }}>
+                          <input
+                            value={delLinks[i] !== undefined ? delLinks[i] : (d.link || '')}
+                            onChange={e => setDelLinks(l => ({ ...l, [i]: e.target.value }))}
+                            placeholder="Delivery link (Drive, Dropbox…)"
+                            style={{ flex: 1, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, outline: 'none', fontFamily: 'Syne, sans-serif' }}
+                          />
+                          <button
+                            onClick={() => handleSaveDelLink(i, delLinks[i] !== undefined ? delLinks[i] : (d.link || ''))}
+                            disabled={delLinkSaving[i]}
+                            style={{ padding: '8px 14px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                          >{delLinkSaving[i] ? '…' : d.link ? 'Update' : 'Submit'}</button>
+                        </div>
+                      )}
                     </div>
-                    {d.link && <a href={d.link} target="_blank" rel="noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: '#4A9EFF', marginLeft: 28 }}>📎 {d.link}</a>}
-                    {isCrew && (
-                      <div style={{ display: 'flex', gap: 8, marginLeft: 28 }}>
-                        <input
-                          value={delLinks[i] !== undefined ? delLinks[i] : (d.link || '')}
-                          onChange={e => setDelLinks(l => ({ ...l, [i]: e.target.value }))}
-                          placeholder="Paste delivery link (Drive, Dropbox...)"
-                          style={{ flex: 1, background: '#1A1A1A', border: '1px solid #333', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, outline: 'none', fontFamily: 'Syne, sans-serif' }}
-                        />
-                        <button
-                          onClick={() => handleSaveDelLink(i, delLinks[i] !== undefined ? delLinks[i] : (d.link || ''))}
-                          disabled={delLinkSaving[i]}
-                          style={{ padding: '8px 14px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                        >{delLinkSaving[i] ? '...' : d.link ? 'Update' : 'Submit'}</button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
-          {/* Leave a note */}
-          {isCrew && (
-            <div>
-              <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Leave a Note for Studio 65</div>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <textarea
-                  rows={3}
-                  value={noteText}
-                  onChange={e => setNoteText(e.target.value)}
-                  placeholder="Ask a question or leave a note..."
-                  style={{ flex: 1, background: '#242424', border: '1px solid #333', borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'Syne, sans-serif', lineHeight: 1.6 }}
-                />
-                <button
-                  onClick={handleSaveNote}
-                  disabled={noteSaving || !noteText.trim()}
-                  style={{ padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !noteText.trim() ? 0.4 : 1 }}
-                >{noteSaving ? '...' : 'Send'}</button>
-              </div>
-            </div>
-          )}
-
-          {/* Crew Chat */}
-          <div>
-            <div style={{ fontSize: 11, fontFamily: MONO, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Chat with Studio 65</div>
+          {/* Chat */}
+          <Divider />
+          <div style={{ padding: '16px 18px' }}>
+            <SectionLabel>Chat with Studio 65</SectionLabel>
             <CrewProjectChat project={p} contact={contact} />
           </div>
 
-          {/* Call sheet download */}
-          <button
-            onClick={() => downloadCallSheet(p, crewRoles[0] || rentalRoles[0], contact)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 0', background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 10, color: '#4A9EFF', fontSize: 13, fontWeight: 700, cursor: 'pointer', width: '100%', fontFamily: MONO }}
-          >📄 Download Call Sheet PDF</button>
+          {/* Leave a note */}
+          {isCrew && (
+            <>
+              <Divider />
+              <div style={{ padding: '16px 18px' }}>
+                <SectionLabel>Leave a Note</SectionLabel>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <textarea
+                    rows={2}
+                    value={noteText}
+                    onChange={e => setNoteText(e.target.value)}
+                    placeholder="Ask a question or leave a note for the team…"
+                    style={{ flex: 1, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'Syne, sans-serif', lineHeight: 1.6 }}
+                  />
+                  <button
+                    onClick={handleSaveNote}
+                    disabled={noteSaving || !noteText.trim()}
+                    style={{ padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !noteText.trim() ? 0.3 : 1 }}
+                  >{noteSaving ? '…' : 'Send'}</button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Call Sheet */}
+          <div style={{ padding: '12px 18px 18px' }}>
+            <button
+              onClick={() => downloadCallSheet(p, crewRoles[0] || rentalRoles[0], contact)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px 0', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: 10, color: '#555', fontSize: 12, fontWeight: 600, cursor: 'pointer', width: '100%', fontFamily: MONO }}
+            >Download Call Sheet PDF</button>
+          </div>
+
         </div>
       )}
     </div>
