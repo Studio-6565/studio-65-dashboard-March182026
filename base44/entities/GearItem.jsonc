@@ -39,6 +39,20 @@
       ],
       "default": "Good"
     },
+    "ownership": {
+      "type": "string",
+      "enum": [
+        "Mine",
+        "Borrowed",
+        "Rental"
+      ],
+      "default": "Mine",
+      "description": "Who owns this gear"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Name of owner if borrowed/rental"
+    },
     "purchase_date": {
       "type": "string",
       "format": "date"
