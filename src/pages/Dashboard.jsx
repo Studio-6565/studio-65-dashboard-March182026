@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
 import ProjectModal from '@/components/studio/ProjectModal';
+import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import StudioAIChat from '@/components/studio/StudioAIChat';
@@ -64,17 +65,15 @@ export default function Dashboard() {
 
   // ── Project CRUD ────────────────────────────────────────────────────────────
   const handleCreateProject = async (form) => {
-    const id = nextProjectId(projects);
     const optimistic = {
-      ...form, project_id: id, crew: [], rentals: [],
-      deliverables: form.deliverables || [], hours: [],
-      activity: [{ msg: 'Project created', ts: new Date().toISOString() }],
+      ...form,
       id: '__optimistic__' + Date.now(),
     };
     setProjects(prev => [optimistic, ...prev]);
     setProjectModalOpen(false);
     showToast(form.name + ' created!');
-    const created = await base44.entities.Project.create({ ...optimistic, id: undefined });
+    const { id: _ignore, ...rest } = optimistic;
+    const created = await base44.entities.Project.create(rest);
     setProjects(prev => prev.map(p => p.id === optimistic.id ? created : p));
   };
 
@@ -291,14 +290,23 @@ export default function Dashboard() {
       {/* ── Bottom tab bar (mobile) ── */}
       <BottomTabBar />
 
-      {/* ── Create / Edit project modal ── */}
+      {/* ── Create project wizard (new) ── */}
+      <ProjectWizard
+        open={projectModalOpen && !editingProject}
+        onClose={() => setProjectModalOpen(false)}
+        projects={projects}
+        contacts={contacts}
+        onSave={handleCreateProject}
+      />
+
+      {/* ── Edit project modal (existing) ── */}
       <ProjectModal
-        open={projectModalOpen}
+        open={projectModalOpen && !!editingProject}
         onClose={() => { setProjectModalOpen(false); setEditingProject(null); }}
         editingProject={editingProject}
         templates={templates}
         projects={projects}
-        onSave={editingProject ? handleEditProject : handleCreateProject}
+        onSave={handleEditProject}
       />
 
       <StudioAIChat projects={projects} contacts={contacts} />

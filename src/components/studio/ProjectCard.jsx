@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
+import ProjectStatusNudge from './ProjectStatusNudge';
 
 const StatusTag = ({ status }) => {
   const s = STATUS_STYLE[status] || STATUS_STYLE['Booked'];
@@ -77,7 +78,7 @@ export default function ProjectCard({ project: p, onClick }) {
       </div>
 
       {/* Bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ flex: 1, marginRight: 12 }}>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginBottom: 4 }}>Deliverables — {done}/{del.length} done</div>
           <div style={{ height: 3, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
@@ -89,6 +90,9 @@ export default function ProjectCard({ project: p, onClick }) {
           <div style={{ fontSize: 12, fontWeight: 600, color: owed > 0 ? '#E81A1A' : '#7BC853' }}>{fmt(owed)}</div>
         </div>
       </div>
+
+      {/* Status nudge */}
+      <ProjectStatusNudge project={p} onClick={onClick} />
     </div>
   );
 }
