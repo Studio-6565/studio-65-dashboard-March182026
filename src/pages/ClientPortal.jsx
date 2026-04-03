@@ -58,7 +58,7 @@ function LoginScreen({ onLogin }) {
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 64, marginBottom: 12 }} />
+          <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 64, marginBottom: 12, display: 'block', margin: '0 auto 12px' }} />
           <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Client Portal</div>
           <div style={{ fontSize: 13, color: '#555' }}>Your private space to collaborate with Studio 65</div>
         </div>

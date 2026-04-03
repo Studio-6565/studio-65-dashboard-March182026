@@ -96,7 +96,7 @@ function LoginScreen({ onLogin }) {
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', padding: 20 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 64, marginBottom: 12 }} />
+          <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 64, display: 'block', margin: '0 auto 12px' }} />
           <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Crew Portal</div>
           <div style={{ fontSize: 13, color: '#555' }}>Your shoots, schedule & pay — all in one place</div>
         </div>
