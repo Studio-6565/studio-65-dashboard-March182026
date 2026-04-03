@@ -13,7 +13,7 @@ import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -24,8 +24,21 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors — unregistered/unauthenticated users go to onboarding
+  // Handle authentication errors — only send non-admins to onboarding
   if (authError && (authError.type === 'user_not_registered' || authError.type === 'auth_required')) {
+    // If user is admin, let them access the dashboard
+    if (user?.role === 'admin') {
+      return (
+        <Routes>
+          <Route path="/portal" element={<Portal />} />
+          <Route path="/client-portal" element={<ClientPortal />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/" element={<Navigate to="/projects" replace />} />
+          <Route path="/*" element={<Dashboard />} />
+        </Routes>
+      );
+    }
+    // Non-admins go to onboarding
     return (
       <Routes>
         <Route path="/portal" element={<Portal />} />
