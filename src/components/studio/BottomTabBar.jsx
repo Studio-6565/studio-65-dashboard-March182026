@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Film, Calendar, Clipboard, Sparkles, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Mail, Settings } from 'lucide-react';
 
 // Primary tabs — always visible
 const PRIMARY_TABS = [
-  { path: '/projects',  icon: '🎬', label: 'Projects' },
-  { path: '/calendar',  icon: '📅', label: 'Calendar' },
-  { path: '/contacts',  icon: '📋', label: 'Contacts' },
-  { path: '/agents',    icon: '✦',  label: 'AI',        ai: true },
+  { path: '/projects',  Icon: Film, label: 'Projects' },
+  { path: '/calendar',  Icon: Calendar, label: 'Calendar' },
+  { path: '/contacts',  Icon: Clipboard, label: 'Contacts' },
+  { path: '/agents',    Icon: Sparkles, label: 'AI', ai: true },
 ];
 
 // Secondary tabs — appear in the "More" drawer
 const MORE_TABS = [
-  { path: '/analytics',  icon: '📊', label: 'Analytics' },
-  { path: '/crew',       icon: '👥', label: 'Crew Spend' },
-  { path: '/timeline',   icon: '⏱',  label: 'Timeline' },
-  { path: '/gear',       icon: '🎒', label: 'Gear' },
-  { path: '/operations', icon: '✅', label: 'Operations' },
-  { path: '/contracts',  icon: '📝', label: 'Contracts' },
-  { path: '/inbox',      icon: '📨', label: 'Inbox' },
-  { path: '/settings',   icon: '⚙️', label: 'Settings' },
+  { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
+  { path: '/crew',       Icon: Users, label: 'Crew Spend' },
+  { path: '/timeline',   Icon: Clock, label: 'Timeline' },
+  { path: '/gear',       Icon: Backpack, label: 'Gear' },
+  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
+  { path: '/contracts',  Icon: FileText, label: 'Contracts' },
+  { path: '/inbox',      Icon: Mail, label: 'Inbox' },
+  { path: '/settings',   Icon: Settings, label: 'Settings' },
 ];
 
 export default function BottomTabBar() {
@@ -89,7 +90,7 @@ export default function BottomTabBar() {
                   transition: 'background 0.15s',
                 }}
               >
-                <span style={{ fontSize: 24 }}>{t.icon}</span>
+                <t.Icon size={24} color={active ? '#E81A1A' : '#888'} strokeWidth={1.5} />
                 <span style={{
                   fontSize: 12, fontWeight: active ? 700 : 500,
                   color: active ? '#E81A1A' : '#888',
@@ -136,11 +137,7 @@ export default function BottomTabBar() {
                   background: '#E81A1A',
                 }} />
               )}
-              <span style={{
-                fontSize: t.ai ? 17 : 20, lineHeight: 1,
-                color: active ? '#fff' : '#555',
-                fontWeight: t.ai ? 700 : 400,
-              }}>{t.icon}</span>
+              <t.Icon size={20} color={active ? '#E81A1A' : '#555'} strokeWidth={1.5} />
               <span style={{
                 fontSize: 10, fontWeight: active ? 700 : 400,
                 color: active ? '#fff' : '#444',

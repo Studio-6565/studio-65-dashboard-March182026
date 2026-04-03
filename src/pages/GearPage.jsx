@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import BottomSheet from '@/components/studio/BottomSheet';
 import ShootKits from '@/components/gear/ShootKits';
+import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -11,7 +12,7 @@ const LS = { fontSize: 10, fontWeight: 700, color: '#555', textTransform: 'upper
 const CATEGORIES = ['Camera', 'Lens', 'Audio', 'Lighting', 'Drone', 'Stabilizer', 'Storage', 'Accessories', 'Other'];
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Repair'];
 const CONDITION_COLOR = { Excellent: '#7BC853', Good: '#4A9EFF', Fair: '#F59E0B', 'Needs Repair': '#E81A1A' };
-const CAT_ICON = { Camera: '📷', Lens: '🔭', Audio: '🎙', Lighting: '💡', Drone: '🚁', Stabilizer: '⚖️', Storage: '💾', Accessories: '🔌', Other: '📦' };
+const CAT_ICON = { Camera, Lens: Eye, Audio: Mic2, Lighting: Lightbulb, Drone: Radio, Stabilizer: Maximize2, Storage: HardDrive, Accessories: Plug, Other: Package };
 
 const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', purchase_date: '', purchase_price: '', notes: '' };
 
@@ -217,7 +218,7 @@ export default function GearPage() {
         <div key={cat} style={{ marginBottom: 24 }}>
           {/* Category header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 14 }}>{CAT_ICON[cat] || '📦'}</span>
+            {React.createElement(CAT_ICON[cat] || Package, { size: 18, color: '#E81A1A', strokeWidth: 1.5 })}
             <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cat}</span>
             <span style={{ fontFamily: MONO, fontSize: 10, color: '#333', marginLeft: 2 }}>({items.length})</span>
             <div style={{ flex: 1, height: 1, background: '#1A1A1A', marginLeft: 6 }} />

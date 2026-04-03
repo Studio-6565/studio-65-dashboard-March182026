@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, Sparkles } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { path: '/projects',   icon: '🎬', label: 'Projects' },
-  { path: '/calendar',   icon: '📅', label: 'Calendar' },
-  { path: '/analytics',  icon: '📊', label: 'Analytics' },
-  { path: '/timeline',   icon: '⏱',  label: 'Timeline' },
-  { path: '/crew',       icon: '👥', label: 'Crew' },
-  { path: '/contacts',   icon: '📋', label: 'Contacts' },
-  { path: '/inbox',      icon: '📨', label: 'Inbox' },
-  { path: '/gear',       icon: '🎒', label: 'Gear' },
-  { path: '/operations', icon: '✅', label: 'Operations' },
-  { path: '/contracts',  icon: '📝', label: 'Contracts' },
-  { path: '/settings',   icon: '⚙️', label: 'Settings' },
+  { path: '/projects',   Icon: Film, label: 'Projects' },
+  { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
+  { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
+  { path: '/timeline',   Icon: Clock, label: 'Timeline' },
+  { path: '/crew',       Icon: Users, label: 'Crew' },
+  { path: '/contacts',   Icon: Clipboard, label: 'Contacts' },
+  { path: '/inbox',      Icon: Mail, label: 'Inbox' },
+  { path: '/gear',       Icon: Backpack, label: 'Gear' },
+  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
+  { path: '/contracts',  Icon: FileText, label: 'Contracts' },
+  { path: '/settings',   Icon: Settings, label: 'Settings' },
 ];
 
-const AI_ITEM = { path: '/agents', icon: '✦', label: 'AI Agents' };
+const AI_ITEM = { path: '/agents', Icon: Sparkles, label: 'AI Agents' };
 
 export default function SideNav({ onNewProject }) {
   const location = useLocation();
@@ -108,7 +109,7 @@ export default function SideNav({ onNewProject }) {
 
       {/* Main nav */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(({ path, icon, label }) => {
+        {NAV_ITEMS.map(({ path, Icon, label }) => {
           const active = isActive(path);
           return (
             <Link key={path} to={path} style={{ textDecoration: 'none' }}>
@@ -127,7 +128,7 @@ export default function SideNav({ onNewProject }) {
               onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#161616'; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
               >
-                <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+                <Icon size={18} color={active ? '#E81A1A' : '#666'} strokeWidth={1.5} style={{ flexShrink: 0 }} />
                 {!collapsed && (
                   <span style={{
                     fontSize: 13, fontWeight: active ? 700 : 500,
@@ -163,7 +164,7 @@ export default function SideNav({ onNewProject }) {
               onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#161616'; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
               >
-                <span style={{ fontSize: 16, flexShrink: 0, color: '#E81A1A' }}>{AI_ITEM.icon}</span>
+                <AI_ITEM.Icon size={18} color="#E81A1A" strokeWidth={1.5} style={{ flexShrink: 0 }} />
                 {!collapsed && (
                   <span style={{
                     fontSize: 13, fontWeight: active ? 700 : 500,

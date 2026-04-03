@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
+import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
@@ -105,8 +106,11 @@ function LoginScreen({ onLogin }) {
 
         {/* Mode toggle */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 16 }}>
-          {[{ key: 'email', label: '✉ Email' }, { key: 'code', label: '🔑 Access Code' }].map(m => (
-            <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s' }}>{m.label}</button>
+          {[{ key: 'email', label: 'Email', Icon: Mail }, { key: 'code', label: 'Access Code', Icon: Key }].map(m => (
+            <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <m.Icon size={14} strokeWidth={2} />
+              {m.label}
+            </button>
           ))}
         </div>
 
@@ -139,8 +143,8 @@ function LoginScreen({ onLogin }) {
           {mode === 'email' && otpSent && (
             <form onSubmit={handleOtpVerify}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📬</div>
-                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Check your email</div>
+               <MailIcon size={40} color="#E81A1A" style={{ margin: '0 auto 8px', display: 'block' }} />
+               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Check your email</div>
                 <div style={{ fontSize: 12, color: '#555' }}>We sent a 6-digit code to <span style={{ color: '#4A9EFF' }}>{email}</span></div>
               </div>
               <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>6-Digit Code</label>
@@ -350,7 +354,7 @@ function ProjectCard({ project: p, contact }) {
           )}
           {confirmed && <span style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color: '#7BC853' }}>Confirmed</span>}
           {declined  && <span style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color: '#E81A1A' }}>Declined</span>}
-          <span style={{ color: '#2A2A2A', fontSize: 11 }}>{expanded ? '▲' : '▼'}</span>
+          {expanded ? <ChevronUp size={16} color="#555" /> : <ChevronDown size={16} color="#555" />}
         </div>
       </div>
 
@@ -557,14 +561,17 @@ export default function Portal() {
 
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '24px 20px 60px' }}>
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 2 }}>Hey {contact.name.split(' ')[0]} 👋</div>
+          <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 2 }}>Hey {contact.name.split(' ')[0]}</div>
           <div style={{ fontSize: 13, color: '#555' }}>{projects.length} project{projects.length !== 1 ? 's' : ''} on your account</div>
         </div>
 
         {/* Tab bar */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
-          {[{ key: 'projects', label: '🎬 Projects' }, { key: 'contracts', label: '📝 Contracts' }].map(t => (
-            <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+          {[{ key: 'projects', label: 'Projects', Icon: FilesIcon }, { key: 'contracts', label: 'Contracts', Icon: FilesIcon }].map(t => (
+            <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <t.Icon size={14} color={crewTab === t.key ? '#fff' : '#666'} strokeWidth={2} />
+              {t.label}
+            </button>
           ))}
         </div>
 
@@ -572,7 +579,7 @@ export default function Portal() {
 
         {crewTab === 'projects' && (projects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444' }}>
-            <div style={{ fontSize: 44, marginBottom: 14 }}>🎬</div>
+            <FilesIcon size={56} color="#666" style={{ margin: '0 auto 14px', display: 'block', opacity: 0.3 }} />
             <div style={{ fontSize: 15, fontWeight: 600, color: '#666', marginBottom: 6 }}>No projects yet</div>
             <div style={{ fontSize: 13 }}>Studio 65 will add you to projects soon. Check back later!</div>
           </div>
