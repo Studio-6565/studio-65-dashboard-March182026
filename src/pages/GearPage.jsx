@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import BottomSheet from '@/components/studio/BottomSheet';
+import ShootKits from '@/components/gear/ShootKits';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -15,6 +16,7 @@ const CAT_ICON = { Camera: '📷', Lens: '🔭', Audio: '🎙', Lighting: '💡'
 const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', purchase_date: '', purchase_price: '', notes: '' };
 
 export default function GearPage() {
+  const [tab, setTab] = useState('inventory');
   const [gear, setGear] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -87,8 +89,29 @@ export default function GearPage() {
     <div style={{ color: '#444', padding: 60, textAlign: 'center', fontFamily: MONO, fontSize: 11 }}>Loading inventory...</div>
   );
 
+  if (tab === 'kits') {
+    return (
+      <div style={{ paddingBottom: 40 }}>
+        {/* Tab bar */}
+        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
+          {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+          ))}
+        </div>
+        <ShootKits gear={gear} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ paddingBottom: 40 }}>
+
+      {/* Tab bar */}
+      <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 20, width: 'fit-content' }}>
+        {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+        ))}
+      </div>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, gap: 12 }}>
