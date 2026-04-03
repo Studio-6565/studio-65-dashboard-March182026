@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
+import AIAgents from './AIAgents';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
@@ -13,6 +14,9 @@ import SideNav from '@/components/studio/SideNav';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { nextProjectId, addLog } from '@/lib/studio';
 
+
+
+// ── Tab label for the mobile header ──────────────────────────────────────────
 const TAB_LABELS = {
   '/projects': 'Projects',
   '/analytics': 'Analytics',
@@ -27,10 +31,11 @@ const TAB_LABELS = {
 
 function useTabLabel() {
   const { pathname } = useLocation();
-  if (pathname.startsWith('/projects/')) return null;
+  if (pathname.startsWith('/projects/')) return null; // detail page shows back button
   return TAB_LABELS[pathname] || 'Projects';
 }
 
+// ── Main Dashboard shell ──────────────────────────────────────────────────────
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -61,8 +66,12 @@ export default function Dashboard() {
 
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
 
+  // ── Project CRUD ────────────────────────────────────────────────────────────
   const handleCreateProject = async (form) => {
-    const optimistic = { ...form, id: '__optimistic__' + Date.now() };
+    const optimistic = {
+      ...form,
+      id: '__optimistic__' + Date.now(),
+    };
     setProjects(prev => [optimistic, ...prev]);
     setProjectModalOpen(false);
     showToast(form.name + ' created!');
@@ -80,8 +89,13 @@ export default function Dashboard() {
     await base44.entities.Project.update(editingProject.id, updated);
   };
 
-  const handleProjectUpdate = (updated) => setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
-  const handleProjectDelete = (id) => setProjects(prev => prev.filter(p => p.id !== id));
+  const handleProjectUpdate = (updated) => {
+    setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+  };
+
+  const handleProjectDelete = (id) => {
+    setProjects(prev => prev.filter(p => p.id !== id));
+  };
 
   const handleDuplicate = async (project) => {
     const id = nextProjectId(projects);
@@ -113,14 +127,15 @@ export default function Dashboard() {
   };
 
   const handleDeleteAccount = () => {
-    if (!confirm('Delete your account? This is permanent.')) return;
-    if (!confirm('Are you absolutely sure? All data will be lost.')) return;
-    showToast('Account deletion requested — contact support.', 'red');
+    if (!confirm('Delete your account? This is permanent and cannot be undone.')) return;
+    if (!confirm('Are you absolutely sure? All your data will be lost.')) return;
+    showToast('Account deletion requested — contact support to complete.', 'red');
   };
 
-  const openEdit = (project) => { setEditingProject(project); setProjectModalOpen(true); };
-
-  const openNewProject = () => { setEditingProject(null); setProjectModalOpen(true); };
+  const openEdit = (project) => {
+    setEditingProject(project);
+    setProjectModalOpen(true);
+  };
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -133,23 +148,23 @@ export default function Dashboard() {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif', overflow: 'hidden' }}>
       <StudioToast />
 
-      {/* ── Left Sidebar (desktop only) ── */}
+      {/* ── Left sidebar (desktop only) ── */}
       <div className="desktop-sidebar">
-        <SideNav onNewProject={openNewProject} />
+        <SideNav onNewProject={() => { setEditingProject(null); setProjectModalOpen(true); }} />
       </div>
 
-      {/* ── Main content area ── */}
+      {/* ── Main area ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
-        {/* ── Mobile top header ── */}
+        {/* Mobile top bar */}
         <header className="mobile-header" style={{
           borderBottom: '1px solid #1E1E1E',
-          position: 'sticky', top: 0, zIndex: 100,
           background: 'rgba(10,10,10,0.97)',
-          backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           paddingTop: 'env(safe-area-inset-top)',
           userSelect: 'none',
           flexShrink: 0,
@@ -168,16 +183,15 @@ export default function Dashboard() {
             ) : (
               <img
                 src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png"
-                alt="Studio 65" style={{ height: 26, flexShrink: 0 }}
-                draggable="false"
+                alt="Studio 65" style={{ height: 26 }} draggable="false"
               />
             )}
             <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#fff' }}>
-              {!isDetailPage ? tabLabel : ''}
+              {!isDetailPage && tabLabel}
             </div>
             {(location.pathname === '/projects' || location.pathname === '/') && (
               <button
-                onClick={openNewProject}
+                onClick={() => { setEditingProject(null); setProjectModalOpen(true); }}
                 style={{
                   minWidth: 44, minHeight: 44, padding: '0 16px',
                   background: '#E81A1A', border: 'none', borderRadius: 10,
@@ -188,13 +202,13 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* ── Page content ── */}
+        {/* ── Scrollable main content ── */}
         <main style={{
           flex: 1,
-          padding: '20px 24px',
-          paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
+          padding: '20px 24px',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
         }}>
           <Routes>
             <Route index element={<Navigate to="/projects" replace />} />
@@ -221,7 +235,7 @@ export default function Dashboard() {
                 isRefreshing={isRefreshing}
                 pullProgress={pullProgress}
                 onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
-                onNewProject={openNewProject}
+                onNewProject={() => setProjectModalOpen(true)}
                 onContactsChange={setContacts}
                 onProjectsChange={setProjects}
                 onLogout={() => base44.auth.logout()}
@@ -236,6 +250,7 @@ export default function Dashboard() {
       {/* ── Bottom tab bar (mobile only) ── */}
       <BottomTabBar />
 
+      {/* ── Modals ── */}
       <ProjectWizard
         open={projectModalOpen && !editingProject}
         onClose={() => setProjectModalOpen(false)}
@@ -243,7 +258,6 @@ export default function Dashboard() {
         contacts={contacts}
         onSave={handleCreateProject}
       />
-
       <ProjectModal
         open={projectModalOpen && !!editingProject}
         onClose={() => { setProjectModalOpen(false); setEditingProject(null); }}
@@ -256,22 +270,22 @@ export default function Dashboard() {
       <StudioAIChat projects={projects} contacts={contacts} />
 
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Desktop: show sidebar, hide mobile header & bottom bar */
+        @keyframes fadeTab {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .desktop-sidebar { display: none; }
+        .mobile-header { display: block; }
         @media (min-width: 768px) {
-          .desktop-sidebar { display: flex !important; }
+          .desktop-sidebar { display: block !important; }
           .mobile-header { display: none !important; }
           nav[data-bottom-tab] { display: none !important; }
         }
-
-        /* Mobile: hide sidebar, show mobile header & bottom bar */
         @media (max-width: 767px) {
           .desktop-sidebar { display: none !important; }
           .mobile-header { display: block !important; }
         }
-
-        button:active { opacity: 0.75; transform: scale(0.97); }
+        button:active { opacity: 0.72; transform: scale(0.97); }
       `}</style>
     </div>
   );
