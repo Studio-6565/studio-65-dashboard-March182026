@@ -16,6 +16,7 @@ const MORE_TABS = [
   { path: '/timeline',   icon: '⏱',  label: 'Timeline' },
   { path: '/gear',       icon: '🎒', label: 'Gear' },
   { path: '/operations', icon: '✅', label: 'Operations' },
+  { path: '/contracts',  icon: '📝', label: 'Contracts' },
 ];
 
 export default function BottomTabBar() {

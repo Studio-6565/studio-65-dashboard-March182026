@@ -15,6 +15,7 @@ import BottomSheet from './BottomSheet';
 import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import AIAgents from '@/pages/AIAgents';
+import ContractsPage from '@/pages/ContractsPage';
 import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
@@ -144,7 +145,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations', 'agents'];
+const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations', 'agents', 'contracts'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, onLogout, onDeleteAccount, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -226,6 +227,7 @@ export default function TabPanels({
           {tab === 'gear' && <GearTab loadData={loadData || noopRefresh} />}
           {tab === 'operations' && <OperationsTab loadData={loadData || noopRefresh} />}
           {tab === 'agents' && <AIAgents projects={projects} contacts={contacts} />}
+          {tab === 'contracts' && <ContractsPage />}
           {tab === 'contacts' && (
             <ContactsTab
               contacts={contacts}

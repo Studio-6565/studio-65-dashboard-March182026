@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
 import Dashboard from './pages/Dashboard.jsx';
+import ContractsPage from './pages/ContractsPage.jsx';
 import Portal from './pages/Portal';
 import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';

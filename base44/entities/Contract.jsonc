@@ -1,0 +1,80 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "client",
+        "crew"
+      ],
+      "default": "client"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "signed",
+        "declined"
+      ],
+      "default": "draft"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string",
+      "description": "Full contract text / HTML"
+    },
+    "signed_at": {
+      "type": "string"
+    },
+    "signature_name": {
+      "type": "string",
+      "description": "Name typed at signing"
+    },
+    "declined_at": {
+      "type": "string"
+    },
+    "decline_reason": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

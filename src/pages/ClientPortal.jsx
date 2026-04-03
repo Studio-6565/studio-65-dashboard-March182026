@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import BookingRequestForm from '@/components/portal/BookingRequestForm';
+import ClientContractsTab from '@/components/portal/ClientContractsTab';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: '12px 14px', color: '#fff', fontSize: 14, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -48,7 +49,9 @@ function LoginScreen({ onLogin }) {
     // mark as read silently
     sorted.filter(m => m.from === 'studio' && !m.read_by_client)
           .forEach(m => base44.entities.ClientMessage.update(m.id, { ...m, read_by_client: true }));
-    onLogin(c, myProjects, sorted);
+    // load contracts for this client
+    const allContracts = await base44.entities.Contract.filter({ contact_name: c.name });
+    onLogin(c, myProjects, sorted, allContracts);
     setLoading(false);
   };
 
@@ -321,12 +324,13 @@ export default function ClientPortal() {
   const [contact, setContact]           = useState(null);
   const [projects, setProjects]         = useState([]);
   const [messages, setMessages]         = useState([]);
+  const [contracts, setContracts]       = useState([]);
   const [tab, setTab]                   = useState('inbox');
   const [showCompose, setShowCompose]   = useState(false);
   const [showBooking, setShowBooking]   = useState(false);
   const [projectFilter, setProjectFilter] = useState(null);
 
-  const handleLogin = (c, projs, msgs) => { setContact(c); setProjects(projs); setMessages(msgs); };
+  const handleLogin = (c, projs, msgs, contracts) => { setContact(c); setProjects(projs); setMessages(msgs); setContracts(contracts || []); };
 
   const handleApproval = async (msg, status, note = '') => {
     const updated = { ...msg, approval_status: status, approval_note: note };
@@ -347,9 +351,10 @@ export default function ClientPortal() {
   const displayMessages  = projectFilter ? messages.filter(m => m.project_id === projectFilter) : messages;
 
   const TABS = [
-    { key: 'inbox',    label: 'Inbox' },
-    { key: 'projects', label: 'Projects' },
-    { key: 'book',     label: '📅 Book a Shoot' },
+    { key: 'inbox',     label: 'Inbox' },
+    { key: 'projects',  label: 'Projects' },
+    { key: 'contracts', label: '📝 Contracts' },
+    { key: 'book',      label: '📅 Book a Shoot' },
   ];
 
   return (
@@ -476,6 +481,11 @@ export default function ClientPortal() {
             })}
           </div>
         )}
+        {/* ── CONTRACTS ── */}
+        {tab === 'contracts' && (
+          <ClientContractsTab contracts={contracts} contact={contact} onContractsChange={setContracts} />
+        )}
+
         {/* ── BOOK ── */}
         {tab === 'book' && (
           <div style={{ paddingTop: 8 }}>

@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { path: '/contacts',   icon: '📋', label: 'Contacts' },
   { path: '/gear',       icon: '🎒', label: 'Gear' },
   { path: '/operations', icon: '✅', label: 'Operations' },
+  { path: '/contracts',  icon: '📝', label: 'Contracts' },
 ];
 
 const AI_ITEM = { path: '/agents', icon: '✦', label: 'AI Agents' };
