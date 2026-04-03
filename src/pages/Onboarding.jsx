@@ -135,7 +135,7 @@ export default function Onboarding() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 24, fontSize: 12, color: '#444', fontFamily: MONO }}>
-            Already have access? <a href="/portal" style={{ color: '#4A9EFF', textDecoration: 'none' }}>Log in to your portal →</a>
+            Admin? <a href="/admin-login" style={{ color: '#E81A1A', textDecoration: 'none', fontWeight: 700 }}>Log in to dashboard</a> · Crew/Client? <a href="/portal" style={{ color: '#4A9EFF', textDecoration: 'none' }}>Log in to portal →</a>
           </div>
         </div>
       </div>
