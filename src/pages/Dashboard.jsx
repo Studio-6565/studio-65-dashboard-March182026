@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-r
 import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
-import AIAgents from './AIAgents';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
@@ -95,6 +94,13 @@ export default function Dashboard() {
 
   const handleProjectUpdate = (updated) => {
     setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+  };
+
+  const handleMarkPaid = async (project) => {
+    const updated = { ...project, paid: !project.paid };
+    setProjects(prev => prev.map(p => p.id === project.id ? updated : p));
+    await base44.entities.Project.update(project.id, { paid: !project.paid });
+    showToast(updated.paid ? 'Marked as paid' : 'Marked as unpaid', updated.paid ? 'green' : 'amber');
   };
 
   const handleProjectDelete = (id) => {
@@ -239,6 +245,7 @@ export default function Dashboard() {
                 onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
                 onNewProject={() => setProjectModalOpen(true)}
                 onProjectUpdate={handleProjectUpdate}
+                onMarkPaid={handleMarkPaid}
                 onContactsChange={setContacts}
                 onProjectsChange={setProjects}
                 onDeleteAccount={handleDeleteAccount}

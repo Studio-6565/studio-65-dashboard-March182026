@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, memo } from 'react';
 import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
 import ProjectStatusNudge from './ProjectStatusNudge';
 import { base44 } from '@/api/base44Client';
@@ -16,7 +16,7 @@ const StatusTag = ({ status }) => {
 
 const STATUS_ORDER = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
 
-export default function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
+function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
   const del = p.deliverables || [];
   const done = del.filter(d => d.done).length;
   const pct = del.length ? (done / del.length * 100) : 0;
@@ -171,3 +171,5 @@ export default function ProjectCard({ project: p, onClick, onMarkPaid, onProject
     </div>
   );
 }
+
+export default memo(ProjectCard);

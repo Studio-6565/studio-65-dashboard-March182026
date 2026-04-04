@@ -47,7 +47,7 @@ const chipStyle = (active) => ({
   userSelect: 'none',
 });
 
-function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, onProjectsChange, containerRef, isRefreshing, pullProgress }) {
+function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, onProjectsChange, onMarkPaid, containerRef, isRefreshing, pullProgress }) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
@@ -138,7 +138,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
           {filtered.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} />
+            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} onMarkPaid={onMarkPaid} />
           ))}
         </div>
       )}
@@ -187,7 +187,7 @@ function OperationsTab({ loadData }) {
 export default function TabPanels({
   projects, contacts, containerRef, isRefreshing, pullProgress,
   onOpenDetail, onNewProject, onContactsChange, onProjectsChange,
-  onDeleteAccount, loadData,
+  onMarkPaid, onDeleteAccount, loadData,
 }) {
   const { pathname } = useLocation();
   const activeTab = TABS.find(t => pathname === '/' + t) || 'projects';
@@ -206,6 +206,7 @@ export default function TabPanels({
               onNewProject={onNewProject}
               onProjectUpdate={onProjectsChange ? (updated) => onProjectsChange(prev => prev.map(p => p.id === updated.id ? updated : p)) : () => {}}
               onProjectsChange={onProjectsChange}
+              onMarkPaid={onMarkPaid}
               containerRef={containerRef}
               isRefreshing={isRefreshing}
               pullProgress={pullProgress}

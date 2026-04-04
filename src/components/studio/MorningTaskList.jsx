@@ -22,31 +22,33 @@ export default function MorningTaskList() {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    base44.entities.DailyTask.list('order', 100).then(all => {
-      // Auto-reset tasks that were done on a previous day
+    const init = async () => {
+      const all = await base44.entities.DailyTask.list('order', 100);
+
+      // Auto-reset tasks completed on a previous day
       const toReset = all.filter(t => t.done && t.done_date && t.done_date < TODAY);
+      let current = all;
       if (toReset.length > 0) {
-        Promise.all(toReset.map(t =>
+        await Promise.all(toReset.map(t =>
           base44.entities.DailyTask.update(t.id, { ...t, done: false, done_date: null })
-        )).then(() => {
-          base44.entities.DailyTask.list('order', 100).then(fresh => {
-            setTasks(fresh);
-            setLoading(false);
-          });
-        });
-      } else {
-        setTasks(all);
-        setLoading(false);
-        // Seed default tasks if empty
-        if (all.length === 0) {
-          Promise.all(
-            DEFAULT_TASKS.map((label, i) =>
-              base44.entities.DailyTask.create({ label, done: false, order: i })
-            )
-          ).then(created => setTasks(created));
-        }
+        ));
+        current = await base44.entities.DailyTask.list('order', 100);
       }
-    });
+
+      // Seed defaults only if truly empty (after reset check)
+      if (current.length === 0) {
+        const created = await Promise.all(
+          DEFAULT_TASKS.map((label, i) =>
+            base44.entities.DailyTask.create({ label, done: false, order: i })
+          )
+        );
+        setTasks(created);
+      } else {
+        setTasks(current);
+      }
+      setLoading(false);
+    };
+    init();
   }, []);
 
   const toggle = async (task) => {

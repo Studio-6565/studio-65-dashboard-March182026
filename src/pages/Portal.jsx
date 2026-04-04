@@ -373,6 +373,8 @@ function EquipmentChecklistSection({ project: p }) {
   );
 }
 
+
+
 // ── Project Card ───────────────────────────────────────────────────────────
 
 function ProjectCard({ project: p, contact }) {
