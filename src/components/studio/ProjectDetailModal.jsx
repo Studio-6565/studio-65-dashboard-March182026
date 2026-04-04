@@ -32,7 +32,7 @@ const DetailTab = ({ label, active, onClick }) => (
   }}>{label}</button>
 );
 
-export default function ProjectDetailModal({ open, onClose, project, contacts, onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange, inline = false }) {
+export default function ProjectDetailModal({ open, onClose, project, contacts, projects = [], onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange, inline = false }) {
   const [tab, setTab] = useState('overview');
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
@@ -521,14 +521,17 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap', borderLeft: `3px solid ${c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#444'}`, paddingLeft: 10, marginLeft: -12 }}>
                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
-                       <button 
-                         onClick={() => setSelectedCrewForCalendar(selectedCrewForCalendar === c.name ? null : c.name)}
-                         style={{ position: 'absolute', right: 10, top: 10, padding: '4px 8px', fontSize: 10, background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.25)', borderRadius: 4, color: '#4A9EFF', cursor: 'pointer', fontWeight: 600 }}
-                       >
-                         {selectedCrewForCalendar === c.name ? 'Hide' : 'View'} Calendar
-                       </button>
+
                        <div style={{ flex: 1, minWidth: 140 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
+                         <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                           <span>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</span>
+                           <button 
+                             onClick={() => setSelectedCrewForCalendar(selectedCrewForCalendar === c.name ? null : c.name)}
+                             style={{ padding: '3px 8px', fontSize: 9, background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.25)', borderRadius: 4, color: '#4A9EFF', cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap' }}
+                           >
+                             {selectedCrewForCalendar === c.name ? 'Hide' : 'View'} Cal
+                           </button>
+                         </div>
                         <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>
                           {c.role} ·{' '}
                           {c.rate_type === 'hourly'
