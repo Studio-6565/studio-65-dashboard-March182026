@@ -14,6 +14,7 @@ import EditReviewTab from './tabs/EditReviewTab';
 import InvoiceGenerator from './InvoiceGenerator';
 import ProjectChat from './ProjectChat';
 import ProjectAIActions from './ProjectAIActions';
+import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -165,6 +166,21 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     if (!crewForm.name.trim()) { showToast('Enter a name', 'red'); return; }
     const rate = parseFloat(crewForm.cost) || 0;
     const hours = crewForm.rate_type === 'hourly' ? (parseFloat(crewForm.hours) || 0) : undefined;
+    
+    // Check for double-booking
+    const existingProjects = (projects || []).filter(proj => {
+      if (proj.id === p.id) return false; // Exclude current project
+      const projStart = new Date(proj.date);
+      const projEnd = new Date(proj.end_date || proj.date);
+      const crewStart = new Date(p.date);
+      const crewEnd = new Date(p.end_date || p.date);
+      return projStart <= crewEnd && projEnd >= crewStart && (proj.crew || []).some(c => c.name.toLowerCase() === crewForm.name.trim().toLowerCase());
+    });
+    
+    if (existingProjects.length > 0) {
+      showToast(`${crewForm.name} is already booked on ${existingProjects.length} overlapping project(s)`, 'amber');
+    }
+    
     const newMember = { name: crewForm.name.trim(), role: crewForm.role.trim(), rate_type: crewForm.rate_type || 'flat', cost: rate, ...(hours !== undefined ? { hours } : {}), phone: crewForm.phone.trim(), email: (crewForm.email || '').trim(), paid: false };
     const crew = [...(p.crew || []), newMember];
     const crew_cost = crew.reduce((s, c) => s + crewTotal(c), 0);
@@ -307,6 +323,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   };
 
   const crewContacts = (contacts || []).filter(c => (c.types || []).includes('Crew'));
+  const [selectedCrewForCalendar, setSelectedCrewForCalendar] = useState(null);
 
   const handleEmailCrew = (c) => {
     if (!c.email) { showToast('No email saved for ' + c.name, 'red'); return; }
@@ -438,6 +455,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
       {/* Crew */}
       {tab === 'crew' && (
         <div>
+          <div style={{ marginBottom: 16 }}>
+            <CrewAvailabilityCalendar projects={projects || []} selectedCrew={selectedCrewForCalendar} />
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Crew Members</div>
@@ -500,8 +520,14 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap', borderLeft: `3px solid ${c.avail === 'yes' ? '#7BC853' : c.avail === 'no' ? '#E81A1A' : '#444'}`, paddingLeft: 10, marginLeft: -12 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
-                      <div style={{ flex: 1, minWidth: 140 }}>
+                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.paid ? '#7BC853' : '#E81A1A', flexShrink: 0, marginTop: 5 }} />
+                       <button 
+                         onClick={() => setSelectedCrewForCalendar(selectedCrewForCalendar === c.name ? null : c.name)}
+                         style={{ position: 'absolute', right: 10, top: 10, padding: '4px 8px', fontSize: 10, background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.25)', borderRadius: 4, color: '#4A9EFF', cursor: 'pointer', fontWeight: 600 }}
+                       >
+                         {selectedCrewForCalendar === c.name ? 'Hide' : 'View'} Calendar
+                       </button>
+                       <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}{c.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{c.phone}</span>}</div>
                         <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>
                           {c.role} ·{' '}
