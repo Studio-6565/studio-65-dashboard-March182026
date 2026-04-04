@@ -21,6 +21,7 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import AISmartNudges from './AISmartNudges';
 import RevenueGoal from './RevenueGoal';
 import TodaysShoots from './TodaysShoots';
+import MorningTaskList from './MorningTaskList';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -94,6 +95,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
   return (
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <MorningTaskList />
       <TodaysShoots projects={projects} onOpenDetail={onOpenDetail} />
       <UpcomingReminders projects={projects} />
       <AISmartNudges projects={projects} />
