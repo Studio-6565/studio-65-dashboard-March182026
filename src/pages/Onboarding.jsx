@@ -117,6 +117,17 @@ export default function Onboarding() {
             <div style={{ fontSize: 14, color: '#555', lineHeight: 1.6 }}>Tell us who you are so we can set up your profile correctly.</div>
           </div>
 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+            <a href="/portal" style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '18px 20px', borderRadius: 14, textDecoration: 'none',
+              background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.3)',
+              color: '#4A9EFF', fontSize: 16, fontWeight: 700, cursor: 'pointer',
+            }}>
+              🎥 Crew / Client Portal Login →
+            </a>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {Object.entries(TYPE_INFO).map(([type, info]) => (
               <button
@@ -143,14 +154,6 @@ export default function Onboarding() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28 }}>
-            <a href="/portal" style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '16px 20px', borderRadius: 14, textDecoration: 'none',
-              background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.3)',
-              color: '#4A9EFF', fontSize: 15, fontWeight: 700,
-            }}>
-              🎥 Crew / Client Portal Login →
-            </a>
             <button
               onClick={() => base44.auth.redirectToLogin('/projects')}
               style={{
