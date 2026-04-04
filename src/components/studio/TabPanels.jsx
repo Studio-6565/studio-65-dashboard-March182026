@@ -14,8 +14,8 @@ import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import ContractsPage from '@/pages/ContractsPage';
 import InboxPage from '@/pages/InboxPage';
-import LeadsPage from '@/pages/LeadsPage';
 import SettingsPage from '@/pages/SettingsPage';
+import LeadsPage from '@/pages/LeadsPage';
 import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import AISmartNudges from './AISmartNudges';
@@ -221,7 +221,6 @@ export default function TabPanels({
               <CrewSpendView projects={projects.filter(p => !p.archived)} />
             </div>
           )}
-          {tab === 'leads' && <LeadsPage />}
           {tab === 'timeline' && (
             <TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={onOpenDetail} />
           )}
@@ -239,6 +238,7 @@ export default function TabPanels({
               loadData={loadData || noopRefresh}
             />
           )}
+          {tab === 'leads' && <LeadsPage />}
         </div>
       ))}
     </div>
