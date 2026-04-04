@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StudioModal from './StudioModal';
 import WaButton from './WaButton';
+import { useHaptic } from '@/hooks/useHaptic';
 import { fmt, fmtH, fmtTs, fmtDateRange, crewOwed, rentalsOwed, margin, marginColor, STATUS_STYLE, crewAvailMsg, crewPayMsg, gearAvailMsg, gearPayMsg, addLog } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
@@ -38,7 +39,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   const [delForm, setDelForm] = useState({ name: '', due: '' });
   const [hourForm, setHourForm] = useState({ desc: '', person: '', hours: '', date: new Date().toISOString().split('T')[0] });
   const [notes, setNotes] = useState('');
+  const [quickInvoiceLoading, setQuickInvoiceLoading] = useState(false);
   const noteTimer = useRef(null);
+  const haptic = useHaptic();
 
   useEffect(() => {
     if (project) { setNotes(project.notes || ''); setTab('overview'); setEditingCrewIdx(null); }
@@ -61,13 +64,78 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   };
 
   const handleTogglePaid = async () => {
+    haptic.confirm();
     const newPaid = !p.paid;
     const changes = { paid: newPaid, _logMsg: newPaid ? 'Invoice marked as paid' : 'Invoice marked as unpaid' };
     await update(changes);
     showToast(newPaid ? 'Invoice marked paid' : 'Marked unpaid', newPaid ? 'green' : 'red');
   };
 
+  const handleQuickInvoice = async () => {
+    haptic.confirm();
+    setQuickInvoiceLoading(true);
+    const invoiceNum = p.invoice_number || `INV-${p.project_id || Date.now()}`;
+    const invoiceDate = p.invoice_date || new Date().toISOString().split('T')[0];
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+    const SANS = 'helvetica', COURIER = 'courier';
+    let y = 0;
+    doc.setFillColor(10,10,10); doc.rect(0,0,210,297,'F');
+    doc.setFillColor(232,26,26); doc.rect(0,0,210,22,'F');
+    doc.setFont(SANS,'bold'); doc.setFontSize(14); doc.setTextColor(255,255,255);
+    doc.text('INVOICE', 20, 14);
+    doc.setFont(COURIER,'normal'); doc.setFontSize(9); doc.setTextColor(255,200,200);
+    doc.text(invoiceNum, 190, 14, { align: 'right' });
+    y = 32;
+    doc.setFont(SANS,'bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+    doc.text('Studio 65', 20, y);
+    doc.setFont(COURIER,'normal'); doc.setFontSize(9); doc.setTextColor(150,150,150);
+    doc.text('studio65production@gmail.com', 20, y+6);
+    doc.text('Toronto, ON', 20, y+12);
+    doc.setFont(COURIER,'bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text('BILL TO', 130, y);
+    doc.setFont(SANS,'bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+    doc.text(p.client || 'Client', 130, y+6);
+    y += 26;
+    doc.setFillColor(25,25,25); doc.roundedRect(18,y,174,18,3,3,'F');
+    [['Invoice Date', invoiceDate],['Due Date','On Receipt'],['Project',p.project_id||'—'],['Status',p.paid?'PAID':'OUTSTANDING']].forEach(([label,value],i) => {
+      const x = 22 + i*44;
+      doc.setFont(COURIER,'normal'); doc.setFontSize(7); doc.setTextColor(80,80,80);
+      doc.text(label.toUpperCase(), x, y+6);
+      doc.setFont(COURIER,'bold'); doc.setFontSize(9); doc.setTextColor(200,200,200);
+      doc.text(value, x, y+13);
+    });
+    y += 26;
+    const lineItems = [
+      { desc: `Production Services — ${p.name}`, amount: p.revenue || 0 },
+      ...(p.expenses||[]).map(e => ({ desc: `${e.category||'Expense'}: ${e.desc}`, amount: e.amount||0 })),
+    ];
+    const grandTotal = lineItems.reduce((s,l) => s+l.amount, 0);
+    doc.setFont(COURIER,'normal'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text('DESCRIPTION', 20, y); y += 10;
+    lineItems.forEach((item,idx) => {
+      if (idx%2===0) { doc.setFillColor(15,15,15); doc.rect(18,y-3,174,10,'F'); }
+      doc.setFont(SANS,'normal'); doc.setFontSize(10); doc.setTextColor(220,220,220);
+      doc.text(doc.splitTextToSize(item.desc,130)[0], 20, y+3);
+      doc.setFont(COURIER,'bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
+      doc.text(fmt(item.amount), 188, y+3, { align: 'right' });
+      y += 10;
+    });
+    y += 6;
+    doc.setFillColor(30,30,30); doc.roundedRect(120,y,72,18,3,3,'F');
+    doc.setFont(COURIER,'normal'); doc.setFontSize(9); doc.setTextColor(150,150,150);
+    doc.text('TOTAL DUE', 124, y+7);
+    doc.setFont(SANS,'bold'); doc.setFontSize(15); doc.setTextColor(232,26,26);
+    doc.text(fmt(grandTotal), 188, y+13, { align: 'right' });
+    doc.save(`Invoice_${invoiceNum}_${p.client||'Client'}.pdf`);
+    await base44.entities.Project.update(p.id, { ...p, invoice_number: invoiceNum, invoice_date: invoiceDate });
+    onUpdate({ ...p, invoice_number: invoiceNum, invoice_date: invoiceDate });
+    setQuickInvoiceLoading(false);
+    showToast('Invoice downloaded!', 'green');
+  };
+
   const handleCrewPaid = async (i) => {
+    haptic.confirm();
     const crew = [...p.crew];
     crew[i] = { ...crew[i], paid: !crew[i].paid };
     await update({ crew, _logMsg: crew[i].name + (crew[i].paid ? ' marked paid' : ' marked unpaid') });
@@ -106,6 +174,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   };
 
   const handleDelCrew = async (i) => {
+    haptic.error();
     const crew = p.crew.filter((_, j) => j !== i);
     const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
     await update({ crew, crew_cost, net: p.revenue - crew_cost - p.rental_cost, _logMsg: `Crew member removed` });
@@ -134,6 +203,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
   };
 
   const handleSetAvail = async (i, status) => {
+    haptic.soft();
     const crew = [...p.crew];
     crew[i] = { ...crew[i], avail: status };
     await update({ crew, _logMsg: `${crew[i].name} marked ${status === 'yes' ? 'available' : 'unavailable'}` });
@@ -333,11 +403,18 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
                 <div style={{ fontSize: 13, fontWeight: 600 }}>Invoice</div>
                 <div style={{ fontSize: 11, color: '#666', marginTop: 2, fontFamily: '"DM Mono", monospace' }}>{p.paid ? 'Invoice paid ✓' : 'Awaiting payment'}</div>
               </div>
+              <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleTogglePaid} style={{
                 padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace',
                 background: p.paid ? 'rgba(232,26,26,0.1)' : 'rgba(123,200,83,0.1)',
                 color: p.paid ? '#E81A1A' : '#7BC853',
               }}>{p.paid ? 'Mark Unpaid' : 'Mark Paid'}</button>
+              <button onClick={handleQuickInvoice} disabled={quickInvoiceLoading} style={{
+                padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace',
+                background: 'rgba(74,158,255,0.1)', color: '#4A9EFF',
+                opacity: quickInvoiceLoading ? 0.6 : 1,
+              }}>{quickInvoiceLoading ? '⏳' : '⬇ Invoice PDF'}</button>
+            </div>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>

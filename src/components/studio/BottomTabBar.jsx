@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useHaptic } from '@/hooks/useHaptic';
 import { Film, Calendar, Clipboard, Sparkles, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Mail, Settings } from 'lucide-react';
 
 // Primary tabs — always visible
@@ -26,6 +27,7 @@ export default function BottomTabBar() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  const haptic = useHaptic();
 
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(path + '/');
@@ -33,6 +35,7 @@ export default function BottomTabBar() {
   const inMore = MORE_TABS.some(t => isActive(t.path));
 
   const go = (path) => {
+    haptic.tap();
     setMoreOpen(false);
     navigate(location.pathname === path ? path : path, { replace: location.pathname === path });
   };
@@ -148,7 +151,7 @@ export default function BottomTabBar() {
 
         {/* More button */}
         <button
-          onClick={() => setMoreOpen(o => !o)}
+          onClick={() => { haptic.tap(); setMoreOpen(o => !o); }}
           style={{
             flex: 1, border: 'none', background: 'transparent',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
