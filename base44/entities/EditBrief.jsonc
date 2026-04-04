@@ -1,0 +1,66 @@
+{
+  "name": "EditBrief",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Director notes for the editor"
+    },
+    "script": {
+      "type": "string",
+      "description": "Script or story outline"
+    },
+    "inspo_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "raw_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "style_notes": {
+      "type": "string",
+      "description": "Color grade, pacing, music style notes"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "project_id"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

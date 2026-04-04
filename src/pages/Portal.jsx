@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
+import EditorSection from '@/components/portal/EditorSection';
 import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp, CheckSquare, Package } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
@@ -22,10 +23,12 @@ function LoginScreen({ onLogin }) {
 
   const loadContactProjects = async (c) => {
     const allProjects = await base44.entities.Project.list('-date', 200);
+    const isEditor = (c.types || []).includes('Editor');
     const myProjects  = allProjects.filter(p => {
       const inCrew    = (p.crew || []).some(m => m.name.toLowerCase() === c.name.toLowerCase());
       const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === c.name.toLowerCase());
-      return inCrew || inRentals;
+      // Editors see all projects they are assigned to as crew, OR all active projects if editor type
+      return inCrew || inRentals || isEditor;
     });
     return myProjects;
   };
@@ -680,6 +683,7 @@ export default function Portal() {
   if (!contact) return <LoginScreen onLogin={handleLogin} />;
 
   const today            = new Date().toISOString().split('T')[0];
+  const isEditor         = (contact.types || []).includes('Editor');
   const upcomingProjects = projects.filter(p => !p.archived && (p.date || '') >= today);
   const pastProjects     = projects.filter(p =>  p.archived || (p.date || '') <  today);
 
@@ -733,7 +737,25 @@ export default function Portal() {
           </div>
         ) : (
           <>
-            {upcomingProjects.length > 0 && (
+            {/* Editor view: show brief + uploads per project */}
+            {isEditor && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {projects.filter(p => !p.archived).map(p => (
+                  <div key={p.id} style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 14, overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 16px', borderBottom: '1px solid #1A1A1A' }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 2 }}>{p.name}</div>
+                      <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{p.client}{p.date ? ' · ' + p.date : ''}</div>
+                    </div>
+                    <div style={{ padding: 16 }}>
+                      <EditorSection project={p} contact={contact} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Crew / Vendor view: existing project cards */}
+            {!isEditor && upcomingProjects.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Upcoming</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -741,7 +763,7 @@ export default function Portal() {
                 </div>
               </div>
             )}
-            {pastProjects.length > 0 && (
+            {!isEditor && pastProjects.length > 0 && (
               <div>
                 <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Past</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

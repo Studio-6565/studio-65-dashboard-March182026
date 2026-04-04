@@ -13,6 +13,7 @@
           "Crew",
           "Client",
           "Vendor",
+          "Editor",
           "Other"
         ]
       }

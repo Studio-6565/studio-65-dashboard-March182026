@@ -17,6 +17,7 @@
         "Crew",
         "Client",
         "Vendor",
+        "Editor",
         "Other"
       ]
     },
@@ -98,6 +99,23 @@
       "type": "string"
     },
     "vendor_website": {
+      "type": "string"
+    },
+    "editor_software": {
+      "type": "string",
+      "description": "e.g. Premiere Pro, DaVinci Resolve"
+    },
+    "editor_style": {
+      "type": "string",
+      "description": "e.g. fast-paced, cinematic, documentary"
+    },
+    "editor_portfolio": {
+      "type": "string"
+    },
+    "editor_rate": {
+      "type": "string"
+    },
+    "editor_availability": {
       "type": "string"
     },
     "other_reason": {

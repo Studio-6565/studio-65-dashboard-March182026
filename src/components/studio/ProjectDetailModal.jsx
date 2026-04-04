@@ -10,6 +10,7 @@ import CallSheetTab from './tabs/CallSheetTab';
 import RemindersTab from './tabs/RemindersTab';
 import CrewRatingsTab from './tabs/CrewRatingsTab';
 import ExpensesTab from './tabs/ExpensesTab';
+import EditReviewTab from './tabs/EditReviewTab';
 import InvoiceGenerator from './InvoiceGenerator';
 import ProjectChat from './ProjectChat';
 import ProjectAIActions from './ProjectAIActions';
@@ -333,7 +334,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
     showToast(`${name} saved to Contacts`, 'green');
   };
 
-  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'expenses', 'invoice', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'crew chat', 'activity'];
+  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'expenses', 'invoice', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'edit', 'crew chat', 'activity'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -775,6 +776,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
 
       {/* Crew Ratings */}
       {tab === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
+
+      {/* Edit Review */}
+      {tab === 'edit' && <EditReviewTab project={p} />}
 
       {/* Crew Chat */}
       {tab === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
