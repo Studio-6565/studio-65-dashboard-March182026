@@ -92,7 +92,8 @@ function LoginScreen({ onLogin }) {
       const myProjects = await loadContactProjects(c);
       onLogin(c, myProjects);
     } catch (err) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', err);
+      setError('Login failed: ' + (err?.message || 'Unknown error'));
     }
     setLoading(false);
   };
