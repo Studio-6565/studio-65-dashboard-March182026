@@ -123,7 +123,8 @@ function LoginScreen({ onLogin }) {
       });
       setOtpSent(true);
     } catch (err) {
-      setError('Failed to send code. Please try again.');
+      console.error('Email send error:', err);
+      setError('Failed to send code: ' + (err?.message || 'Unknown error'));
     }
     setLoading(false);
   };
