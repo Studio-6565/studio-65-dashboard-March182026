@@ -8,7 +8,7 @@ const PRIMARY_TABS = [
   { path: '/projects',  Icon: Film, label: 'Projects' },
   { path: '/calendar',  Icon: Calendar, label: 'Calendar' },
   { path: '/contacts',  Icon: Clipboard, label: 'Contacts' },
-  { path: '/inbox',     Icon: Mail, label: 'Inbox' },
+  { path: '/leads',     Icon: BarChart3, label: 'Leads' },
 ];
 
 // Secondary tabs — appear in the "More" drawer
@@ -17,6 +17,7 @@ const MORE_TABS = [
   { path: '/crew',       Icon: Users, label: 'Crew Spend' },
   { path: '/timeline',   Icon: Clock, label: 'Timeline' },
   { path: '/gear',       Icon: Backpack, label: 'Gear' },
+  { path: '/inbox',      Icon: Mail, label: 'Inbox' },
   { path: '/contracts',  Icon: FileText, label: 'Contracts' },
   { path: '/operations', Icon: CheckSquare, label: 'Operations' },
   { path: '/settings',   Icon: Settings, label: 'Settings' },

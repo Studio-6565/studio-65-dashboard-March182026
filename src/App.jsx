@@ -11,6 +11,7 @@ import ContractsPage from './pages/ContractsPage.jsx';
 import Portal from './pages/Portal';
 import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';
+import LeadsPage from './pages/LeadsPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -55,6 +56,7 @@ const AuthenticatedApp = () => {
       <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
+      <Route path="/leads" element={<LeadsPage />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>

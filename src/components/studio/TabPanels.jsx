@@ -14,6 +14,7 @@ import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import ContractsPage from '@/pages/ContractsPage';
 import InboxPage from '@/pages/InboxPage';
+import LeadsPage from '@/pages/LeadsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
@@ -152,7 +153,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'leads', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -220,6 +221,7 @@ export default function TabPanels({
               <CrewSpendView projects={projects.filter(p => !p.archived)} />
             </div>
           )}
+          {tab === 'leads' && <LeadsPage />}
           {tab === 'timeline' && (
             <TimelineView projects={projects.filter(p => !p.archived)} onOpenDetail={onOpenDetail} />
           )}

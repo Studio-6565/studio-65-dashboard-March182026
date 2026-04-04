@@ -24,6 +24,7 @@ const TAB_LABELS = {
   '/crew': 'Crew',
   '/timeline': 'Timeline',
   '/contacts': 'Contacts',
+  '/leads': 'Sales Pipeline',
   '/inbox': 'Inbox',
   '/gear': 'Gear',
   '/operations': 'Operations',
