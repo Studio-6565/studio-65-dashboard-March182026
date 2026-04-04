@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
 import EditorSection from '@/components/portal/EditorSection';
-import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp, CheckSquare, Package } from 'lucide-react';
+import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp, CheckSquare, Package, Fingerprint } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
@@ -20,6 +20,17 @@ function LoginScreen({ onLogin }) {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const [otpStore, setOtpStore] = useState(null); // { code, expires }
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioChecking, setBioChecking] = useState(false);
+
+  // Check biometric support on mount
+  useEffect(() => {
+    if (window.PublicKeyCredential) {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then(available => setBioSupported(available))
+        .catch(() => setBioSupported(false));
+    }
+  }, []);
 
   const loadContactProjects = async (c) => {
     const allProjects = await base44.entities.Project.list('-date', 200);
@@ -31,6 +42,38 @@ function LoginScreen({ onLogin }) {
       return inCrew || inRentals || isEditor;
     });
     return myProjects;
+  };
+
+  // Biometric login handler
+  const handleBiometricLogin = async () => {
+    setBioChecking(true); setError('');
+    try {
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: new Uint8Array(32),
+          timeout: 60000,
+          userVerification: 'preferred',
+        },
+        mediation: 'optional',
+      });
+      
+      if (assertion) {
+        // Decode biometric identifier as email from the response
+        // In a real app, this would validate against your server
+        const userId = new TextDecoder().decode(assertion.id);
+        const contacts = await base44.entities.Contact.filter({ email: userId });
+        if (contacts.length) {
+          const c = contacts[0];
+          const myProjects = await loadContactProjects(c);
+          onLogin(c, myProjects);
+        } else {
+          setError('Biometric recognized but no account found. Try email or access code.');
+        }
+      }
+    } catch (err) {
+      setError(err.name === 'NotAllowedError' ? 'Biometric verification cancelled.' : 'Biometric login failed. Try email or access code.');
+    }
+    setBioChecking(false);
   };
 
   // ── Code login ──
@@ -108,18 +151,31 @@ function LoginScreen({ onLogin }) {
         </div>
 
         {/* Mode toggle */}
-        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 16 }}>
-          {[{ key: 'email', label: 'Email', Icon: Mail }, { key: 'code', label: 'Access Code', Icon: Key }].map(m => (
-            <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <m.Icon size={14} strokeWidth={2} />
-              {m.label}
-            </button>
-          ))}
-        </div>
+         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 16 }}>
+           {[...(bioSupported ? [{ key: 'bio', label: 'Thumbprint', Icon: Fingerprint }] : []), { key: 'email', label: 'Email', Icon: Mail }, { key: 'code', label: 'Access Code', Icon: Key }].map(m => (
+             <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+               <m.Icon size={14} strokeWidth={2} />
+               {m.label}
+             </button>
+           ))}
+         </div>
 
         <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16, padding: 32 }}>
-          {/* ── Access Code ── */}
-          {mode === 'code' && (
+           {/* ── Biometric ── */}
+           {mode === 'bio' && (
+             <div style={{ textAlign: 'center' }}>
+               <Fingerprint size={64} color="#E81A1A" style={{ margin: '0 auto 20px', display: 'block' }} />
+               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Use Your Thumbprint</div>
+               <div style={{ fontSize: 12, color: '#555', marginBottom: 24 }}>Place your finger on the sensor to login</div>
+               {error && <div style={{ marginBottom: 16, padding: '12px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, fontSize: 13, color: '#E81A1A' }}>{error}</div>}
+               <button onClick={handleBiometricLogin} disabled={bioChecking} style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: bioChecking ? 'default' : 'pointer', opacity: bioChecking ? 0.7 : 1 }}>
+                 {bioChecking ? 'Scanning...' : 'Verify Thumbprint →'}
+               </button>
+             </div>
+           )}
+
+           {/* ── Access Code ── */}
+           {mode === 'code' && (
             <form onSubmit={handleCodeSubmit}>
               <label style={{ fontSize: 12, fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: MONO, marginBottom: 10, display: 'block' }}>Access Code</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your personal code" autoFocus style={{ ...IS, letterSpacing: '0.08em' }} />
