@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
 import ProjectStatusNudge from './ProjectStatusNudge';
+import { base44 } from '@/api/base44Client';
 
 const StatusTag = ({ status }) => {
   const s = STATUS_STYLE[status] || STATUS_STYLE['Booked'];
@@ -13,13 +14,29 @@ const StatusTag = ({ status }) => {
   );
 };
 
-export default function ProjectCard({ project: p, onClick, onMarkPaid }) {
+const STATUS_ORDER = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
+
+export default function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
   const del = p.deliverables || [];
   const done = del.filter(d => d.done).length;
   const pct = del.length ? (done / del.length * 100) : 0;
   const owed = crewOwed(p);
   const totalHrs = (p.hours || []).reduce((s, h) => s + h.hours, 0);
   const m = margin(p);
+
+  const [showStatusPicker, setShowStatusPicker] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const handleStatusChange = async (e, newStatus) => {
+    e.stopPropagation();
+    if (newStatus === p.status) { setShowStatusPicker(false); return; }
+    setUpdatingStatus(true);
+    const updated = { ...p, status: newStatus };
+    await base44.entities.Project.update(p.id, updated);
+    onProjectUpdate && onProjectUpdate(updated);
+    setUpdatingStatus(false);
+    setShowStatusPicker(false);
+  };
 
   // Swipe state
   const touchStartX = useRef(null);
@@ -88,7 +105,23 @@ export default function ProjectCard({ project: p, onClick, onMarkPaid }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', background: '#2A2A2A', borderRadius: 4, color: '#D9D9D9', fontFamily: '"DM Mono", monospace' }}>{p.client}</span>
             <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, fontFamily: '"DM Mono", monospace', fontWeight: 600, background: marginBg(m), color: marginColor(m) }}>{m}% margin</span>
-            <StatusTag status={p.status || 'Booked'} />
+            <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+              <button
+                onClick={e => { e.stopPropagation(); setShowStatusPicker(v => !v); }}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                <StatusTag status={p.status || 'Booked'} />
+              </button>
+              {showStatusPicker && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 50, marginTop: 4, background: '#1E1E1E', border: '1px solid #333', borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                  {STATUS_ORDER.map(s => (
+                    <button key={s} onClick={e => handleStatusChange(e, s)} disabled={updatingStatus} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 14px', background: s === p.status ? 'rgba(232,26,26,0.12)' : 'transparent', border: 'none', color: s === p.status ? '#E81A1A' : '#ccc', fontSize: 12, fontWeight: s === p.status ? 700 : 400, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>
+                      {s === p.status ? '● ' : '○ '}{s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {p.track_hours && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontFamily: '"DM Mono", monospace' }}>⏱ {(totalHrs).toFixed(1)} hrs</span>}
             {p.notes && <span style={{ fontSize: 10, color: '#666' }}>📝</span>}
           </div>

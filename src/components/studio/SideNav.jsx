@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, Sparkles } from 'lucide-react';
+import GlobalSearch from './GlobalSearch';
 
 const NAV_ITEMS = [
   { path: '/projects',   Icon: Film, label: 'Projects' },
@@ -19,7 +20,7 @@ const NAV_ITEMS = [
 
 const AI_ITEM = { path: '/agents', Icon: Sparkles, label: 'AI Agents' };
 
-export default function SideNav({ onNewProject }) {
+export default function SideNav({ onNewProject, projects, contacts }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -79,8 +80,15 @@ export default function SideNav({ onNewProject }) {
         </button>
       </div>
 
+      {/* Global Search */}
+      {!collapsed && (
+        <div style={{ padding: '8px 12px', flexShrink: 0 }}>
+          <GlobalSearch projects={projects || []} contacts={contacts || []} />
+        </div>
+      )}
+
       {/* New Project button */}
-      <div style={{ padding: collapsed ? '12px 10px' : '12px 12px', flexShrink: 0 }}>
+      <div style={{ padding: collapsed ? '12px 10px' : '4px 12px 12px', flexShrink: 0 }}>
         <button
           onClick={onNewProject}
           style={{

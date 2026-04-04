@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { fmt } from '@/lib/studio';
 import { showToast } from '../StudioToast';
+import { base44 } from '@/api/base44Client';
 
 const MONO = '"DM Mono", monospace';
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -9,13 +10,24 @@ const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'upper
 const CATEGORIES = ['Travel', 'Food', 'Props', 'Software', 'Printing', 'Other'];
 const CAT_COLORS = { Travel: '#4A9EFF', Food: '#F59E0B', Props: '#A78BFA', Software: '#7BC853', Printing: '#F97316', Other: '#888' };
 
-const emptyForm = { desc: '', category: 'Other', amount: '', date: new Date().toISOString().split('T')[0] };
+const emptyForm = { desc: '', category: 'Other', amount: '', date: new Date().toISOString().split('T')[0], receipt_url: '' };
 
 export default function ExpensesTab({ project: p, onUpdate }) {
   const [form, setForm] = useState(emptyForm);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
   const expenses = p.expenses || [];
 
   const total = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+
+  const handleReceiptUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    const res = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, receipt_url: res.file_url }));
+    setUploading(false);
+    showToast('Receipt uploaded', 'blue');
+  };
 
   const handleAdd = async () => {
     if (!form.desc.trim()) { showToast('Enter a description', 'red'); return; }
@@ -69,9 +81,10 @@ export default function ExpensesTab({ project: p, onUpdate }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 600 }}>{e.desc}</div>
                 {e.date && <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', marginTop: 1 }}>{e.date}</div>}
-              </div>
-              <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: '#F59E0B', flexShrink: 0 }}>{fmt(e.amount)}</span>
-              <button onClick={() => handleDelete(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, padding: '2px 5px' }}>×</button>
+                {e.receipt_url && <a href={e.receipt_url} target="_blank" rel="noreferrer" style={{ fontFamily: MONO, fontSize: 9, color: '#4A9EFF', marginTop: 2, display: 'block' }}>📎 Receipt</a>}
+                </div>
+                <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: '#F59E0B', flexShrink: 0 }}>{fmt(e.amount)}</span>
+                <button onClick={() => handleDelete(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, padding: '2px 5px' }}>×</button>
             </div>
           ))
         )}
@@ -99,6 +112,14 @@ export default function ExpensesTab({ project: p, onUpdate }) {
             <label style={LL}>Date</label>
             <input style={{ ...SS, background: '#1E1E1E', width: 130 }} type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
           </div>
+        </div>
+        {/* Receipt photo upload */}
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <input ref={fileRef} type="file" accept="image/*,application/pdf" style={{ display: 'none' }} onChange={e => handleReceiptUpload(e.target.files[0])} />
+          <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '7px 14px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 7, color: form.receipt_url ? '#4A9EFF' : '#888', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: MONO }}>
+            {uploading ? '⏳ Uploading...' : form.receipt_url ? '📎 Receipt Attached ✓' : '📷 Attach Receipt'}
+          </button>
+          {form.receipt_url && <button onClick={() => setForm(f => ({ ...f, receipt_url: '' }))} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 13 }}>×</button>}
         </div>
         <button onClick={handleAdd} style={{ marginTop: 10, width: '100%', padding: '9px 0', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
           + Log Expense

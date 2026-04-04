@@ -10,6 +10,7 @@ import ProjectDetailPage from './ProjectDetailPage';
 import StudioToast, { showToast } from '@/components/studio/StudioToast';
 import StudioAIChat from '@/components/studio/StudioAIChat';
 import BottomTabBar from '@/components/studio/BottomTabBar';
+import GlobalSearch from '@/components/studio/GlobalSearch';
 import SideNav from '@/components/studio/SideNav';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { nextProjectId, addLog } from '@/lib/studio';
@@ -156,7 +157,7 @@ export default function Dashboard() {
 
       {/* ── Left sidebar (desktop only) ── */}
       <div className="desktop-sidebar">
-        <SideNav onNewProject={() => { setEditingProject(null); setProjectModalOpen(true); }} />
+        <SideNav onNewProject={() => { setEditingProject(null); setProjectModalOpen(true); }} projects={projects} contacts={contacts} />
       </div>
 
       {/* ── Main area ── */}
@@ -237,6 +238,7 @@ export default function Dashboard() {
                 pullProgress={pullProgress}
                 onOpenDetail={(p) => navigate(`/projects/${p.id}`)}
                 onNewProject={() => setProjectModalOpen(true)}
+                onProjectUpdate={handleProjectUpdate}
                 onContactsChange={setContacts}
                 onProjectsChange={setProjects}
                 onDeleteAccount={handleDeleteAccount}

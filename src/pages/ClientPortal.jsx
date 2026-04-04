@@ -343,15 +343,19 @@ export default function ClientPortal() {
     setShowCompose(false);
   };
 
-  const handleSignOut = () => { setContact(null); setProjects([]); setMessages([]); setTab('inbox'); };
+  const [bookingSent, setBookingSent] = useState(false);
+
+  const handleSignOut = () => { setContact(null); setProjects([]); setMessages([]); setTab('inbox'); setBookingSent(false); };
 
   if (!contact) return <LoginScreen onLogin={handleLogin} />;
 
   const pendingApprovals = messages.filter(m => m.from === 'studio' && (m.type === 'script' || m.type === 'approval_request') && m.approval_status === 'pending').length;
   const displayMessages  = projectFilter ? messages.filter(m => m.project_id === projectFilter) : messages;
 
+  const unreadCount = messages.filter(m => m.from === 'studio' && !m.read_by_client).length;
+
   const TABS = [
-    { key: 'inbox',     label: 'Inbox' },
+    { key: 'inbox',     label: 'Inbox', badge: unreadCount },
     { key: 'projects',  label: 'Projects' },
     { key: 'contracts', label: '📝 Contracts' },
     { key: 'book',      label: '📅 Book a Shoot' },
@@ -383,7 +387,10 @@ export default function ClientPortal() {
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
           {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 22px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+            <button key={t.key} onClick={() => setTab(t.key)} style={{ position: 'relative', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>
+              {t.label}
+              {t.badge > 0 && <span style={{ position: 'absolute', top: 2, right: 2, width: 16, height: 16, borderRadius: '50%', background: '#4A9EFF', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t.badge > 9 ? '9+' : t.badge}</span>}
+            </button>
           ))}
         </div>
 
@@ -489,23 +496,41 @@ export default function ClientPortal() {
         {/* ── BOOK ── */}
         {tab === 'book' && (
           <div style={{ paddingTop: 8 }}>
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>Book a Shoot</div>
-              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
-                Submit a booking request and Studio 65 will get back to you to confirm availability and details.
+            {bookingSent ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
+                <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, color: '#7BC853' }}>Booking Request Sent!</div>
+                <div style={{ fontSize: 14, color: '#666', lineHeight: 1.7, marginBottom: 28 }}>
+                  Studio 65 has received your request and will be in touch shortly to confirm availability and next steps.
+                </div>
+                <button
+                  onClick={() => setBookingSent(false)}
+                  style={{ padding: '12px 28px', background: '#1E1E1E', border: '1px solid #333', borderRadius: 12, color: '#ccc', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Submit Another Request
+                </button>
               </div>
-            </div>
-            <button
-              onClick={() => setShowBooking(true)}
-              style={{ width: '100%', padding: '16px 0', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
-            >
-              📅 Submit a Booking Request →
-            </button>
+            ) : (
+              <>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>Book a Shoot</div>
+                  <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
+                    Submit a booking request and Studio 65 will get back to you to confirm availability and details.
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowBooking(true)}
+                  style={{ width: '100%', padding: '16px 0', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  📅 Submit a Booking Request →
+                </button>
+              </>
+            )}
           </div>
         )}
       </main>
 
-      {showBooking && <BookingRequestForm contact={contact} onSent={() => setShowBooking(false)} onClose={() => setShowBooking(false)} />}
+      {showBooking && <BookingRequestForm contact={contact} onSent={() => { setShowBooking(false); setBookingSent(true); }} onClose={() => setShowBooking(false)} />}
 
       {/* Floating compose button — only on inbox */}
       {tab !== 'book' && (

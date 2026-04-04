@@ -20,6 +20,7 @@ import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import AISmartNudges from './AISmartNudges';
 import RevenueGoal from './RevenueGoal';
+import TodaysShoots from './TodaysShoots';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -46,7 +47,7 @@ const chipStyle = (active) => ({
   userSelect: 'none',
 });
 
-function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isRefreshing, pullProgress }) {
+function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, onProjectsChange, containerRef, isRefreshing, pullProgress }) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
@@ -93,6 +94,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
   return (
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
+      <TodaysShoots projects={projects} onOpenDetail={onOpenDetail} />
       <UpcomingReminders projects={projects} />
       <AISmartNudges projects={projects} />
       <RevenueGoal projects={projects} />
@@ -135,7 +137,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
           {filtered.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} />
+            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} />
           ))}
         </div>
       )}
@@ -201,6 +203,8 @@ export default function TabPanels({
               projects={projects}
               onOpenDetail={onOpenDetail}
               onNewProject={onNewProject}
+              onProjectUpdate={onProjectUpdate || (() => {})}
+              onProjectsChange={onProjectsChange}
               containerRef={containerRef}
               isRefreshing={isRefreshing}
               pullProgress={pullProgress}
