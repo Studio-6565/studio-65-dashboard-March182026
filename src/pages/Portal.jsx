@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
-import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp, CheckSquare, Package } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
@@ -258,6 +258,118 @@ function CrewProjectChat({ project, contact }) {
   );
 }
 
+// ── Shot List Section ──────────────────────────────────────────────────────
+
+function ShotListSection({ project: p }) {
+  const [shots, setShots] = useState(p.shot_list || []);
+  const [saving, setSaving] = useState(null);
+
+  const toggle = async (i) => {
+    const updated = shots.map((s, j) => j === i ? { ...s, done: !s.done } : s);
+    setShots(updated);
+    setSaving(i);
+    await base44.entities.Project.update(p.id, { ...p, shot_list: updated });
+    setSaving(null);
+  };
+
+  const done = shots.filter(s => s.done).length;
+
+  return (
+    <div style={{ padding: '14px 16px', borderTop: '1px solid #1A1A1A' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <CheckSquare size={13} color="#555" />
+          <span style={{ fontFamily: MONO, fontSize: 10, color: '#3A3A3A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Shot List</span>
+        </div>
+        <span style={{ fontFamily: MONO, fontSize: 10, color: done === shots.length ? '#7BC853' : '#3A3A3A' }}>{done}/{shots.length}</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {shots.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => toggle(i)}
+            disabled={saving === i}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: s.done ? 'rgba(123,200,83,0.04)' : '#111',
+              border: `1px solid ${s.done ? 'rgba(123,200,83,0.12)' : '#1A1A1A'}`,
+              borderRadius: 8, padding: '10px 12px',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
+              transition: 'all 0.15s',
+            }}
+          >
+            <div style={{
+              width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+              border: `1.5px solid ${s.done ? '#7BC853' : '#252525'}`,
+              background: s.done ? '#7BC853' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {s.done && <span style={{ fontSize: 9, color: '#000', fontWeight: 800 }}>✓</span>}
+            </div>
+            <span style={{ fontSize: 13, color: s.done ? '#3A3A3A' : '#bbb', textDecoration: s.done ? 'line-through' : 'none', flex: 1 }}>{s.shot}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Equipment Checklist Section ────────────────────────────────────────────
+
+function EquipmentChecklistSection({ project: p }) {
+  const [items, setItems] = useState(p.equipment_checklist || []);
+  const [saving, setSaving] = useState(null);
+
+  const toggle = async (i) => {
+    const updated = items.map((it, j) => j === i ? { ...it, checked: !it.checked } : it);
+    setItems(updated);
+    setSaving(i);
+    await base44.entities.Project.update(p.id, { ...p, equipment_checklist: updated });
+    setSaving(null);
+  };
+
+  const checked = items.filter(it => it.checked).length;
+
+  return (
+    <div style={{ padding: '14px 16px', borderTop: '1px solid #1A1A1A' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Package size={13} color="#555" />
+          <span style={{ fontFamily: MONO, fontSize: 10, color: '#3A3A3A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Gear Checklist</span>
+        </div>
+        <span style={{ fontFamily: MONO, fontSize: 10, color: checked === items.length ? '#7BC853' : '#3A3A3A' }}>{checked}/{items.length}</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {items.map((it, i) => (
+          <button
+            key={i}
+            onClick={() => toggle(i)}
+            disabled={saving === i}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: it.checked ? 'rgba(74,158,255,0.04)' : '#111',
+              border: `1px solid ${it.checked ? 'rgba(74,158,255,0.12)' : '#1A1A1A'}`,
+              borderRadius: 8, padding: '10px 12px',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
+              transition: 'all 0.15s',
+            }}
+          >
+            <div style={{
+              width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+              border: `1.5px solid ${it.checked ? '#4A9EFF' : '#252525'}`,
+              background: it.checked ? '#4A9EFF' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {it.checked && <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>}
+            </div>
+            <span style={{ fontSize: 13, color: it.checked ? '#3A3A3A' : '#bbb', textDecoration: it.checked ? 'line-through' : 'none', flex: 1 }}>{it.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Project Card ───────────────────────────────────────────────────────────
 
 function ProjectCard({ project: p, contact }) {
@@ -508,7 +620,17 @@ function ProjectCard({ project: p, contact }) {
             </div>
           )}
 
-          {/* 5. Chat */}
+          {/* 5. Shot List */}
+          {(p.shot_list || []).length > 0 && (
+            <ShotListSection project={p} />
+          )}
+
+          {/* 6. Equipment Checklist */}
+          {(p.equipment_checklist || []).length > 0 && (
+            <EquipmentChecklistSection project={p} />
+          )}
+
+          {/* 7. Chat */}
           <div style={{ padding: '14px 16px', borderTop: '1px solid #1A1A1A' }}>
             <div style={{ fontFamily: MONO, fontSize: 10, color: '#3A3A3A', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Messages</div>
             <CrewProjectChat project={p} contact={contact} />
@@ -534,9 +656,26 @@ export default function Portal() {
   const [contact, setContact]   = useState(null);
   const [projects, setProjects] = useState([]);
   const [crewTab, setCrewTab]   = useState('projects');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleLogin = (c, projs) => { setContact(c); setProjects(projs); };
-  const handleSignOut = () => { setContact(null); setProjects([]); setCrewTab('projects'); };
+  const handleSignOut = () => { setContact(null); setProjects([]); setCrewTab('projects'); setUnreadCount(0); };
+
+  // Count unread messages from studio across all projects
+  useEffect(() => {
+    if (!contact) return;
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.type === 'create' && event.data?.from_role === 'studio' && !event.data?.read_by_crew) {
+        setUnreadCount(c => c + 1);
+      }
+    });
+    // Initial load of unread count
+    base44.entities.DirectMessage.list('-created_date', 200).then(msgs => {
+      const unread = msgs.filter(m => m.from_role === 'studio' && !m.read_by_crew).length;
+      setUnreadCount(unread);
+    });
+    return unsub;
+  }, [contact]);
 
   if (!contact) return <LoginScreen onLogin={handleLogin} />;
 
@@ -568,9 +707,18 @@ export default function Portal() {
         {/* Tab bar */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24 }}>
           {[{ key: 'projects', label: 'Projects', Icon: FilesIcon }, { key: 'contracts', label: 'Contracts', Icon: FilesIcon }].map(t => (
-            <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666', display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
               <t.Icon size={14} color={crewTab === t.key ? '#fff' : '#666'} strokeWidth={2} />
               {t.label}
+              {t.key === 'projects' && unreadCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: 4, right: 4,
+                  width: 16, height: 16, borderRadius: '50%',
+                  background: '#4A9EFF', color: '#fff',
+                  fontSize: 9, fontWeight: 800, fontFamily: MONO,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
+              )}
             </button>
           ))}
         </div>
