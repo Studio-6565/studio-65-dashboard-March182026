@@ -87,7 +87,7 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
         padding: 18, cursor: 'pointer', position: 'relative', overflow: 'hidden',
         transform: `translateX(${swipeX}px)`,
         transition: swiping ? 'none' : 'transform 0.25s ease, border-color 0.2s',
-        display: 'flex', flexDirection: 'column', height: '100%', width: '100%',
+        display: 'flex', flexDirection: 'column', height: '100%',
       }}
       onMouseEnter={e => { if (!swiping) { e.currentTarget.style.borderColor = '#555'; } }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = '#333'; }}
