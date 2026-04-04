@@ -93,11 +93,11 @@ export default function LeadsPage() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 2 }}>Sales Pipeline</div>
-          <div style={{ fontSize: 13, color: '#555' }}>Track leads from prospect to close</div>
+          <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>Sales Pipeline</div>
+          <div style={{ fontSize: 13, color: '#666' }}>Track leads from prospect to close</div>
         </div>
         <button
           onClick={() => {
@@ -105,17 +105,18 @@ export default function LeadsPage() {
             setModalOpen(true);
           }}
           style={{
-            padding: '10px 16px',
+            padding: '12px 18px',
             background: '#E81A1A',
             border: 'none',
             borderRadius: 10,
             color: '#fff',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 700,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
+            minHeight: 44,
           }}
         >
           <Plus size={16} /> New Lead
@@ -138,11 +139,11 @@ export default function LeadsPage() {
             key={f.value}
             onClick={() => setFilter(f.value)}
             style={{
-              padding: '8px 14px',
-              background: filter === f.value ? '#E81A1A' : '#1A1A1A',
-              border: `1px solid ${filter === f.value ? '#E81A1A' : '#2A2A2A'}`,
-              borderRadius: 8,
-              color: filter === f.value ? '#fff' : '#666',
+              padding: '9px 14px',
+              background: filter === f.value ? 'rgba(232,26,26,0.1)' : '#1A1A1A',
+              border: `1px solid ${filter === f.value ? 'rgba(232,26,26,0.35)' : '#2A2A2A'}`,
+              borderRadius: 10,
+              color: filter === f.value ? '#E81A1A' : '#666',
               fontSize: 12,
               fontWeight: 600,
               cursor: 'pointer',
@@ -164,7 +165,7 @@ export default function LeadsPage() {
             { key: 'negotiating', label: '💬 Negotiating', count: statusGroups.negotiating.length },
             { key: 'won', label: '✅ Won', count: statusGroups.won.length },
           ].map((col) => (
-            <div key={col.key} style={{ background: '#111', borderRadius: 12, padding: 14 }}>
+            <div key={col.key} style={{ background: '#111', border: '1px solid #1A1A1A', borderRadius: 12, padding: 16 }}>
               <div
                 style={{
                   fontSize: 12,
@@ -177,7 +178,7 @@ export default function LeadsPage() {
                 }}
               >
                 <span>{col.label}</span>
-                <span style={{ background: '#1E1E1E', padding: '2px 6px', borderRadius: 4, fontSize: 10 }}>
+                <span style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', padding: '4px 8px', borderRadius: 6, fontSize: 10, color: '#666', fontWeight: 500 }}>
                   {col.count}
                 </span>
               </div>
