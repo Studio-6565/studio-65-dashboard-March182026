@@ -13,16 +13,6 @@ import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 
-const UnauthenticatedApp = () => {
-  return (
-    <Routes>
-      <Route path="/portal" element={<Portal />} />
-      <Route path="/client-portal" element={<ClientPortal />} />
-      <Route path="*" element={<Onboarding />} />
-    </Routes>
-  );
-};
-
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
 
@@ -35,9 +25,14 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Portal and client portal are public, always accessible
+  // Portal and client portal bypass auth requirement
   if (window.location.pathname.startsWith('/portal') || window.location.pathname.startsWith('/client-portal')) {
-    return <UnauthenticatedApp />;
+    return (
+      <Routes>
+        <Route path="/portal" element={<Portal />} />
+        <Route path="/client-portal" element={<ClientPortal />} />
+      </Routes>
+    );
   }
 
   // Handle authentication errors — only send non-admins to onboarding
