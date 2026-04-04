@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
 import EditorSection from '@/components/portal/EditorSection';
-import { Mail, Key, Mail as MailIcon, FilesIcon, ChevronDown, ChevronUp, CheckSquare, Package, Fingerprint } from 'lucide-react';
+import { Mail, Key, Files, ChevronDown, ChevronUp, CheckSquare, Package, Fingerprint } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
@@ -154,7 +154,7 @@ function LoginScreen({ onLogin }) {
          <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 16 }}>
            {[...(bioSupported ? [{ key: 'bio', label: 'Thumbprint', Icon: Fingerprint }] : []), { key: 'email', label: 'Email', Icon: Mail }, { key: 'code', label: 'Access Code', Icon: Key }].map(m => (
              <button key={m.key} onClick={() => { setMode(m.key); setError(''); setOtpSent(false); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: mode === m.key ? '#E81A1A' : 'transparent', color: mode === m.key ? '#fff' : '#555', transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-               <m.Icon size={14} strokeWidth={2} />
+               <m.Icon size={14} strokeWidth={1.5} />
                {m.label}
              </button>
            ))}
@@ -202,7 +202,7 @@ function LoginScreen({ onLogin }) {
           {mode === 'email' && otpSent && (
             <form onSubmit={handleOtpVerify}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-               <MailIcon size={40} color="#E81A1A" style={{ margin: '0 auto 8px', display: 'block' }} />
+               <Mail size={40} color="#E81A1A" style={{ margin: '0 auto 8px', display: 'block' }} />
                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Check your email</div>
                 <div style={{ fontSize: 12, color: '#555' }}>We sent a 6-digit code to <span style={{ color: '#4A9EFF' }}>{email}</span></div>
               </div>
@@ -768,7 +768,7 @@ export default function Portal() {
 
         {/* Tab bar */}
         <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24 }}>
-          {[{ key: 'projects', label: 'Projects', Icon: FilesIcon }, { key: 'contracts', label: 'Contracts', Icon: FilesIcon }].map(t => (
+          {[{ key: 'projects', label: 'Projects', Icon: Files }, { key: 'contracts', label: 'Contracts', Icon: Files }].map(t => (
             <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666', display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
               <t.Icon size={14} color={crewTab === t.key ? '#fff' : '#666'} strokeWidth={2} />
               {t.label}
@@ -789,7 +789,7 @@ export default function Portal() {
 
         {crewTab === 'projects' && (projects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444' }}>
-            <FilesIcon size={56} color="#666" style={{ margin: '0 auto 14px', display: 'block', opacity: 0.3 }} />
+            <Files size={56} color="#666" style={{ margin: '0 auto 14px', display: 'block', opacity: 0.3 }} />
             <div style={{ fontSize: 15, fontWeight: 600, color: '#666', marginBottom: 6 }}>No projects yet</div>
             <div style={{ fontSize: 13 }}>Studio 65 will add you to projects soon. Check back later!</div>
           </div>
