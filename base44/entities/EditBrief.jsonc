@@ -8,6 +8,11 @@
     "project_name": {
       "type": "string"
     },
+    "published": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the brief is visible to the editor"
+    },
     "notes": {
       "type": "string",
       "description": "Director notes for the editor"

@@ -16,11 +16,14 @@ function BriefViewer({ projectId }) {
   const [brief, setBrief] = useState(null);
 
   useEffect(() => {
-    base44.entities.EditBrief.filter({ project_id: projectId }).then(r => r.length && setBrief(r[0]));
+    base44.entities.EditBrief.filter({ project_id: projectId }).then(r => {
+      const published = r.find(b => b.published);
+      setBrief(published || null);
+    });
   }, [projectId]);
 
   if (!brief) return (
-    <div style={{ fontFamily: MONO, fontSize: 11, color: '#444', padding: '12px 0' }}>No brief added yet. Check back soon.</div>
+    <div style={{ fontFamily: MONO, fontSize: 11, color: '#444', padding: '12px 0' }}>No brief available yet. Check back soon.</div>
   );
 
   return (

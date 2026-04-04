@@ -69,12 +69,42 @@ function BriefSection({ project }) {
     await save({ [key]: updated });
   };
 
+  const handlePublishToggle = async () => {
+    const newPublished = !brief?.published;
+    await save({ published: newPublished });
+    if (newPublished) {
+      // Notify editor that brief is ready
+      base44.functions.invoke('editReviewNotify', {
+        type: 'brief_published',
+        project_name: project.name,
+        project_id: project.id,
+      });
+      showToast('Brief published — editor notified!', 'green');
+    } else {
+      showToast('Brief unpublished', 'amber');
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Edit Brief</div>
-        {saving && <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>Saving...</div>}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {saving && <div style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>Saving...</div>}
+          <button onClick={handlePublishToggle} style={{
+            padding: '5px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO,
+            background: brief?.published ? 'rgba(123,200,83,0.15)' : 'rgba(245,158,11,0.12)',
+            color: brief?.published ? '#7BC853' : '#F59E0B',
+          }}>
+            {brief?.published ? '✓ Published' : '↑ Publish to Editor'}
+          </button>
+        </div>
       </div>
+      {!brief?.published && (
+        <div style={{ padding: '8px 12px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 8, fontFamily: MONO, fontSize: 11, color: '#F59E0B' }}>
+          Draft — editor cannot see this yet. Click "Publish to Editor" when ready.
+        </div>
+      )}
 
       {/* Notes */}
       <div>
@@ -363,6 +393,15 @@ export default function EditReviewTab({ project }) {
   const pendingCount = uploads.filter(u => u.status === 'pending_review').length;
   const newFromEditor = uploads.reduce((sum, u) => sum + (u.comments || []).filter(c => c.from_role === 'editor' && !c.read_by_studio).length, 0);
 
+  const markAllRead = async () => {
+    const unread = uploads.filter(u => (u.comments || []).some(c => c.from_role === 'editor' && !c.read_by_studio));
+    await Promise.all(unread.map(u => {
+      const updated = { ...u, read_by_studio: true, comments: (u.comments || []).map(c => ({ ...c, read_by_studio: c.from_role === 'editor' ? true : c.read_by_studio })) };
+      return base44.entities.EditUpload.update(u.id, updated).then(() => handleUpdate(updated));
+    }));
+    showToast('All marked as read', 'blue');
+  };
+
   return (
     <div>
       {/* Sub-nav */}
@@ -399,8 +438,28 @@ export default function EditReviewTab({ project }) {
             </div>
           ) : (
             <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
-                {uploads.length} cut{uploads.length !== 1 ? 's' : ''} submitted
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {uploads.length} cut{uploads.length !== 1 ? 's' : ''} submitted
+                </div>
+                {newFromEditor > 0 && (
+                  <button onClick={markAllRead} style={{ padding: '5px 12px', background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.25)', borderRadius: 8, color: '#4A9EFF', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: MONO }}>
+                    ✓ Mark All Read ({newFromEditor})
+                  </button>
+                )}
+              </div>
+              {/* Version history summary */}
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+                {uploads.map(u => {
+                  const st = STATUS_COLORS[u.status] || STATUS_COLORS.pending_review;
+                  return (
+                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', background: '#111', border: `1px solid ${st.clr}30`, borderRadius: 20 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 10, color: '#E81A1A', fontWeight: 700 }}>{u.version || 'v?'}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: st.clr }}>·</span>
+                      <span style={{ fontFamily: MONO, fontSize: 9, color: st.clr }}>{st.label}</span>
+                    </div>
+                  );
+                })}
               </div>
               {uploads.map(u => (
                 <UploadCard key={u.id} upload={u} onUpdate={handleUpdate} onDelete={() => handleDelete(u.id)} />

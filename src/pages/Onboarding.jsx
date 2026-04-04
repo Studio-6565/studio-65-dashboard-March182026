@@ -35,6 +35,13 @@ const TYPE_INFO = {
     border: 'rgba(123,200,83,0.3)',
     description: 'Gear rental companies, studios, suppliers & service providers.',
   },
+  Editor: {
+    icon: '🎞️',
+    color: '#E81A1A',
+    bg: 'rgba(232,26,26,0.1)',
+    border: 'rgba(232,26,26,0.3)',
+    description: 'Video editors, colorists, motion designers & post-production pros.',
+  },
   Other: {
     icon: '✨',
     color: '#A78BFA',
@@ -78,6 +85,7 @@ export default function Onboarding() {
     client_company: '', client_project_type: '', client_budget: '', client_timeline: '',
     client_how_found: '', client_brief: '',
     vendor_company: '', vendor_offerings: '', vendor_service_area: '', vendor_website: '',
+    editor_software: '', editor_style: '', editor_portfolio: '', editor_rate: '', editor_availability: '',
     other_reason: '',
   });
 
@@ -206,12 +214,14 @@ export default function Onboarding() {
           {contactType === 'Crew' && 'Join the Crew'}
           {contactType === 'Client' && 'Book with Studio 65'}
           {contactType === 'Vendor' && 'Partner with Us'}
+          {contactType === 'Editor' && 'Join as an Editor'}
           {contactType === 'Other' && 'Get in Touch'}
         </div>
         <div style={{ fontSize: 13, color: '#555', marginBottom: 32, lineHeight: 1.6 }}>
           {contactType === 'Crew' && 'Fill out your details and we\'ll review your application. We\'ll be in touch if there\'s a fit.'}
           {contactType === 'Client' && 'Tell us about your project and we\'ll reach out to discuss how we can bring it to life.'}
           {contactType === 'Vendor' && 'Share what you offer and we\'ll add you to our rolodex of trusted partners.'}
+          {contactType === 'Editor' && 'Tell us about your editing style and experience. We\'ll reach out when there\'s a project match.'}
           {contactType === 'Other' && 'Tell us a bit about yourself and why you\'re reaching out.'}
         </div>
 
@@ -310,6 +320,29 @@ export default function Onboarding() {
                 </Field>
                 <Field label="Website">
                   <input style={IS} value={form.vendor_website} onChange={e => set('vendor_website', e.target.value)} placeholder="https://yoursite.com" />
+                </Field>
+              </div>
+            </>
+          )}
+
+          {/* ── Editor-specific ── */}
+          {contactType === 'Editor' && (
+            <>
+              <Field label="Editing Software">
+                <input style={IS} value={form.editor_software} onChange={e => set('editor_software', e.target.value)} placeholder="e.g. Premiere Pro, DaVinci Resolve, Final Cut" />
+              </Field>
+              <Field label="Editing Style">
+                <input style={IS} value={form.editor_style} onChange={e => set('editor_style', e.target.value)} placeholder="e.g. Fast-paced, cinematic, documentary, wedding" />
+              </Field>
+              <Field label="Portfolio / Showreel">
+                <input style={IS} value={form.editor_portfolio} onChange={e => set('editor_portfolio', e.target.value)} placeholder="https://vimeo.com/yourshowreel" />
+              </Field>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
+                <Field label="Day / Project Rate">
+                  <input style={IS} value={form.editor_rate} onChange={e => set('editor_rate', e.target.value)} placeholder="e.g. $300/day or $500/project" />
+                </Field>
+                <Field label="Availability">
+                  <input style={IS} value={form.editor_availability} onChange={e => set('editor_availability', e.target.value)} placeholder="e.g. Weekends, full-time, freelance" />
                 </Field>
               </div>
             </>

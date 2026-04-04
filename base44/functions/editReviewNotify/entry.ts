@@ -4,7 +4,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
-    const { type, project_name, editor_name, version, comment_body, timecode, status } = payload;
+    const { type, project_name, project_id, editor_name, version, comment_body, timecode, status } = payload;
 
     const STUDIO_EMAIL = 'studio65production@gmail.com';
 
@@ -29,6 +29,29 @@ Deno.serve(async (req) => {
           subject: `New Feedback on ${project_name} — ${version}`,
           body: `Hi ${editor_name},\n\nStudio 65 left a comment on your edit for ${project_name} (${version})${timecodeStr}:\n\n"${comment_body}"\n\nLog into the crew portal to view and respond to all feedback.\n\n— Studio 65`,
         });
+      }
+    }
+
+    if (type === 'brief_published') {
+      // Find all editors assigned to this project and notify them
+      const projects = await base44.asServiceRole.entities.Project.filter({ id: project_id });
+      const project = projects[0];
+      if (project) {
+        const editorCrew = (project.crew || []).filter(c => c.email);
+        // Also check contacts with Editor type
+        const editorContacts = await base44.asServiceRole.entities.Contact.list('name', 200);
+        const editors = editorContacts.filter(c => (c.types || []).includes('Editor') && c.email);
+        const allEmails = [...new Set([
+          ...editorCrew.map(c => c.email),
+          ...editors.map(c => c.email),
+        ])];
+        await Promise.all(allEmails.map(email =>
+          base44.asServiceRole.integrations.Core.SendEmail({
+            to: email,
+            subject: `📋 Brief Ready — ${project_name}`,
+            body: `Hi,\n\nStudio 65 has published the edit brief for ${project_name}.\n\nLog into the portal to view director notes, script, style references, and raw footage links.\n\nPortal: ${Deno.env.get('BASE44_APP_URL') || 'https://studio65.base44.app'}/portal\n\n— Studio 65`,
+          })
+        ));
       }
     }
 

@@ -8,6 +8,7 @@ const TYPE_COLORS = {
   Crew: { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B' },
   Client: { bg: 'rgba(74,158,255,0.12)', color: '#4A9EFF' },
   Vendor: { bg: 'rgba(123,200,83,0.12)', color: '#7BC853' },
+  Editor: { bg: 'rgba(232,26,26,0.12)', color: '#E81A1A' },
   Other: { bg: 'rgba(150,150,150,0.12)', color: '#888' },
 };
 
@@ -20,7 +21,7 @@ const WaSvg = () => (
 
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
-const TYPES = ['Crew', 'Client', 'Vendor', 'Other'];
+const TYPES = ['Crew', 'Client', 'Vendor', 'Editor', 'Other'];
 const emptyForm = {
   name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat',
   notes: '', portal_password: '', offerings: [],
@@ -28,6 +29,7 @@ const emptyForm = {
   crew_instagram: '', crew_portfolio: '',
   client_company: '', client_project_type: '', client_budget: '', client_how_found: '',
   vendor_company: '', vendor_service_area: '', vendor_website: '',
+  editor_software: '', editor_style: '', editor_portfolio: '', editor_rate: '', editor_availability: '',
 };
 
 function VendorOfferingsEditor({ offerings, onChange }) {
@@ -152,6 +154,9 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
       client_budget: c.client_budget || '', client_how_found: c.client_how_found || '',
       vendor_company: c.vendor_company || '', vendor_service_area: c.vendor_service_area || '',
       vendor_website: c.vendor_website || '',
+      editor_software: c.editor_software || '', editor_style: c.editor_style || '',
+      editor_portfolio: c.editor_portfolio || '', editor_rate: c.editor_rate || '',
+      editor_availability: c.editor_availability || '',
     });
     setEditingId(c.id);
     setShowForm(true);
@@ -285,8 +290,22 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
               </div>
             )}
 
+            {/* ── Editor fields ── */}
+            {form.types.includes('Editor') && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 14px', background: 'rgba(232,26,26,0.04)', border: '1px solid rgba(232,26,26,0.15)', borderRadius: 10 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#E81A1A', textTransform: 'uppercase', marginBottom: 4 }}>🎞️ Editor Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div><label style={labelStyle}>Software</label><input style={inputStyle} value={form.editor_software} onChange={e => setForm(f => ({ ...f, editor_software: e.target.value }))} placeholder="e.g. Premiere Pro, DaVinci" /></div>
+                  <div><label style={labelStyle}>Editing Style</label><input style={inputStyle} value={form.editor_style} onChange={e => setForm(f => ({ ...f, editor_style: e.target.value }))} placeholder="e.g. Cinematic, fast-paced" /></div>
+                  <div><label style={labelStyle}>Rate</label><input style={inputStyle} value={form.editor_rate} onChange={e => setForm(f => ({ ...f, editor_rate: e.target.value }))} placeholder="e.g. $300/day" /></div>
+                  <div><label style={labelStyle}>Availability</label><input style={inputStyle} value={form.editor_availability} onChange={e => setForm(f => ({ ...f, editor_availability: e.target.value }))} placeholder="e.g. Freelance" /></div>
+                  <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Portfolio / Showreel</label><input style={inputStyle} value={form.editor_portfolio} onChange={e => setForm(f => ({ ...f, editor_portfolio: e.target.value }))} placeholder="https://vimeo.com/..." /></div>
+                </div>
+              </div>
+            )}
+
             {/* ── Other / universal role field if no specific type selected ── */}
-            {!form.types.includes('Crew') && !form.types.includes('Client') && !form.types.includes('Vendor') && (
+            {!form.types.includes('Crew') && !form.types.includes('Client') && !form.types.includes('Vendor') && !form.types.includes('Editor') && (
               <div><label style={labelStyle}>Role</label><input style={inputStyle} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Partner, Collaborator" /></div>
             )}
 
@@ -353,6 +372,15 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                         onClick={e => { e.stopPropagation(); const portal = types.includes('Client') ? 'client-portal' : 'portal'; navigator.clipboard.writeText(`${window.location.origin}/${portal}?code=${c.portal_password}`); }}
                         style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)', color: '#A78BFA', fontSize: 10, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
                       >Copy Link</button>
+                    </div>
+                  )}
+                  {/* Editor profile info on card */}
+                  {types.includes('Editor') && (c.editor_software || c.editor_style || c.editor_portfolio) && (
+                    <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {c.editor_software && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#E81A1A' }}>🎞️ {c.editor_software}</div>}
+                      {c.editor_style && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#888' }}>🎨 {c.editor_style}</div>}
+                      {c.editor_rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#F59E0B' }}>💰 {c.editor_rate}</div>}
+                      {c.editor_portfolio && <a href={c.editor_portfolio} target="_blank" rel="noreferrer" style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF' }}>🎬 Portfolio →</a>}
                     </div>
                   )}
                   {(c.offerings || []).length > 0 && (
