@@ -151,7 +151,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif', overflow: 'hidden', paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <div style={{ display: 'flex', height: '100%', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif', overflow: 'hidden' }}>
       <StudioToast />
 
       {/* ── Left sidebar (desktop only) ── */}
@@ -168,6 +168,7 @@ export default function Dashboard() {
           background: '#0A0A0A',
           userSelect: 'none',
           flexShrink: 0,
+          paddingTop: 'env(safe-area-inset-top, 0px)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, height: 52, padding: '0 16px' }}>
             {isDetailPage ? (
@@ -208,7 +209,7 @@ export default function Dashboard() {
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
           padding: '20px 16px',
-          paddingBottom: 'calc(70px + env(safe-area-inset-bottom))',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 20px))',
         }}>
           <Routes>
             <Route index element={<Navigate to="/projects" replace />} />

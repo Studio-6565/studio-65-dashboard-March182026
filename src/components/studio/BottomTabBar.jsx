@@ -110,7 +110,7 @@ export default function BottomTabBar() {
         borderTop: '1px solid #1E1E1E',
         display: 'flex',
         alignItems: 'stretch',
-        paddingBottom: 0,
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
         userSelect: 'none',
       }}>
         {PRIMARY_TABS.map(t => {
