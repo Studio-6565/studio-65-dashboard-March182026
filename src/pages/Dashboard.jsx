@@ -165,9 +165,7 @@ export default function Dashboard() {
         {/* Mobile top bar */}
         <header className="mobile-header" style={{
           borderBottom: '1px solid #1E1E1E',
-          background: 'rgba(10,10,10,0.97)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+          background: '#0A0A0A',
           paddingTop: 'env(safe-area-inset-top)',
           userSelect: 'none',
           flexShrink: 0,
@@ -210,8 +208,8 @@ export default function Dashboard() {
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 24px',
-          paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+          padding: '20px 16px',
+          paddingBottom: 'calc(70px + env(safe-area-inset-bottom))',
         }}>
           <Routes>
             <Route index element={<Navigate to="/projects" replace />} />
