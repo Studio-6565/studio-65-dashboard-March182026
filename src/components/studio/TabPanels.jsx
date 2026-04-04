@@ -10,6 +10,7 @@ import StatsBar from './StatsBar';
 import UpcomingReminders from './UpcomingReminders';
 import ProjectCard from './ProjectCard';
 import BottomSheet from './BottomSheet';
+import PaymentDeadlines from './PaymentDeadlines';
 import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import ContractsPage from '@/pages/ContractsPage';
@@ -97,6 +98,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
       <MorningTaskList />
       <TodaysShoots projects={projects} onOpenDetail={onOpenDetail} />
+      <PaymentDeadlines projects={projects} />
       <UpcomingReminders projects={projects} />
       <AISmartNudges projects={projects} />
       <RevenueGoal projects={projects} />

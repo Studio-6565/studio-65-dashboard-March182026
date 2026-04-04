@@ -147,6 +147,11 @@
           },
           "portal_note": {
             "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Payment due date for this crew member"
           }
         }
       }
@@ -173,6 +178,11 @@
           },
           "paid": {
             "type": "boolean"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Payment due date for this rental"
           }
         }
       }
