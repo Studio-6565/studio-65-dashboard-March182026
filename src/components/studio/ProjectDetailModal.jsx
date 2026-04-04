@@ -11,6 +11,7 @@ import CrewRatingsTab from './tabs/CrewRatingsTab';
 import ExpensesTab from './tabs/ExpensesTab';
 import InvoiceGenerator from './InvoiceGenerator';
 import ProjectChat from './ProjectChat';
+import ProjectAIActions from './ProjectAIActions';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -287,6 +288,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
       <div style={{ display: 'flex', gap: 2, marginBottom: 20, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {tabs.map(t => <DetailTab key={t} label={t.charAt(0).toUpperCase() + t.slice(1)} active={tab === t} onClick={() => setTab(t)} />)}
       </div>
+
+      {/* AI Actions */}
+      <ProjectAIActions project={p} contacts={contacts} tab={tab} />
 
       {/* Overview */}
       {tab === 'overview' && (

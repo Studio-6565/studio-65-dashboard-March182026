@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import StudioModal from './StudioModal';
 import { fmt, nextProjectId } from '@/lib/studio';
+import { base44 } from '@/api/base44Client';
 
 const STEPS = [
   { key: 'basics',      label: 'Basic Info',           icon: '🎬' },
@@ -37,6 +38,8 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
   const [revenue, setRevenue]       = useState('');
   const [crewCost, setCrewCost]     = useState('');
   const [rentalCost, setRentalCost] = useState('');
+  const [aiPriceSuggestion, setAiPriceSuggestion] = useState(null);
+  const [aiPriceLoading, setAiPriceLoading] = useState(false);
 
   // Step 4 — crew
   const [crew, setCrew]         = useState([]);
@@ -218,6 +221,35 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
           <div style={{ padding: '14px 16px', background: 'rgba(123,200,83,0.05)', border: '1px solid rgba(123,200,83,0.15)', borderRadius: 10, fontSize: 13, color: '#aaa', lineHeight: 1.6 }}>
             💰 Set your revenue and expected costs to track profitability from day one.
           </div>
+          {/* AI Pricing Suggestion */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(232,26,26,0.05)', border: '1px solid rgba(232,26,26,0.15)', borderRadius: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13 }}>✦</span>
+            <span style={{ fontSize: 12, color: '#888', flex: 1 }}>Not sure what to charge?</span>
+            <button
+              type="button"
+              disabled={aiPriceLoading || !name}
+              onClick={async () => {
+                setAiPriceLoading(true);
+                const ctx = projects.filter(p => p.revenue > 0).slice(0, 20).map(p => `- ${p.name} (${p.client}): $${p.revenue}, Net $${p.net}`).join('\n');
+                const res = await base44.functions.invoke('studioAgents', {
+                  agent: 'pricing',
+                  prompt: `Suggest a pricing range for this new project:\nName: ${name}\nClient: ${client}\nDate: ${date}\nAddress: ${address || 'TBD'}\nNotes: ${notes || 'None'}`,
+                  context: `PAST PROJECT PRICING DATA:\n${ctx || 'No past data.'}`,
+                });
+                setAiPriceSuggestion(res.data?.result || 'No response.');
+                setAiPriceLoading(false);
+              }}
+              style={{ padding: '6px 14px', background: aiPriceLoading ? '#222' : 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 20, color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
+            >
+              {aiPriceLoading ? '⏳ Loading...' : 'Get AI Suggestion →'}
+            </button>
+          </div>
+          {aiPriceSuggestion && (
+            <div style={{ padding: '12px 14px', background: '#111', border: '1px solid rgba(232,26,26,0.2)', borderLeft: '3px solid #E81A1A', borderRadius: 10, fontSize: 12, color: '#ccc', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#E81A1A', marginBottom: 6, textTransform: 'uppercase' }}>✦ AI PRICING SUGGESTION</div>
+              {aiPriceSuggestion}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             <div>
               <label style={LS}>Revenue ($)</label>

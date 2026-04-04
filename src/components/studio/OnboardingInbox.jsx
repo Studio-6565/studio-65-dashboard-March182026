@@ -2,6 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 
+async function screenWithAI(req) {
+  const fields = [
+    req.contact_type === 'Crew' ? `Skills: ${req.crew_skills || 'N/A'}, Experience: ${req.crew_experience || 'N/A'}, Rate: ${req.crew_rate || 'N/A'}, Equipment: ${req.crew_equipment || 'N/A'}` : null,
+    req.contact_type === 'Client' ? `Company: ${req.client_company || 'N/A'}, Project: ${req.client_project_type || 'N/A'}, Budget: ${req.client_budget || 'N/A'}, Brief: ${req.client_brief || 'N/A'}` : null,
+    req.contact_type === 'Vendor' ? `Company: ${req.vendor_company || 'N/A'}, Offerings: ${req.vendor_offerings || 'N/A'}, Area: ${req.vendor_service_area || 'N/A'}` : null,
+  ].filter(Boolean).join('\n');
+  const res = await base44.functions.invoke('studioAgents', {
+    agent: 'onboardingScreener',
+    prompt: `Review this ${req.contact_type} applicant and give a hiring/approval recommendation. Be concise and direct.\n\nName: ${req.name}\nEmail: ${req.email}\nPhone: ${req.phone || 'N/A'}\nRole: ${req.role || 'N/A'}\n${fields}\nNotes: ${req.notes || 'None'}`,
+    context: '',
+  });
+  return res.data?.result || 'No response.';
+}
+
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LS = { fontSize: 10, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: MONO, marginBottom: 4, display: 'block' };
@@ -25,6 +39,44 @@ function DetailRow({ label, value }) {
       <span style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase' }}>{label}</span>
       <span style={{ fontSize: 13, color: '#ddd', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{value}</span>
     </div>
+  );
+}
+
+function AIScreenButton({ req }) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleScreen = async (e) => {
+    e.stopPropagation();
+    setLoading(true);
+    const text = await screenWithAI(req);
+    setLoading(false);
+    setResult(text);
+  };
+
+  return (
+    <>
+      <button
+        onClick={handleScreen}
+        disabled={loading}
+        style={{ padding: '11px 14px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.2)', borderRadius: 10, color: '#E81A1A', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: MONO, whiteSpace: 'nowrap' }}
+      >
+        {loading ? '⏳ Screening...' : '✦ AI Screen'}
+      </button>
+      {result && (
+        <div onClick={() => setResult(null)} style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 600, background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px 20px 0 0', maxHeight: '75vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 16 }}>🔍</span>
+              <div style={{ flex: 1, fontSize: 14, fontWeight: 800 }}>AI Screening — {req.name}</div>
+              <button onClick={() => { navigator.clipboard.writeText(result); }} style={{ padding: '5px 10px', background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 6, color: '#4A9EFF', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: MONO }}>📋 Copy</button>
+              <button onClick={() => setResult(null)} style={{ background: 'none', border: 'none', color: '#555', fontSize: 20, cursor: 'pointer' }}>×</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: 18, fontSize: 13, color: '#ddd', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>{result}</div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -163,6 +215,7 @@ function RequestCard({ req, onUpdate, onApprove, onDeny }) {
                   <button onClick={handleApprove} disabled={saving} style={{ flex: 1, padding: '11px 0', background: '#7BC853', border: 'none', borderRadius: 10, color: '#000', fontSize: 13, fontWeight: 800, cursor: 'pointer', minWidth: 100 }}>✓ Approve & Add</button>
                   <button onClick={() => setEditing(true)} style={{ padding: '11px 16px', background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.25)', borderRadius: 10, color: '#4A9EFF', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✏ Edit</button>
                   <button onClick={handleDeny} disabled={saving} style={{ padding: '11px 16px', background: 'rgba(232,26,26,0.12)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 10, color: '#E81A1A', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✗ Deny</button>
+                  <AIScreenButton req={req} />
                 </div>
               )}
               {req.status === 'approved' && (
