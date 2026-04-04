@@ -32,18 +32,6 @@ function LoginScreen({ onLogin }) {
     }
   }, []);
 
-  const loadContactProjects = async (c) => {
-    const allProjects = await base44.entities.Project.list('-date', 200);
-    const isEditor = (c.types || []).includes('Editor');
-    const myProjects  = allProjects.filter(p => {
-      const inCrew    = (p.crew || []).some(m => m.name.toLowerCase() === c.name.toLowerCase());
-      const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === c.name.toLowerCase());
-      // Editors see all projects they are assigned to as crew, OR all active projects if editor type
-      return inCrew || inRentals || isEditor;
-    });
-    return myProjects;
-  };
-
   // Biometric login handler
   const handleBiometricLogin = async () => {
     setBioChecking(true); setError('');
@@ -82,18 +70,11 @@ function LoginScreen({ onLogin }) {
     if (!password.trim()) return;
     setLoading(true); setError('');
     try {
-      const contacts = await base44.entities.Contact.filter({ portal_password: password.trim() });
-      if (!contacts.length) {
-        setError('Invalid code. Please check with Studio 65.');
-        setLoading(false); return;
-      }
-      // Accept any contact regardless of type — crew, vendor, or multi-role
-      const c = contacts[0];
-      const myProjects = await loadContactProjects(c);
-      onLogin(c, myProjects);
+      const res = await base44.functions.invoke('portalAuth', { action: 'login_by_code', portal_password: password.trim() });
+      onLogin(res.data.contact, res.data.projects);
     } catch (err) {
       console.error('Login error:', err);
-      setError('Login failed: ' + (err?.message || 'Unknown error'));
+      setError(err.response?.data?.error || 'Login failed: ' + (err?.message || 'Unknown error'));
     }
     setLoading(false);
   };
@@ -104,12 +85,8 @@ function LoginScreen({ onLogin }) {
     if (!email.trim()) return;
     setLoading(true); setError('');
     try {
-      const contacts = await base44.entities.Contact.filter({ email: email.trim().toLowerCase() });
-      if (!contacts.length) {
-        setError('No account found with that email. Please check with Studio 65.');
-        setLoading(false); return;
-      }
-      const c = contacts[0];
+      const res = await base44.functions.invoke('portalAuth', { action: 'check_email', email: email.trim().toLowerCase() });
+      const c = res.data.contact;
       // Generate a 6-digit OTP
       const code = String(Math.floor(100000 + Math.random() * 900000));
       const expires = Date.now() + 10 * 60 * 1000; // 10 min
@@ -124,7 +101,7 @@ function LoginScreen({ onLogin }) {
       setOtpSent(true);
     } catch (err) {
       console.error('Email send error:', err);
-      setError('Failed to send code: ' + (err?.message || 'Unknown error'));
+      setError(err.response?.data?.error || 'Failed to send code: ' + (err?.message || 'Unknown error'));
     }
     setLoading(false);
   };
@@ -145,8 +122,8 @@ function LoginScreen({ onLogin }) {
     }
     setLoading(true);
     try {
-      const myProjects = await loadContactProjects(pendingContact);
-      onLogin(pendingContact, myProjects);
+      const res = await base44.functions.invoke('portalAuth', { action: 'login_by_otp', email: pendingContact.email });
+      onLogin(res.data.contact, res.data.projects);
     } catch (err) {
       setError('Login failed. Please try again.');
     }
