@@ -143,14 +143,18 @@ export default function Onboarding() {
             }}>
               🎥 Crew / Client Portal Login →
             </a>
-            <a href="/admin-login" onClick={e => { e.preventDefault(); base44.auth.redirectToLogin('/projects'); }} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '16px 20px', borderRadius: 14, textDecoration: 'none',
-              background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)',
-              color: '#E81A1A', fontSize: 15, fontWeight: 700,
-            }}>
+            <button
+              onClick={() => base44.auth.redirectToLogin('/projects')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '16px 20px', borderRadius: 14, cursor: 'pointer',
+                background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)',
+                color: '#E81A1A', fontSize: 15, fontWeight: 700,
+                width: '100%', fontFamily: 'Syne, sans-serif',
+              }}
+            >
               🔐 Admin Dashboard Login →
-            </a>
+            </button>
           </div>
         </div>
       </div>
