@@ -19,6 +19,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import AISmartNudges from './AISmartNudges';
+import RevenueGoal from './RevenueGoal';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -94,6 +95,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, containerRef, isR
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
       <UpcomingReminders projects={projects} />
       <AISmartNudges projects={projects} />
+      <RevenueGoal projects={projects} />
       <StatsBar projects={projects} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <input

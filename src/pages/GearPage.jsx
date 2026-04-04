@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import BottomSheet from '@/components/studio/BottomSheet';
 import ShootKits from '@/components/gear/ShootKits';
+import GearCalendar from '@/components/gear/GearCalendar';
 import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package, Download } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
@@ -17,7 +18,7 @@ const CAT_ICON = { Camera, Lens: Eye, Audio: Mic2, Lighting: Lightbulb, Drone: R
 const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', vendor_contact_id: '', purchase_date: '', purchase_price: '', notes: '' };
 
 export default function GearPage() {
-  const [tab, setTab] = useState('inventory');
+  const [tab, setTab] = useState('inventory'); // 'inventory' | 'kits' | 'calendar'
   const [gear, setGear] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -144,16 +145,28 @@ export default function GearPage() {
     <div style={{ color: '#444', padding: 60, textAlign: 'center', fontFamily: MONO, fontSize: 11 }}>Loading inventory...</div>
   );
 
+  const TAB_BAR = (
+    <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
+      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Availability' }].map(t => (
+        <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+      ))}
+    </div>
+  );
+
   if (tab === 'kits') {
     return (
       <div style={{ paddingBottom: 40 }}>
-        {/* Tab bar */}
-        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
-          {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
-          ))}
-        </div>
+        {TAB_BAR}
         <ShootKits gear={gear} />
+      </div>
+    );
+  }
+
+  if (tab === 'calendar') {
+    return (
+      <div style={{ paddingBottom: 40 }}>
+        {TAB_BAR}
+        <GearCalendar gear={activeGear} />
       </div>
     );
   }
@@ -161,12 +174,7 @@ export default function GearPage() {
   return (
     <div style={{ paddingBottom: 40 }}>
 
-      {/* Tab bar */}
-      <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 20, width: 'fit-content' }}>
-        {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
-        ))}
-      </div>
+      {TAB_BAR}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, gap: 12 }}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
 import ProjectStatusNudge from './ProjectStatusNudge';
 
@@ -13,7 +13,7 @@ const StatusTag = ({ status }) => {
   );
 };
 
-export default function ProjectCard({ project: p, onClick }) {
+export default function ProjectCard({ project: p, onClick, onMarkPaid }) {
   const del = p.deliverables || [];
   const done = del.filter(d => d.done).length;
   const pct = del.length ? (done / del.length * 100) : 0;
@@ -21,17 +21,58 @@ export default function ProjectCard({ project: p, onClick }) {
   const totalHrs = (p.hours || []).reduce((s, h) => s + h.hours, 0);
   const m = margin(p);
 
+  // Swipe state
+  const touchStartX = useRef(null);
+  const [swipeX, setSwipeX] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const SWIPE_THRESHOLD = 80;
+
+  const onTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    setSwiping(true);
+  };
+  const onTouchMove = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    setSwipeX(Math.max(-120, Math.min(0, dx)));
+  };
+  const onTouchEnd = () => {
+    if (swipeX < -SWIPE_THRESHOLD && onMarkPaid) {
+      onMarkPaid(p);
+    }
+    setSwipeX(0);
+    setSwiping(false);
+    touchStartX.current = null;
+  };
+
   return (
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
+      {/* Swipe action reveal */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, bottom: 0, width: 100,
+        background: p.paid ? 'rgba(232,26,26,0.8)' : 'rgba(123,200,83,0.9)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        borderRadius: '0 12px 12px 0',
+        flexDirection: 'column', gap: 4,
+      }}>
+        <span style={{ fontSize: 20 }}>{p.paid ? '✗' : '✓'}</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', fontFamily: '"DM Mono", monospace' }}>{p.paid ? 'Unpaid' : 'Mark Paid'}</span>
+      </div>
+
     <div
-      onClick={onClick}
+      onClick={() => { if (Math.abs(swipeX) < 10) onClick(); }}
       className="group"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
       style={{
         background: '#1E1E1E', border: '1px solid #333', borderRadius: 12,
         padding: 18, cursor: 'pointer', position: 'relative', overflow: 'hidden',
-        transition: 'border-color 0.2s, transform 0.15s',
+        transform: `translateX(${swipeX}px)`,
+        transition: swiping ? 'none' : 'transform 0.25s ease, border-color 0.2s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = '#555'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.transform = 'translateY(0)'; }}
+      onMouseEnter={e => { if (!swiping) { e.currentTarget.style.borderColor = '#555'; } }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = '#333'; }}
     >
       {/* Red accent top bar on hover */}
       <div className="group-hover:opacity-100" style={{
@@ -93,6 +134,7 @@ export default function ProjectCard({ project: p, onClick }) {
 
       {/* Status nudge */}
       <ProjectStatusNudge project={p} onClick={onClick} />
+    </div>
     </div>
   );
 }

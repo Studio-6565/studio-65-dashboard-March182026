@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import SignaturePad from '@/components/studio/SignaturePad';
 
 const MONO = '"DM Mono", monospace';
 
@@ -65,16 +66,13 @@ function ContractViewer({ contract, onSign, onDecline, onBack }) {
       {canAct && (
         <div style={{ background: '#1A1A1A', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 14, padding: '20px' }}>
           <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>✍️ Your Signature Required</div>
-          <div style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>By typing your full name and clicking "Sign", you agree to the terms above.</div>
+          <div style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>Sign below — draw your signature or type your name. Either is legally binding.</div>
 
           {!showDecline ? (
             <>
-              <input
-                value={signName}
-                onChange={e => setSignName(e.target.value)}
-                placeholder="Type your full legal name to sign..."
-                style={{ background: '#111', border: '1px solid #333', borderRadius: 10, padding: '12px 14px', color: '#fff', fontSize: 14, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', marginBottom: 12, boxSizing: 'border-box' }}
-              />
+              <div style={{ marginBottom: 12 }}>
+                <SignaturePad value={signName} onChange={setSignName} />
+              </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button
                   onClick={handleSign}

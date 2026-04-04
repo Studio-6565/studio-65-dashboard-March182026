@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
+import { useTheme } from '@/hooks/useTheme';
 
 const MONO = '"DM Mono", monospace';
 
@@ -75,6 +76,7 @@ const PLAN_FEATURES = {
 };
 
 export default function SettingsPage({ onDeleteAccount }) {
+  const { theme, setTheme } = useTheme();
   const [user, setUser] = useState(null);
   const [studioName, setStudioName] = useState('Studio 65');
   const [studioEmail, setStudioEmail] = useState('studio65production@gmail.com');
@@ -211,6 +213,27 @@ export default function SettingsPage({ onDeleteAccount }) {
             </div>
           </Row>
         ))}
+      </Section>
+
+      {/* Appearance */}
+      <Section title="Appearance">
+        <Row label="Theme" hint="Switch between dark and light mode">
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[{ key: 'dark', label: '🌙 Dark' }, { key: 'light', label: '☀️ Light' }].map(t => (
+              <button
+                key={t.key}
+                onClick={() => setTheme(t.key)}
+                style={{
+                  padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  border: `1px solid ${theme === t.key ? 'rgba(232,26,26,0.5)' : '#2A2A2A'}`,
+                  background: theme === t.key ? 'rgba(232,26,26,0.1)' : '#111',
+                  color: theme === t.key ? '#E81A1A' : '#555',
+                  fontFamily: MONO,
+                }}
+              >{t.label}</button>
+            ))}
+          </div>
+        </Row>
       </Section>
 
       {/* Notifications */}

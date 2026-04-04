@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SignaturePad from '@/components/studio/SignaturePad';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 10, padding: '11px 14px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
