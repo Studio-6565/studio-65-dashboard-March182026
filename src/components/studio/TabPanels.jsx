@@ -139,9 +139,11 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, alignItems: 'stretch' }}>
           {filtered.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} onMarkPaid={onMarkPaid} />
+            <div key={p.id} style={{ display: 'flex', flexDirection: 'column' }}>
+              <ProjectCard project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} onMarkPaid={onMarkPaid} />
+            </div>
           ))}
         </div>
       )}

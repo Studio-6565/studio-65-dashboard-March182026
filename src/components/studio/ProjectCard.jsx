@@ -63,7 +63,7 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
   };
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12, height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Swipe action reveal */}
       <div style={{
         position: 'absolute', right: 0, top: 0, bottom: 0, width: 100,
@@ -87,6 +87,7 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
         padding: 18, cursor: 'pointer', position: 'relative', overflow: 'hidden',
         transform: `translateX(${swipeX}px)`,
         transition: swiping ? 'none' : 'transform 0.25s ease, border-color 0.2s',
+        display: 'flex', flexDirection: 'column', height: '100%',
       }}
       onMouseEnter={e => { if (!swiping) { e.currentTarget.style.borderColor = '#555'; } }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = '#333'; }}
@@ -151,8 +152,8 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
         ))}
       </div>
 
-      {/* Bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      {/* Bottom — grows to push status nudge down */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flex: 1 }}>
         <div style={{ flex: 1, marginRight: 12 }}>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginBottom: 4 }}>Deliverables — {done}/{del.length} done</div>
           <div style={{ height: 3, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
@@ -165,7 +166,7 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
         </div>
       </div>
 
-      {/* Status nudge */}
+      {/* Status nudge — stays at bottom */}
       <ProjectStatusNudge project={p} onClick={onClick} />
     </div>
     </div>
