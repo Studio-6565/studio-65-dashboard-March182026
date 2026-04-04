@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useHaptic } from '@/hooks/useHaptic';
-import { Film, Calendar, Clipboard, Sparkles, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Mail, Settings } from 'lucide-react';
+import { Film, Calendar, Clipboard, Mail, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Settings } from 'lucide-react';
 
 // Primary tabs — always visible
 const PRIMARY_TABS = [
   { path: '/projects',  Icon: Film, label: 'Projects' },
   { path: '/calendar',  Icon: Calendar, label: 'Calendar' },
   { path: '/contacts',  Icon: Clipboard, label: 'Contacts' },
-  { path: '/agents',    Icon: Sparkles, label: 'AI', ai: true },
+  { path: '/inbox',     Icon: Mail, label: 'Inbox' },
 ];
 
 // Secondary tabs — appear in the "More" drawer
@@ -17,9 +17,8 @@ const MORE_TABS = [
   { path: '/crew',       Icon: Users, label: 'Crew Spend' },
   { path: '/timeline',   Icon: Clock, label: 'Timeline' },
   { path: '/gear',       Icon: Backpack, label: 'Gear' },
-  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
   { path: '/contracts',  Icon: FileText, label: 'Contracts' },
-  { path: '/inbox',      Icon: Mail, label: 'Inbox' },
+  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
   { path: '/settings',   Icon: Settings, label: 'Settings' },
 ];
 

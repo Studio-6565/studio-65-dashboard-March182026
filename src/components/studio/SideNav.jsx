@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, Sparkles } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
 const NAV_ITEMS = [
@@ -13,12 +13,10 @@ const NAV_ITEMS = [
   { path: '/contacts',   Icon: Clipboard, label: 'Contacts' },
   { path: '/inbox',      Icon: Mail, label: 'Inbox' },
   { path: '/gear',       Icon: Backpack, label: 'Gear' },
-  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
   { path: '/contracts',  Icon: FileText, label: 'Contracts' },
+  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
   { path: '/settings',   Icon: Settings, label: 'Settings' },
 ];
-
-const AI_ITEM = { path: '/agents', Icon: Sparkles, label: 'AI Agents' };
 
 export default function SideNav({ onNewProject, projects, contacts }) {
   const location = useLocation();
@@ -150,40 +148,7 @@ export default function SideNav({ onNewProject, projects, contacts }) {
           );
         })}
 
-        {/* Divider before AI */}
-        <div style={{ height: 1, background: '#1A1A1A', margin: '8px 4px' }} />
 
-        {/* AI Agents */}
-        {(() => {
-          const active = isActive(AI_ITEM.path);
-          return (
-            <Link to={AI_ITEM.path} style={{ textDecoration: 'none' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: collapsed ? '10px 0' : '9px 12px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 8,
-                cursor: 'pointer',
-                background: active ? 'rgba(232,26,26,0.08)' : 'transparent',
-                borderLeft: active ? '2px solid #E81A1A' : '2px solid transparent',
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#161616'; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-              >
-                <AI_ITEM.Icon size={18} color="#E81A1A" strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                {!collapsed && (
-                  <span style={{
-                    fontSize: 13, fontWeight: active ? 700 : 500,
-                    color: active ? '#E81A1A' : '#555',
-                    whiteSpace: 'nowrap',
-                  }}>{AI_ITEM.label}</span>
-                )}
-              </div>
-            </Link>
-          );
-        })()}
       </nav>
 
       {/* Bottom: sign out */}
