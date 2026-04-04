@@ -13,6 +13,16 @@ import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 
+const UnauthenticatedApp = () => {
+  return (
+    <Routes>
+      <Route path="/portal" element={<Portal />} />
+      <Route path="/client-portal" element={<ClientPortal />} />
+      <Route path="*" element={<Onboarding />} />
+    </Routes>
+  );
+};
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
 
@@ -25,14 +35,17 @@ const AuthenticatedApp = () => {
     );
   }
 
+  // Portal and client portal are public, always accessible
+  if (window.location.pathname.startsWith('/portal') || window.location.pathname.startsWith('/client-portal')) {
+    return <UnauthenticatedApp />;
+  }
+
   // Handle authentication errors — only send non-admins to onboarding
   if (authError && (authError.type === 'user_not_registered' || authError.type === 'auth_required')) {
     // If user is admin, let them access the dashboard
     if (user?.role === 'admin') {
       return (
         <Routes>
-          <Route path="/portal" element={<Portal />} />
-          <Route path="/client-portal" element={<ClientPortal />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/" element={<Navigate to="/projects" replace />} />
           <Route path="/*" element={<Dashboard />} />
@@ -42,8 +55,6 @@ const AuthenticatedApp = () => {
     // Non-admins go to onboarding
     return (
       <Routes>
-        <Route path="/portal" element={<Portal />} />
-        <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="*" element={<Onboarding />} />
       </Routes>
     );
@@ -52,8 +63,6 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/portal" element={<Portal />} />
-      <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/leads" element={<LeadsPage />} />
