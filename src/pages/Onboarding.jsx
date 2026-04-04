@@ -134,8 +134,23 @@ export default function Onboarding() {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 24, fontSize: 12, color: '#444', fontFamily: MONO }}>
-            Admin? <a href="/admin-login" style={{ color: '#E81A1A', textDecoration: 'none', fontWeight: 700 }}>Log in to dashboard</a> · Crew/Client? <a href="/portal" style={{ color: '#4A9EFF', textDecoration: 'none' }}>Log in to portal →</a>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28 }}>
+            <a href="/portal" style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '16px 20px', borderRadius: 14, textDecoration: 'none',
+              background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.3)',
+              color: '#4A9EFF', fontSize: 15, fontWeight: 700,
+            }}>
+              🎥 Crew / Client Portal Login →
+            </a>
+            <a href="/admin-login" onClick={e => { e.preventDefault(); base44.auth.redirectToLogin('/projects'); }} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '16px 20px', borderRadius: 14, textDecoration: 'none',
+              background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.25)',
+              color: '#E81A1A', fontSize: 15, fontWeight: 700,
+            }}>
+              🔐 Admin Dashboard Login →
+            </a>
           </div>
         </div>
       </div>
