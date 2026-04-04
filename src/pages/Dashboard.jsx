@@ -166,7 +166,8 @@ export default function Dashboard() {
         <header className="mobile-header" style={{
           borderBottom: '1px solid #1E1E1E',
           background: '#0A0A0A',
-          paddingTop: 'env(safe-area-inset-top)',
+          marginTop: 0,
+          paddingTop: 'env(safe-area-inset-top, 0px)',
           userSelect: 'none',
           flexShrink: 0,
         }}>

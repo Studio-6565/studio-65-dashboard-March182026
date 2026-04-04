@@ -106,13 +106,11 @@ export default function BottomTabBar() {
       <nav data-bottom-tab="true" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         zIndex: 200,
-        background: 'rgba(10,10,10,0.98)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        background: '#0A0A0A',
         borderTop: '1px solid #1E1E1E',
         display: 'flex',
         alignItems: 'stretch',
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         userSelect: 'none',
       }}>
         {PRIMARY_TABS.map(t => {
