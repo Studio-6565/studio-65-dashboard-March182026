@@ -100,8 +100,8 @@ function LoginScreen({ onLogin }) {
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 64, display: 'block', margin: '0 auto 12px' }} />
-          <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Crew Portal</div>
-          <div style={{ fontSize: 13, color: '#555' }}>Your shoots, schedule & pay — all in one place</div>
+          <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>Crew Portal</div>
+          <div style={{ fontSize: 16, color: '#555' }}>Your shoots, schedule & pay — all in one place</div>
         </div>
 
         {/* Mode toggle */}
@@ -566,7 +566,7 @@ export default function Portal() {
         </div>
 
         {/* Tab bar */}
-        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
+        <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24 }}>
           {[{ key: 'projects', label: 'Projects', Icon: FilesIcon }, { key: 'contracts', label: 'Contracts', Icon: FilesIcon }].map(t => (
             <button key={t.key} onClick={() => setCrewTab(t.key)} style={{ padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: crewTab === t.key ? '#E81A1A' : 'transparent', color: crewTab === t.key ? '#fff' : '#666', display: 'flex', alignItems: 'center', gap: 6 }}>
               <t.Icon size={14} color={crewTab === t.key ? '#fff' : '#666'} strokeWidth={2} />

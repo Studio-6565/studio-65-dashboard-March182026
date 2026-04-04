@@ -295,7 +295,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
       {/* Overview */}
       {tab === 'overview' && (
         <div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8, marginBottom: 16 }}>
             {[['Revenue', fmt(p.revenue), ''], ['Crew', fmt(p.crew_cost), '#E81A1A'], ['Rental', fmt(p.rental_cost), ''], ['Net', fmt(p.net), '#7BC853']].map(([l, v, c]) => (
               <div key={l} style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>{l}</div>
@@ -340,7 +340,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
               }}>{p.paid ? 'Mark Unpaid' : 'Mark Paid'}</button>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
             <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
               <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Crew Owed</div>
               <div style={{ fontSize: 16, fontWeight: 700, color: cOwed > 0 ? '#E81A1A' : '#7BC853' }}>{fmt(cOwed)}</div>
@@ -572,7 +572,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
             </div>
           )}
           <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px,1fr))', gap: 10, marginBottom: 10 }}>
               {[['Equipment', 'equipment', 'e.g. Camera', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text'], ['Cost ($)', 'cost', '0', 'number']].map(([l, k, ph, type]) => (
                 <div key={k}>
                   <label style={LL}>{l}</label>
@@ -664,7 +664,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
           </div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10, marginTop: 16 }}>Log New Entry</div>
           <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 10, alignItems: 'end', marginBottom: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px,1fr))', gap: 10, alignItems: 'end', marginBottom: 10 }}>
               {[['Description', 'desc', 'e.g. On-site shoot', 'text'], ['Person', 'person', 'e.g. Rathan', 'text'], ['Hours', 'hours', '4', 'number']].map(([l, k, ph, type]) => (
                 <div key={k}>
                   <label style={LL}>{l}</label>

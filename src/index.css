@@ -156,6 +156,36 @@
   .md-nav { display: block !important; }
 }
 
+/* ── Mobile responsiveness ── */
+@media (max-width: 767px) {
+  /* Ensure no content overflows horizontally */
+  body { overflow-x: hidden; }
+
+  /* Stack fixed multi-column grids vertically */
+  [style*="grid-template-columns: 1fr 1fr 1fr 1fr"],
+  [style*="grid-template-columns: repeat(4,1fr)"],
+  [style*="grid-template-columns: 1fr 1fr 1fr auto"],
+  [style*="grid-template-columns: 1fr 1fr auto"],
+  [style*="gridTemplateColumns: '1fr 1fr 1fr 1fr'"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Full-width containers on mobile */
+  [style*="maxWidth: 680"],
+  [style*="maxWidth: 720"],
+  [style*="max-width: 680"],
+  [style*="max-width: 720"] {
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Minimum font sizes for readability */
+  p, span, div, label, input, textarea, select, button {
+    font-size: max(var(--font-size, 1em), 16px);
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--studio-charcoal); }

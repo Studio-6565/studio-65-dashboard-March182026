@@ -218,7 +218,7 @@ export default function Onboarding() {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
           {/* ── Universal fields ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
             <div style={{ gridColumn: '1/-1' }}>
               <Field label="Full Name *">
                 <input style={IS} required value={form.name} onChange={e => set('name', e.target.value)} placeholder="Your full name" autoFocus />
@@ -249,7 +249,7 @@ export default function Onboarding() {
               <Field label="Gear You Own">
                 <textarea style={{ ...TA, minHeight: 70 }} rows={3} value={form.crew_equipment} onChange={e => set('crew_equipment', e.target.value)} placeholder="List your main equipment (cameras, lenses, accessories...)" />
               </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
                 <Field label="Availability">
                   <input style={IS} value={form.crew_availability} onChange={e => set('crew_availability', e.target.value)} placeholder="e.g. Weekends, weekdays" />
                 </Field>
@@ -281,7 +281,7 @@ export default function Onboarding() {
               <Field label="Project Brief">
                 <textarea style={{ ...TA, minHeight: 90 }} rows={4} value={form.client_brief} onChange={e => set('client_brief', e.target.value)} placeholder="Describe your project, goals, style references, audience..." />
               </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
                 <Field label="Estimated Budget">
                   <input style={IS} value={form.client_budget} onChange={e => set('client_budget', e.target.value)} placeholder="e.g. $2,000–$5,000" />
                 </Field>
@@ -304,7 +304,7 @@ export default function Onboarding() {
               <Field label="What Do You Offer?">
                 <textarea style={{ ...TA, minHeight: 80 }} rows={3} value={form.vendor_offerings} onChange={e => set('vendor_offerings', e.target.value)} placeholder="List gear, services, studio space, etc. with rough pricing if possible..." />
               </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
                 <Field label="Service Area">
                   <input style={IS} value={form.vendor_service_area} onChange={e => set('vendor_service_area', e.target.value)} placeholder="e.g. GTA, Toronto" />
                 </Field>
