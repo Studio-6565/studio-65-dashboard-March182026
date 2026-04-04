@@ -42,6 +42,13 @@ const TYPE_INFO = {
     border: 'rgba(232,26,26,0.3)',
     description: 'Video editors, colorists, motion designers & post-production pros.',
   },
+  Director: {
+    icon: '🎬',
+    color: '#F59E0B',
+    bg: 'rgba(245,158,11,0.1)',
+    border: 'rgba(245,158,11,0.3)',
+    description: 'Directors, producers, production managers & creative leads.',
+  },
   Other: {
     icon: '✨',
     color: '#A78BFA',
@@ -86,6 +93,7 @@ export default function Onboarding() {
     client_how_found: '', client_brief: '',
     vendor_company: '', vendor_offerings: '', vendor_service_area: '', vendor_website: '',
     editor_software: '', editor_style: '', editor_portfolio: '', editor_rate: '', editor_availability: '',
+    director_experience: '', director_specialties: '', director_portfolio: '', director_team_size: '',
     other_reason: '',
   });
 
@@ -128,14 +136,14 @@ export default function Onboarding() {
             </a>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             {Object.entries(TYPE_INFO).map(([type, info]) => (
               <button
                 key={type}
                 onClick={() => { setContactType(type); setStep('form'); }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 16,
-                  padding: '18px 20px', borderRadius: 14, cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
+                  padding: '16px 14px', borderRadius: 12, cursor: 'pointer',
                   background: '#1A1A1A', border: `1px solid #2A2A2A`,
                   textAlign: 'left', width: '100%',
                   transition: 'border-color 0.2s',
@@ -143,12 +151,11 @@ export default function Onboarding() {
                 onMouseEnter={e => e.currentTarget.style.borderColor = info.color + '60'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = '#2A2A2A'}
               >
-                <div style={{ fontSize: 32, flexShrink: 0 }}>{info.icon}</div>
+                <div style={{ fontSize: 28, flexShrink: 0 }}>{info.icon}</div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 3, color: info.color }}>{type}</div>
-                  <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>{info.description}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2, color: info.color }}>{type}</div>
+                  <div style={{ fontSize: 12, color: '#666', lineHeight: 1.4 }}>{info.description}</div>
                 </div>
-                <div style={{ marginLeft: 'auto', color: '#333', fontSize: 18 }}>→</div>
               </button>
             ))}
           </div>
@@ -214,19 +221,21 @@ export default function Onboarding() {
         </div>
 
         <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>
-          {contactType === 'Crew' && 'Join the Crew'}
-          {contactType === 'Client' && 'Book with Studio 65'}
-          {contactType === 'Vendor' && 'Partner with Us'}
-          {contactType === 'Editor' && 'Join as an Editor'}
-          {contactType === 'Other' && 'Get in Touch'}
-        </div>
-        <div style={{ fontSize: 13, color: '#555', marginBottom: 32, lineHeight: 1.6 }}>
-          {contactType === 'Crew' && 'Fill out your details and we\'ll review your application. We\'ll be in touch if there\'s a fit.'}
-          {contactType === 'Client' && 'Tell us about your project and we\'ll reach out to discuss how we can bring it to life.'}
-          {contactType === 'Vendor' && 'Share what you offer and we\'ll add you to our rolodex of trusted partners.'}
-          {contactType === 'Editor' && 'Tell us about your editing style and experience. We\'ll reach out when there\'s a project match.'}
-          {contactType === 'Other' && 'Tell us a bit about yourself and why you\'re reaching out.'}
-        </div>
+           {contactType === 'Crew' && 'Join the Crew'}
+           {contactType === 'Client' && 'Book with Studio 65'}
+           {contactType === 'Vendor' && 'Partner with Us'}
+           {contactType === 'Editor' && 'Join as an Editor'}
+           {contactType === 'Director' && 'Join as a Director'}
+           {contactType === 'Other' && 'Get in Touch'}
+         </div>
+         <div style={{ fontSize: 13, color: '#555', marginBottom: 32, lineHeight: 1.6 }}>
+           {contactType === 'Crew' && 'Fill out your details and we\'ll review your application. We\'ll be in touch if there\'s a fit.'}
+           {contactType === 'Client' && 'Tell us about your project and we\'ll reach out to discuss how we can bring it to life.'}
+           {contactType === 'Vendor' && 'Share what you offer and we\'ll add you to our rolodex of trusted partners.'}
+           {contactType === 'Editor' && 'Tell us about your editing style and experience. We\'ll reach out when there\'s a project match.'}
+           {contactType === 'Director' && 'Share your vision and experience. We\'d love to collaborate on projects together.'}
+           {contactType === 'Other' && 'Tell us a bit about yourself and why you\'re reaching out.'}
+         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
@@ -348,6 +357,24 @@ export default function Onboarding() {
                   <input style={IS} value={form.editor_availability} onChange={e => set('editor_availability', e.target.value)} placeholder="e.g. Weekends, full-time, freelance" />
                 </Field>
               </div>
+            </>
+          )}
+
+          {/* ── Director-specific ── */}
+          {contactType === 'Director' && (
+            <>
+              <Field label="Years of Experience">
+                <input style={IS} value={form.director_experience} onChange={e => set('director_experience', e.target.value)} placeholder="e.g. 5 years" />
+              </Field>
+              <Field label="Specialties">
+                <input style={IS} value={form.director_specialties} onChange={e => set('director_specialties', e.target.value)} placeholder="e.g. Commercial, music video, narrative, documentary" />
+              </Field>
+              <Field label="Portfolio / Showreel">
+                <input style={IS} value={form.director_portfolio} onChange={e => set('director_portfolio', e.target.value)} placeholder="https://yourportfolio.com" />
+              </Field>
+              <Field label="Typical Team Size">
+                <input style={IS} value={form.director_team_size} onChange={e => set('director_team_size', e.target.value)} placeholder="e.g. Solo, 5-10 person crew, 20+ person crew" />
+              </Field>
             </>
           )}
 
