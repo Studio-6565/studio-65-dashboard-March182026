@@ -81,15 +81,19 @@ function LoginScreen({ onLogin }) {
     e.preventDefault();
     if (!password.trim()) return;
     setLoading(true); setError('');
-    const contacts = await base44.entities.Contact.filter({ portal_password: password.trim() });
-    if (!contacts.length) {
-      setError('Invalid code. Please check with Studio 65.');
-      setLoading(false); return;
+    try {
+      const contacts = await base44.entities.Contact.filter({ portal_password: password.trim() });
+      if (!contacts.length) {
+        setError('Invalid code. Please check with Studio 65.');
+        setLoading(false); return;
+      }
+      // Accept any contact regardless of type — crew, vendor, or multi-role
+      const c = contacts[0];
+      const myProjects = await loadContactProjects(c);
+      onLogin(c, myProjects);
+    } catch (err) {
+      setError('Login failed. Please try again.');
     }
-    // Accept any contact regardless of type — crew, vendor, or multi-role
-    const c = contacts[0];
-    const myProjects = await loadContactProjects(c);
-    onLogin(c, myProjects);
     setLoading(false);
   };
 
@@ -98,24 +102,28 @@ function LoginScreen({ onLogin }) {
     e.preventDefault();
     if (!email.trim()) return;
     setLoading(true); setError('');
-    const contacts = await base44.entities.Contact.filter({ email: email.trim().toLowerCase() });
-    if (!contacts.length) {
-      setError('No account found with that email. Please check with Studio 65.');
-      setLoading(false); return;
+    try {
+      const contacts = await base44.entities.Contact.filter({ email: email.trim().toLowerCase() });
+      if (!contacts.length) {
+        setError('No account found with that email. Please check with Studio 65.');
+        setLoading(false); return;
+      }
+      const c = contacts[0];
+      // Generate a 6-digit OTP
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const expires = Date.now() + 10 * 60 * 1000; // 10 min
+      setOtpStore({ code, expires });
+      setPendingContact(c);
+      // Send OTP via email integration
+      await base44.integrations.Core.SendEmail({
+        to: email.trim().toLowerCase(),
+        subject: 'Your Studio 65 Portal Code',
+        body: `Hi ${c.name},\n\nYour one-time login code for the Studio 65 Crew Portal is:\n\n${code}\n\nThis code expires in 10 minutes.\n\n— Studio 65`,
+      });
+      setOtpSent(true);
+    } catch (err) {
+      setError('Failed to send code. Please try again.');
     }
-    const c = contacts[0];
-    // Generate a 6-digit OTP
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const expires = Date.now() + 10 * 60 * 1000; // 10 min
-    setOtpStore({ code, expires });
-    setPendingContact(c);
-    // Send OTP via email integration
-    await base44.integrations.Core.SendEmail({
-      to: email.trim().toLowerCase(),
-      subject: 'Your Studio 65 Portal Code',
-      body: `Hi ${c.name},\n\nYour one-time login code for the Studio 65 Crew Portal is:\n\n${code}\n\nThis code expires in 10 minutes.\n\n— Studio 65`,
-    });
-    setOtpSent(true);
     setLoading(false);
   };
 
@@ -134,8 +142,12 @@ function LoginScreen({ onLogin }) {
       return;
     }
     setLoading(true);
-    const myProjects = await loadContactProjects(pendingContact);
-    onLogin(pendingContact, myProjects);
+    try {
+      const myProjects = await loadContactProjects(pendingContact);
+      onLogin(pendingContact, myProjects);
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    }
     setLoading(false);
   };
 
