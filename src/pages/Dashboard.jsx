@@ -151,7 +151,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100%', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif', overflow: 'hidden', paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       <StudioToast />
 
       {/* ── Left sidebar (desktop only) ── */}
@@ -166,8 +166,6 @@ export default function Dashboard() {
         <header className="mobile-header" style={{
           borderBottom: '1px solid #1E1E1E',
           background: '#0A0A0A',
-          marginTop: 0,
-          paddingTop: 'env(safe-area-inset-top, 0px)',
           userSelect: 'none',
           flexShrink: 0,
         }}>
