@@ -17,9 +17,14 @@ const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'upper
 
 const DetailTab = ({ label, active, onClick }) => (
   <button onClick={onClick} style={{
-    padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-    cursor: 'pointer', background: active ? '#1E1E1E' : 'transparent',
-    color: active ? '#fff' : '#666', border: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap',
+    padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+    cursor: 'pointer', whiteSpace: 'nowrap', border: 'none',
+    background: active ? '#E81A1A' : 'transparent',
+    color: active ? '#fff' : '#555',
+    fontFamily: '"DM Mono", monospace',
+    letterSpacing: '0.01em',
+    transition: 'all 0.15s',
+    flexShrink: 0,
   }}>{label}</button>
 );
 
@@ -279,7 +284,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, o
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 3, marginBottom: 20, background: '#2A2A2A', borderRadius: 8, padding: 3, width: 'fit-content', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 2, marginBottom: 20, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {tabs.map(t => <DetailTab key={t} label={t.charAt(0).toUpperCase() + t.slice(1)} active={tab === t} onClick={() => setTab(t)} />)}
       </div>
 
