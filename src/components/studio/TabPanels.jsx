@@ -65,6 +65,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
   const filtered = projects
     .filter(p => {
+      if (showArchived && !p.archived) return false;
       if (!showArchived && p.archived) return false;
       if (statusFilter !== 'All' && p.status !== statusFilter) return false;
       if (clientFilter !== 'All' && p.client !== clientFilter) return false;
