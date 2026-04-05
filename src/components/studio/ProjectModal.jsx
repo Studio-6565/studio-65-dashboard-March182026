@@ -3,7 +3,7 @@ import StudioModal from './StudioModal';
 import BottomSheet from './BottomSheet';
 import { fmt, nextProjectId } from '@/lib/studio';
 
-export default function ProjectModal({ open, onClose, editingProject, templates, projects, onSave }) {
+export default function ProjectModal({ open, onClose, editingProject, templates, projects, contacts, onSave }) {
   const [form, setForm] = useState({
     name: '', client: '', date: new Date().toISOString().split('T')[0], end_date: '',
     extra_dates: [],
@@ -110,7 +110,23 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
         </div>
         <div>
           <label style={labelStyle}>Client</label>
-          <input style={inputStyle} value={form.client} onChange={e => setForm(f => ({ ...f, client: e.target.value }))} placeholder="e.g. ATM" />
+          {(contacts || []).filter(c => (c.types || []).includes('Client')).length > 0 ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <select
+                style={{ ...inputStyle, flex: 1 }}
+                value={(contacts || []).filter(c => (c.types || []).includes('Client')).some(c => c.name === form.client) ? form.client : ''}
+                onChange={e => { if (e.target.value) setForm(f => ({ ...f, client: e.target.value })); }}
+              >
+                <option value="">— pick from contacts —</option>
+                {(contacts || []).filter(c => (c.types || []).includes('Client')).map(c => (
+                  <option key={c.id} value={c.name}>{c.name}{c.client_company ? ` (${c.client_company})` : ''}</option>
+                ))}
+              </select>
+              <input style={{ ...inputStyle, flex: 1 }} value={form.client} onChange={e => setForm(f => ({ ...f, client: e.target.value }))} placeholder="or type manually" />
+            </div>
+          ) : (
+            <input style={inputStyle} value={form.client} onChange={e => setForm(f => ({ ...f, client: e.target.value }))} placeholder="e.g. ATM" />
+          )}
         </div>
         <div>
           <label style={labelStyle}>Start Date</label>

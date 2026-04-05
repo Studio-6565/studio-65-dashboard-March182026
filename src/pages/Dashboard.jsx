@@ -274,6 +274,7 @@ export default function Dashboard() {
         editingProject={editingProject}
         templates={templates}
         projects={projects}
+        contacts={contacts}
         onSave={handleEditProject}
       />
 

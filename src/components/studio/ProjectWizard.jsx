@@ -164,8 +164,27 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
           </div>
           <div>
             <label style={LS}>Client *</label>
-            <input style={IS} value={client} onChange={e => setClient(e.target.value)} placeholder="e.g. ATM Creative" list="client-list" />
-            <datalist id="client-list">{clientList.map(c => <option key={c} value={c} />)}</datalist>
+            {contacts.filter(c => (c.types || []).includes('Client')).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <select
+                  style={IS}
+                  value={contacts.filter(c => (c.types || []).includes('Client')).some(c => c.name === client) ? client : ''}
+                  onChange={e => { if (e.target.value) setClient(e.target.value); }}
+                >
+                  <option value="">— pick from contacts —</option>
+                  {contacts.filter(c => (c.types || []).includes('Client')).map(c => (
+                    <option key={c.id} value={c.name}>{c.name}{c.client_company ? ` (${c.client_company})` : ''}</option>
+                  ))}
+                </select>
+                <input style={IS} value={client} onChange={e => setClient(e.target.value)} placeholder="or type manually" list="client-list" />
+                <datalist id="client-list">{clientList.map(c => <option key={c} value={c} />)}</datalist>
+              </div>
+            ) : (
+              <>
+                <input style={IS} value={client} onChange={e => setClient(e.target.value)} placeholder="e.g. ATM Creative" list="client-list" />
+                <datalist id="client-list">{clientList.map(c => <option key={c} value={c} />)}</datalist>
+              </>
+            )}
           </div>
           <div>
             <label style={LS}>Notes / Brief (optional)</label>
