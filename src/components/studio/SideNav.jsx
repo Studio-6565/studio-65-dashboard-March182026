@@ -1,35 +1,62 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
-const NAV_ITEMS = [
-  { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/projects',   Icon: Film, label: 'Projects' },
-  { path: '/script-engine', Icon: Sparkles, label: 'Script Engine' },
-  { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
-  { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
-  { path: '/timeline',   Icon: Clock, label: 'Timeline' },
-  { path: '/crew',       Icon: Users, label: 'Crew' },
-  { path: '/contacts',   Icon: Clipboard, label: 'Contacts' },
-  { path: '/editors',    Icon: Video, label: 'Editors' },
-  { path: '/inbox',      Icon: Mail, label: 'Inbox' },
-  { path: '/gear',       Icon: Backpack, label: 'Gear' },
-  { path: '/contracts',  Icon: FileText, label: 'Contracts' },
-  { path: '/operations', Icon: CheckSquare, label: 'Operations' },
-  { path: '/settings',   Icon: Settings, label: 'Settings' },
+const MONO = '"DM Mono", monospace';
+
+const NAV_SECTIONS = [
+  {
+    section: 'Core',
+    items: [
+      { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
+      { path: '/projects',   Icon: Film, label: 'Projects' },
+      { path: '/script-engine', Icon: Sparkles, label: 'Script Engine' },
+    ]
+  },
+  {
+    section: 'Content',
+    items: [
+      { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
+      { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
+    ]
+  },
+  {
+    section: 'Team',
+    items: [
+      { path: '/crew',       Icon: Users, label: 'Crew' },
+      { path: '/contacts',   Icon: Clipboard, label: 'Contacts' },
+      { path: '/editors',    Icon: Video, label: 'Editors' },
+    ]
+  },
+  {
+    section: 'Admin',
+    items: [
+      { path: '/gear',       Icon: Backpack, label: 'Gear' },
+      { path: '/contracts',  Icon: FileText, label: 'Contracts' },
+      { path: '/operations', Icon: CheckSquare, label: 'Operations' },
+      { path: '/inbox',      Icon: Mail, label: 'Inbox' },
+      { path: '/timeline',   Icon: Clock, label: 'Timeline' },
+      { path: '/settings',   Icon: Settings, label: 'Settings' },
+    ]
+  },
 ];
 
 export default function SideNav({ onNewProject, projects, contacts }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({ 'Core': true, 'Content': true, 'Team': true, 'Admin': false });
 
   const isActive = (path) =>
     location.pathname === path ||
     (path === '/projects' && location.pathname.startsWith('/projects/')) ||
     (path === '/script-engine' && location.pathname.startsWith('/script-engine'));
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const W = collapsed ? 64 : 220;
 
@@ -118,41 +145,77 @@ export default function SideNav({ onNewProject, projects, contacts }) {
       </div>
 
       {/* Main nav */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(({ path, Icon, label }) => {
-          const active = isActive(path);
-          return (
-            <Link key={path} to={path} style={{ textDecoration: 'none' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: collapsed ? '10px 0' : '9px 12px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 8,
-                cursor: 'pointer',
-                background: active ? '#1E1E1E' : 'transparent',
-                borderLeft: active ? '2px solid #E81A1A' : '2px solid transparent',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#161616'; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {NAV_SECTIONS.map(({ section, items }) => (
+          <div key={section} style={{ marginBottom: 8 }}>
+            {/* Section header (collapsible if not Core) */}
+            {section !== 'Core' && !collapsed && (
+              <button
+                onClick={() => toggleSection(section)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 12px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: '#555',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  fontFamily: MONO,
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#888'}
+                onMouseLeave={e => e.currentTarget.style.color = '#555'}
               >
-                <Icon size={18} color={active ? '#E81A1A' : '#666'} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                {!collapsed && (
-                  <span style={{
-                    fontSize: 13, fontWeight: active ? 700 : 500,
-                    color: active ? '#fff' : '#666',
-                    whiteSpace: 'nowrap',
-                    transition: 'color 0.15s',
-                  }}>{label}</span>
-                )}
+                <ChevronDown size={14} style={{ transform: expandedSections[section] ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.15s' }} />
+                {section}
+              </button>
+            )}
+
+            {/* Nav items */}
+            {(section === 'Core' || expandedSections[section]) && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {items.map(({ path, Icon, label }) => {
+                  const active = isActive(path);
+                  return (
+                    <Link key={path} to={path} style={{ textDecoration: 'none' }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: collapsed ? '10px 0' : '9px 12px',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        background: active ? '#1E1E1E' : 'transparent',
+                        borderLeft: active ? '2px solid #E81A1A' : '2px solid transparent',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#161616'; }}
+                      onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <Icon size={18} color={active ? '#E81A1A' : '#666'} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+                        {!collapsed && (
+                          <span style={{
+                            fontSize: 13, fontWeight: active ? 700 : 500,
+                            color: active ? '#fff' : '#666',
+                            whiteSpace: 'nowrap',
+                            transition: 'color 0.15s',
+                          }}>{label}</span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            </Link>
-          );
-        })}
-
-
+            )}
+          </div>
+        ))}
       </nav>
 
       {/* Bottom: sign out */}
