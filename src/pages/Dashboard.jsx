@@ -68,6 +68,20 @@ export default function Dashboard() {
     loadData().finally(() => setLoading(false));
   }, [loadData]);
 
+  // Keep projects in sync with real-time changes (e.g. auto-archive)
+  useEffect(() => {
+    const unsubscribe = base44.entities.Project.subscribe((event) => {
+      if (event.type === 'update') {
+        setProjects(prev => prev.map(p => p.id === event.id ? event.data : p));
+      } else if (event.type === 'create') {
+        setProjects(prev => [event.data, ...prev]);
+      } else if (event.type === 'delete') {
+        setProjects(prev => prev.filter(p => p.id !== event.id));
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
 
   // ── Project CRUD ────────────────────────────────────────────────────────────
