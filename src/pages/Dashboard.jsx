@@ -202,7 +202,7 @@ export default function Dashboard() {
           flexShrink: 0,
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, height: 52, padding: '0 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 48, padding: '0 16px' }}>
             {isDetailPage ? (
               <button
                 onClick={() => navigate('/projects')}
@@ -210,7 +210,7 @@ export default function Dashboard() {
                   background: 'none', border: 'none', color: '#E81A1A',
                   fontSize: 13, fontWeight: 700, cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '6px 0', minHeight: 44, fontFamily: 'Syne, sans-serif',
+                  padding: '4px 0', minHeight: 40, fontFamily: 'Syne, sans-serif',
                 }}
               >← Back</button>
             ) : (
@@ -226,9 +226,9 @@ export default function Dashboard() {
               <button
                 onClick={() => { setEditingProject(null); setProjectModalOpen(true); }}
                 style={{
-                  minWidth: 44, minHeight: 44, padding: '0 16px',
-                  background: '#E81A1A', border: 'none', borderRadius: 10,
-                  color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                  minWidth: 40, minHeight: 40, padding: '0 14px',
+                  background: '#E81A1A', border: 'none', borderRadius: 8,
+                  color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
                 }}
               >+ New</button>
             )}
@@ -240,8 +240,8 @@ export default function Dashboard() {
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 16px',
-          paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 20px))',
+          padding: '16px',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 16px))',
         }}>
           <Routes>
             <Route index element={<Navigate to="/dashboard" replace />} />
