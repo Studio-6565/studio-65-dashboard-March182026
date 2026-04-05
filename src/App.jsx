@@ -13,6 +13,7 @@ import ClientPortal from './pages/ClientPortal';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 import ScriptEngine from './pages/ScriptEngine';
+import ScriptAnalytics from './pages/ScriptAnalytics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/leads" element={<LeadsPage />} />
       <Route path="/script-engine" element={<ScriptEngine />} />
+      <Route path="/script-analytics" element={<ScriptAnalytics />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>

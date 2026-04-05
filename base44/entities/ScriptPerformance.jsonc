@@ -1,0 +1,121 @@
+{
+  "name": "ScriptPerformance",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "Reference to the project this script belongs to"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client": {
+      "type": "string"
+    },
+    "script_title": {
+      "type": "string"
+    },
+    "script_type": {
+      "type": "string",
+      "enum": [
+        "trend-based",
+        "evergreen",
+        "educational",
+        "entertainment",
+        "promotional"
+      ],
+      "description": "Category of the script"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "tiktok",
+        "instagram",
+        "youtube",
+        "linkedin"
+      ],
+      "description": "Platform where script was posted"
+    },
+    "publish_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "shares": {
+      "type": "number",
+      "default": 0
+    },
+    "comments": {
+      "type": "number",
+      "default": 0
+    },
+    "saves": {
+      "type": "number",
+      "default": 0
+    },
+    "watch_time_seconds": {
+      "type": "number",
+      "description": "Total watch time in seconds"
+    },
+    "average_watch_time": {
+      "type": "number",
+      "description": "Average watch time per view"
+    },
+    "retention_rate": {
+      "type": "number",
+      "description": "Percentage of video watched on average (0-100)"
+    },
+    "ctr": {
+      "type": "number",
+      "description": "Click-through rate percentage"
+    },
+    "engagement_rate": {
+      "type": "number",
+      "description": "Total engagement / views * 100"
+    },
+    "click_link": {
+      "type": "number",
+      "description": "Clicks on link/CTA"
+    },
+    "conversions": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of conversions/leads from this script"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Performance notes or insights"
+    }
+  },
+  "required": [
+    "project_id",
+    "script_title",
+    "script_type",
+    "platform",
+    "publish_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

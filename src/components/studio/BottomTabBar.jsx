@@ -14,6 +14,7 @@ const PRIMARY_TABS = [
 // Secondary tabs — appear in the "More" drawer
 const MORE_TABS = [
   { path: '/script-engine', Icon: Sparkles, label: 'Scripts' },
+  { path: '/script-analytics', Icon: BarChart3, label: 'Script Analytics' },
   { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
   { path: '/crew',       Icon: Users, label: 'Crew Spend' },
