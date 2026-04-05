@@ -5,6 +5,11 @@
     "name": {
       "type": "string"
     },
+    "is_test": {
+      "type": "boolean",
+      "default": false,
+      "description": "Marks this as test/dev data \u2014 hidden from the live Portal"
+    },
     "types": {
       "type": "array",
       "items": {
