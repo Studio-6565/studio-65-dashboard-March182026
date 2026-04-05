@@ -2,6 +2,12 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fmt } from '@/lib/studio';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import MorningTaskList from '@/components/studio/MorningTaskList';
+import AISmartNudges from '@/components/studio/AISmartNudges';
+import RevenueGoal from '@/components/studio/RevenueGoal';
+import UpcomingReminders from '@/components/studio/UpcomingReminders';
+import PaymentDeadlines from '@/components/studio/PaymentDeadlines';
+import OverdueInvoices from '@/components/studio/OverdueInvoices';
 
 const MONO = '"DM Mono", monospace';
 
@@ -266,6 +272,14 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
         )}
 
       </div>
+
+      {/* Task list + reminders */}
+      <MorningTaskList />
+      <UpcomingReminders projects={active} />
+      <PaymentDeadlines projects={active} />
+      <OverdueInvoices projects={active} onOpenDetail={openProject} />
+      <AISmartNudges projects={active} />
+      <RevenueGoal projects={active} />
 
       {active.length === 0 && (
         <div style={{ textAlign: 'center', marginTop: 80, color: '#444' }}>

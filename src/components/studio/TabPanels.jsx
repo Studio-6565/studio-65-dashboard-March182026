@@ -6,24 +6,15 @@ import CrewSpendView from './CrewSpendView';
 import TimelineView from './TimelineView';
 import ContactsView from './ContactsView';
 import PullRefreshIndicator from './PullRefreshIndicator';
-import StatsBar from './StatsBar';
-import UpcomingReminders from './UpcomingReminders';
 import ProjectCard from './ProjectCard';
 import BottomSheet from './BottomSheet';
-import PaymentDeadlines from './PaymentDeadlines';
 import GearPage from '@/pages/GearPage';
 import OperationsPage from '@/pages/OperationsPage';
 import ContractsPage from '@/pages/ContractsPage';
 import InboxPage from '@/pages/InboxPage';
 import SettingsPage from '@/pages/SettingsPage';
 import LeadsPage from '@/pages/LeadsPage';
-import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import AISmartNudges from './AISmartNudges';
-import RevenueGoal from './RevenueGoal';
-import OverdueInvoices from './OverdueInvoices';
-import TodaysShoots from './TodaysShoots';
-import MorningTaskList from './MorningTaskList';
 import DashboardHome from '@/pages/DashboardHome';
 import EditorsDashboard from '@/pages/EditorsDashboard';
 import KanbanView from './KanbanView';
@@ -103,7 +94,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
   const statusLabel = statusFilter === 'All' ? 'All Status' : statusFilter;
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} style={{ paddingTop: 4 }}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
 
       {/* View toggle + search bar */}
