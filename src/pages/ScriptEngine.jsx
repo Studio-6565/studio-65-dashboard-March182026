@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import BottomSheet from '@/components/studio/BottomSheet';
+import AIBrainstorming from '@/components/studio/AIBrainstorming';
 
 const MONO = '"DM Mono", monospace';
 
@@ -267,6 +268,8 @@ export default function ScriptEngine() {
                 }} />
               </div>
             </div>
+
+            <AIBrainstorming project={selectedProject} platform={inputs.platform} goal={inputs.goal} />
 
             <button onClick={generateIdeas} disabled={generatingIdeas} style={{
               width: '100%', padding: '12px 0', background: '#E81A1A', border: 'none', borderRadius: 10,
