@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
 const NAV_ITEMS = [
   { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/projects',   Icon: Film, label: 'Projects' },
+  { path: '/script-engine', Icon: Sparkles, label: 'Script Engine' },
   { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
   { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
   { path: '/timeline',   Icon: Clock, label: 'Timeline' },
@@ -27,7 +28,8 @@ export default function SideNav({ onNewProject, projects, contacts }) {
 
   const isActive = (path) =>
     location.pathname === path ||
-    (path === '/projects' && location.pathname.startsWith('/projects/'));
+    (path === '/projects' && location.pathname.startsWith('/projects/')) ||
+    (path === '/script-engine' && location.pathname.startsWith('/script-engine'));
 
   const W = collapsed ? 64 : 220;
 
