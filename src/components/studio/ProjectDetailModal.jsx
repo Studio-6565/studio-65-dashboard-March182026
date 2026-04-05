@@ -193,7 +193,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const handleDelCrew = async (i) => {
     haptic.error();
     const crew = p.crew.filter((_, j) => j !== i);
-    const crew_cost = crew.reduce((s, c) => s + c.cost, 0);
+    const crew_cost = crew.reduce((s, c) => s + crewTotal(c), 0);
     await update({ crew, crew_cost, net: p.revenue - crew_cost - p.rental_cost, _logMsg: `Crew member removed` });
   };
 
