@@ -14,6 +14,7 @@ import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 import ScriptEngine from './pages/ScriptEngine';
 import ScriptAnalytics from './pages/ScriptAnalytics';
+import ContentCalendar from './pages/ContentCalendar';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
       <Route path="/leads" element={<LeadsPage />} />
       <Route path="/script-engine" element={<ScriptEngine />} />
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
+      <Route path="/content-calendar" element={<ContentCalendar />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
