@@ -149,6 +149,72 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* Light mode overrides for hardcoded inline styles */
+  :root.light body,
+  :root.light #root {
+    background: #F5F5F5 !important;
+    color: #1A1A1A !important;
+  }
+
+  :root.light [style*="background: #0A0A0A"],
+  :root.light [style*="background: rgb(10, 10, 10)"] {
+    background: #F5F5F5 !important;
+  }
+
+  :root.light [style*="background: #1E1E1E"],
+  :root.light [style*="background: rgb(30, 30, 30)"] {
+    background: #EBEBEB !important;
+  }
+
+  :root.light [style*="background: #2A2A2A"],
+  :root.light [style*="background: rgb(42, 42, 42)"] {
+    background: #E0E0E0 !important;
+  }
+
+  :root.light [style*="background: #1A1A1A"],
+  :root.light [style*="background: rgb(26, 26, 26)"] {
+    background: #EBEBEB !important;
+  }
+
+  :root.light [style*="background: #111"],
+  :root.light [style*="background: rgb(17, 17, 17)"] {
+    background: #F0F0F0 !important;
+  }
+
+  :root.light [style*="color: #fff"],
+  :root.light [style*="color: rgb(255, 255, 255)"] {
+    color: #1A1A1A !important;
+  }
+
+  :root.light [style*="color: #666"],
+  :root.light [style*="color: rgb(102, 102, 102)"] {
+    color: #555 !important;
+  }
+
+  :root.light [style*="color: #999"],
+  :root.light [style*="color: rgb(153, 153, 153)"] {
+    color: #666 !important;
+  }
+
+  :root.light [style*="border: 1px solid #333"],
+  :root.light [style*="border: 1px solid rgb(51, 51, 51)"] {
+    border-color: #CCCCCC !important;
+  }
+
+  :root.light [style*="border: 1px solid #1E1E1E"],
+  :root.light [style*="border: 1px solid #222"] {
+    border-color: #DEDEDE !important;
+  }
+
+  :root.light [style*="border-bottom: 1px solid #1E1E1E"] {
+    border-bottom-color: #DEDEDE !important;
+  }
+
+  :root.light [style*="border-top: 1px solid #333"] {
+    border-top-color: #CCCCCC !important;
   }
 
   input, textarea, select, button {
