@@ -148,7 +148,8 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const handleRentalPaid = async (i) => {
     const rentals = [...p.rentals];
     rentals[i] = { ...rentals[i], paid: !rentals[i].paid };
-    await update({ rentals, _logMsg: rentals[i].equipment + (rentals[i].paid ? ' rental paid' : ' rental unpaid') });
+    const rental_cost = rentals.reduce((s, r) => s + (parseFloat(r.cost) || 0), 0);
+    await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost, _logMsg: rentals[i].equipment + (rentals[i].paid ? ' rental paid' : ' rental unpaid') });
     showToast(rentals[i].equipment + (rentals[i].paid ? ' paid ✓' : ' unpaid'), rentals[i].paid ? 'green' : 'amber');
   };
 
@@ -245,7 +246,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
     if (!rentalForm.equipment.trim()) { showToast('Enter equipment name', 'red'); return; }
     const cost = parseFloat(rentalForm.cost) || 0;
     const rentals = [...(p.rentals || []), { equipment: rentalForm.equipment.trim(), vendor: rentalForm.vendor.trim(), cost, phone: rentalForm.phone.trim(), email: rentalForm.email.trim(), paid: false }];
-    const rental_cost = rentals.reduce((s, r) => s + r.cost, 0);
+    const rental_cost = rentals.reduce((s, r) => s + (parseFloat(r.cost) || 0), 0);
     await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost, _logMsg: `${rentalForm.equipment} added to rentals` });
     setRentalForm({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
     showToast(rentalForm.equipment + ' added');
@@ -671,7 +672,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {(contacts || []).filter(c => (c.types || []).includes('Vendor') && (c.offerings || []).length > 0).map(c =>
                   c.offerings.map((o, oi) => (
-                    <button key={`${c.id}-${oi}`} onClick={() => setRentalForm(f => ({ ...f, equipment: o.name, vendor: c.name, cost: o.cost || '', phone: c.phone || '', email: c.email || '' }))} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(123,200,83,0.25)', background: 'rgba(123,200,83,0.08)', color: '#7BC853', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>
+                    <button key={`${c.id}-${oi}`} onClick={() => setRentalForm(f => ({ ...f, equipment: o.name, vendor: c.name, cost: String(o.cost || ''), phone: c.phone || '', email: c.email || '' }))} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(123,200,83,0.25)', background: 'rgba(123,200,83,0.08)', color: '#7BC853', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>
                       {o.name}{o.cost > 0 ? ` · $${o.cost}` : ''} <span style={{ opacity: 0.5, fontSize: 9 }}>({c.name})</span>
                     </button>
                   ))
