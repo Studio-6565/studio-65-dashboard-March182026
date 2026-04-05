@@ -14,13 +14,15 @@ Deno.serve(async (req) => {
     if (action === 'login_by_code') {
       try {
         const contacts = await base44.asServiceRole.entities.Contact.filter({ portal_password });
-        if (!contacts.length) {
+        const realContacts = contacts.filter(c => !c.is_test);
+        if (!realContacts.length) {
           return Response.json({ error: 'Invalid code' }, { status: 401 });
         }
-        const contact = contacts[0];
+        const contact = realContacts[0];
         const allProjects = await base44.asServiceRole.entities.Project.list('-date', 200);
         const isEditor = (contact.types || []).includes('Editor');
         const myProjects = allProjects.filter(p => {
+          if (p.is_test) return false;
           const inCrew = (p.crew || []).some(m => m.name.toLowerCase() === contact.name.toLowerCase());
           const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === contact.name.toLowerCase());
           return inCrew || inRentals || isEditor;
@@ -35,10 +37,11 @@ Deno.serve(async (req) => {
     if (action === 'check_email') {
       try {
         const contacts = await base44.asServiceRole.entities.Contact.filter({ email: email.toLowerCase() });
-        if (!contacts.length) {
+        const realContacts = contacts.filter(c => !c.is_test);
+        if (!realContacts.length) {
           return Response.json({ error: 'No account found with that email' }, { status: 404 });
         }
-        return Response.json({ contact: contacts[0] });
+        return Response.json({ contact: realContacts[0] });
       } catch (err) {
         console.error('Email check error:', err.message);
         return Response.json({ error: 'No account found with that email' }, { status: 404 });
@@ -48,13 +51,15 @@ Deno.serve(async (req) => {
     if (action === 'login_by_otp') {
       try {
         const contacts = await base44.asServiceRole.entities.Contact.filter({ email: email.toLowerCase() });
-        if (!contacts.length) {
+        const realContacts = contacts.filter(c => !c.is_test);
+        if (!realContacts.length) {
           return Response.json({ error: 'No account found' }, { status: 404 });
         }
-        const contact = contacts[0];
+        const contact = realContacts[0];
         const allProjects = await base44.asServiceRole.entities.Project.list('-date', 200);
         const isEditor = (contact.types || []).includes('Editor');
         const myProjects = allProjects.filter(p => {
+          if (p.is_test) return false;
           const inCrew = (p.crew || []).some(m => m.name.toLowerCase() === contact.name.toLowerCase());
           const inRentals = (p.rentals || []).some(r => (r.vendor || '').toLowerCase() === contact.name.toLowerCase());
           return inCrew || inRentals || isEditor;
