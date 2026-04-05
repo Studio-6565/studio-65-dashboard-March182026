@@ -131,14 +131,10 @@
     "name"
   ],
   "rls": {
-    "create": {
-      "created_by": "{{user.email}}"
-    },
+    "create": {},
     "read": {},
     "update": {},
-    "delete": {
-      "created_by": "{{user.email}}"
-    },
+    "delete": {},
     "write": {}
   }
 }
