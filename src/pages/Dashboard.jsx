@@ -72,7 +72,14 @@ export default function Dashboard() {
   useEffect(() => {
     const unsubscribe = base44.entities.Project.subscribe((event) => {
       if (event.type === 'update') {
-        setProjects(prev => prev.map(p => p.id === event.id ? event.data : p));
+        setProjects(prev => {
+          const old = prev.find(p => p.id === event.id);
+          // Notify if project was just auto-archived
+          if (old && !old.archived && event.data?.archived) {
+            showToast(`"${event.data.name}" auto-archived — all requirements met ✓`, 'green');
+          }
+          return prev.map(p => p.id === event.id ? event.data : p);
+        });
       } else if (event.type === 'create') {
         setProjects(prev => [event.data, ...prev]);
       } else if (event.type === 'delete') {

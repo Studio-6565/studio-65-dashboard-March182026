@@ -125,6 +125,7 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
             </div>
             {p.track_hours && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontFamily: '"DM Mono", monospace' }}>⏱ {(totalHrs).toFixed(1)} hrs</span>}
             {p.notes && <span style={{ fontSize: 10, color: '#666' }}>📝</span>}
+            {p.archived && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(100,100,100,0.15)', color: '#666', fontFamily: '"DM Mono", monospace', fontWeight: 600 }}>📦 Archived</span>}
           </div>
           {/* Shoot logistics */}
           {(p.address || p.poc_name) && (

@@ -60,6 +60,15 @@ export const nextProjectId = (projects) => {
   return 'PR' + String(Math.max(0, ...nums) + 1).padStart(3, '0');
 };
 
+export const nextInvoiceNumber = (projects) => {
+  const nums = projects.map(p => {
+    const n = (p.invoice_number || '').replace(/^INV-?0*/i, '');
+    return parseInt(n) || 0;
+  });
+  const next = Math.max(0, ...nums) + 1;
+  return 'INV-' + String(next).padStart(4, '0');
+};
+
 export const addLog = (project, msg) => {
   const activity = [...(project.activity || [])];
   activity.unshift({ msg, ts: new Date().toISOString() });

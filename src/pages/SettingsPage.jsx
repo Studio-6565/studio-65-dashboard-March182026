@@ -87,17 +87,37 @@ export default function SettingsPage({ onDeleteAccount }) {
   const [notifyContracts, setNotifyContracts]  = useState(true);
   const [notifyMessages, setNotifyMessages]    = useState(true);
   const [saving, setSaving] = useState(false);
-  const [plan] = useState('pro'); // current plan
+  const [plan] = useState('pro');
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (u) setUser(u);
+      if (u) {
+        setUser(u);
+        // Load saved settings from user profile
+        if (u.studio_name) setStudioName(u.studio_name);
+        if (u.studio_email) setStudioEmail(u.studio_email);
+        if (u.studio_phone) setStudioPhone(u.studio_phone);
+        if (u.studio_website) setStudioWebsite(u.studio_website);
+        if (u.notify_booking !== undefined) setNotifyBooking(u.notify_booking);
+        if (u.notify_onboarding !== undefined) setNotifyOnboarding(u.notify_onboarding);
+        if (u.notify_contracts !== undefined) setNotifyContracts(u.notify_contracts);
+        if (u.notify_messages !== undefined) setNotifyMessages(u.notify_messages);
+      }
     });
   }, []);
 
   const handleSaveProfile = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 600)); // simulate save
+    await base44.auth.updateMe({
+      studio_name: studioName,
+      studio_email: studioEmail,
+      studio_phone: studioPhone,
+      studio_website: studioWebsite,
+      notify_booking: notifyBooking,
+      notify_onboarding: notifyOnboarding,
+      notify_contracts: notifyContracts,
+      notify_messages: notifyMessages,
+    });
     setSaving(false);
     showToast('Studio profile saved', 'green');
   };
@@ -250,6 +270,13 @@ export default function SettingsPage({ onDeleteAccount }) {
         <Row label="New Client Messages" hint="Alert when a client sends a message">
           <Toggle value={notifyMessages} onChange={setNotifyMessages} />
         </Row>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={handleSaveProfile}
+            disabled={saving}
+            style={{ padding: '10px 24px', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}
+          >{saving ? 'Saving...' : 'Save Notifications'}</button>
+        </div>
       </Section>
 
       {/* Account */}
