@@ -403,7 +403,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                     <a href={`mailto:${c.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(37,211,102,0.12)', color: '#25D366' }}>✉ Email</a>
                   )}
                   <button onClick={() => handleEdit(c)} style={{ padding: '6px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>Edit</button>
-                  <button onClick={() => handleDelete(c)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, padding: '4px 6px' }}>×</button>
+                  <button onClick={() => handleDelete(c)} style={{ padding: '6px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(232,26,26,0.15)', color: '#E81A1A' }}>Delete</button>
                 </div>
               </div>
             );
