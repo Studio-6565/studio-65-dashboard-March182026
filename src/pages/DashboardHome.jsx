@@ -175,7 +175,7 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
       )}
 
       {/* Key stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 32 }}>
         <StatCard label="Month Revenue" value={fmt(monthRevenue)} />
         <StatCard label="Month Net" value={fmt(monthNet)} color={monthNet >= 0 ? '#7BC853' : '#E81A1A'} />
         <StatCard label="Crew Owed" value={fmt(crewOwedTotal)} color={crewOwedTotal > 0 ? '#F59E0B' : '#7BC853'} />
@@ -185,7 +185,7 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
       </div>
 
       {/* Pipeline status bar */}
-      <div style={{ background: '#1A1A1A', border: '1px solid #222', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
+      <div style={{ background: '#1A1A1A', border: '1px solid #222', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Pipeline</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {Object.entries(statusCounts).map(([status, count]) => (
@@ -198,7 +198,7 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
       </div>
 
       {/* Revenue chart */}
-      <div style={{ background: '#1A1A1A', border: '1px solid #222', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
+      <div style={{ background: '#1A1A1A', border: '1px solid #222', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Revenue — Last 6 Months</div>
         <ResponsiveContainer width="100%" height={140}>
           <BarChart data={chartData} barGap={3}>
@@ -224,7 +224,7 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
       </div>
 
       {/* Two column layout for lists */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px,1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px,1fr))', gap: 24, marginBottom: 32 }}>
 
         {/* Upcoming shoots */}
         {upcomingShoots.length > 0 && (
