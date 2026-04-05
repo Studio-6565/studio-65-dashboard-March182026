@@ -24,6 +24,8 @@ import RevenueGoal from './RevenueGoal';
 import OverdueInvoices from './OverdueInvoices';
 import TodaysShoots from './TodaysShoots';
 import MorningTaskList from './MorningTaskList';
+import DashboardHome from '@/pages/DashboardHome';
+import EditorsDashboard from '@/pages/EditorsDashboard';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -163,7 +165,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'leads', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['dashboard', 'projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'leads', 'editors', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -198,7 +200,7 @@ function OperationsTab({ loadData }) {
 export default function TabPanels({
   projects, contacts, containerRef, isRefreshing, pullProgress,
   onOpenDetail, onNewProject, onContactsChange, onProjectsChange,
-  onMarkPaid, onDeleteAccount, loadData,
+  onMarkPaid, onDeleteAccount, loadData, onNavigate,
 }) {
   const { pathname } = useLocation();
   const activeTab = TABS.find(t => pathname === '/' + t) || 'projects';
@@ -248,7 +250,9 @@ export default function TabPanels({
               loadData={loadData || noopRefresh}
             />
           )}
+          {tab === 'dashboard' && <DashboardHome projects={projects} contacts={contacts} onOpenDetail={onOpenDetail} />}
           {tab === 'leads' && <LeadsPage />}
+          {tab === 'editors' && <EditorsDashboard />}
         </div>
       ))}
     </div>

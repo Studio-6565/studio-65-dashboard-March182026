@@ -353,7 +353,17 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
     showToast(`${name} saved to Contacts`, 'green');
   };
 
-  const tabs = ['overview', 'crew', 'rentals', 'deliverables', 'expenses', 'invoice', 'setup', 'reminders', 'call sheet', 'ratings', 'notes', ...(p.track_hours ? ['hours'] : []), 'edit', 'crew chat', 'activity'];
+  const [shootSub, setShootSub] = useState('crew');
+  const [postSub, setPostSub] = useState('deliverables');
+  const [financeSub, setFinanceSub] = useState('invoice');
+  const [notesSub, setNotesSub] = useState('notes');
+
+  const shootSubTab = ['crew', 'rentals', 'setup', 'call sheet', 'reminders'];
+  const postSubTab = ['deliverables', 'edit', 'ratings'];
+  const financeSubTab = ['invoice', 'expenses', ...(p.track_hours ? ['hours'] : [])];
+  const notesSubTab = ['notes', 'crew chat', 'activity'];
+
+  const tabs = ['overview', 'shoot', 'post', 'finance', 'notes & log'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -375,13 +385,43 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 20, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {/* Main Tabs */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 10, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {tabs.map(t => <DetailTab key={t} label={t.charAt(0).toUpperCase() + t.slice(1)} active={tab === t} onClick={() => setTab(t)} />)}
       </div>
 
+      {/* Sub-tabs */}
+      {tab === 'shoot' && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+          {shootSubTab.map(t => (
+            <button key={t} onClick={() => setShootSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${shootSub === t ? '#444' : '#2A2A2A'}`, background: shootSub === t ? '#2A2A2A' : 'transparent', color: shootSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
+          ))}
+        </div>
+      )}
+      {tab === 'post' && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+          {postSubTab.map(t => (
+            <button key={t} onClick={() => setPostSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${postSub === t ? '#444' : '#2A2A2A'}`, background: postSub === t ? '#2A2A2A' : 'transparent', color: postSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
+          ))}
+        </div>
+      )}
+      {tab === 'finance' && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+          {financeSubTab.map(t => (
+            <button key={t} onClick={() => setFinanceSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${financeSub === t ? '#444' : '#2A2A2A'}`, background: financeSub === t ? '#2A2A2A' : 'transparent', color: financeSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
+          ))}
+        </div>
+      )}
+      {tab === 'notes & log' && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+          {notesSubTab.map(t => (
+            <button key={t} onClick={() => setNotesSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${notesSub === t ? '#444' : '#2A2A2A'}`, background: notesSub === t ? '#2A2A2A' : 'transparent', color: notesSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
+          ))}
+        </div>
+      )}
+
       {/* AI Actions */}
-      <ProjectAIActions project={p} contacts={contacts} tab={tab} />
+      <ProjectAIActions project={p} contacts={contacts} tab={tab === 'shoot' ? shootSub : tab === 'post' ? postSub : tab === 'finance' ? financeSub : tab === 'notes & log' ? notesSub : tab} />
 
       {/* Overview */}
       {tab === 'overview' && (
@@ -455,8 +495,8 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {/* Crew */}
-      {tab === 'crew' && (
+      {/* SHOOT sub-tabs */}
+      {tab === 'shoot' && shootSub === 'crew' && (
         <div>
           <div style={{ marginBottom: 16 }}>
             <CrewAvailabilityCalendar projects={projects || []} selectedCrew={selectedCrewForCalendar} />
@@ -635,8 +675,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {/* Rentals */}
-      {tab === 'rentals' && (
+      {tab === 'shoot' && shootSub === 'rentals' && (
         <div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Rental Items</div>
           <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16 }}>
@@ -705,8 +744,8 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {/* Deliverables */}
-      {tab === 'deliverables' && (
+      {/* POST sub-tabs */}
+      {tab === 'post' && postSub === 'deliverables' && (
         <div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Deliverables</div>
           <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16 }}>
@@ -742,16 +781,16 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {/* Notes */}
-      {tab === 'notes' && (
+      {/* NOTES & LOG sub-tabs */}
+      {tab === 'notes & log' && notesSub === 'notes' && (
         <div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Project Notes</div>
           <textarea rows={8} placeholder="Client contacts, shoot location, parking info, special instructions..." value={notes} onChange={e => handleSaveNotes(e.target.value)} style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: 12, color: '#fff', fontSize: 13, lineHeight: 1.6, resize: 'vertical', width: '100%', outline: 'none', fontFamily: 'Syne, sans-serif' }} />
         </div>
       )}
 
-      {/* Hours */}
-      {tab === 'hours' && (
+      {/* FINANCE sub-tabs */}
+      {tab === 'finance' && financeSub === 'hours' && (
         <div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Logged Hours</div>
           <div style={{ maxHeight: 240, overflowY: 'auto' }}>
@@ -791,32 +830,16 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {/* Expenses */}
-      {tab === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}
+      {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}
+      {tab === 'finance' && financeSub === 'invoice' && <InvoiceGenerator project={p} onUpdate={onUpdate} />}
+      {tab === 'shoot' && shootSub === 'setup' && <SetupTab project={p} onUpdate={update} />}
+      {tab === 'shoot' && shootSub === 'reminders' && <RemindersTab project={p} />}
+      {tab === 'shoot' && shootSub === 'call sheet' && <CallSheetTab project={p} onUpdate={update} />}
+      {tab === 'post' && postSub === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
+      {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} />}
+      {tab === 'notes & log' && notesSub === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
 
-      {/* Invoice */}
-      {tab === 'invoice' && <InvoiceGenerator project={p} onUpdate={onUpdate} />}
-
-      {/* Setup & Shot List */}
-      {tab === 'setup' && <SetupTab project={p} onUpdate={update} />}
-
-      {/* Reminders */}
-      {tab === 'reminders' && <RemindersTab project={p} />}
-
-      {/* Call Sheet */}
-      {tab === 'call sheet' && <CallSheetTab project={p} onUpdate={update} />}
-
-      {/* Crew Ratings */}
-      {tab === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
-
-      {/* Edit Review */}
-      {tab === 'edit' && <EditReviewTab project={p} />}
-
-      {/* Crew Chat */}
-      {tab === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
-
-      {/* Activity */}
-      {tab === 'activity' && (
+      {tab === 'notes & log' && notesSub === 'activity' && (
         <div>
           <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Activity Log</div>
           <div style={{ maxHeight: 360, overflowY: 'auto' }}>

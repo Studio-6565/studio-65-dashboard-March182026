@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-r
 import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
+import DashboardHome from './DashboardHome';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
@@ -18,6 +19,7 @@ import { nextProjectId, addLog } from '@/lib/studio';
 
 // ── Tab label for the mobile header ──────────────────────────────────────────
 const TAB_LABELS = {
+  '/dashboard': 'Dashboard',
   '/projects': 'Projects',
   '/analytics': 'Analytics',
   '/calendar': 'Calendar',
@@ -26,6 +28,7 @@ const TAB_LABELS = {
   '/contacts': 'Contacts',
   '/leads': 'Sales Pipeline',
   '/inbox': 'Inbox',
+  '/editors': 'Editors',
   '/gear': 'Gear',
   '/operations': 'Operations',
   '/agents': 'AI Agents',
@@ -241,7 +244,7 @@ export default function Dashboard() {
           paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 20px))',
         }}>
           <Routes>
-            <Route index element={<Navigate to="/projects" replace />} />
+            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="projects/:id" element={
               <ProjectDetailPage
                 projects={projects}

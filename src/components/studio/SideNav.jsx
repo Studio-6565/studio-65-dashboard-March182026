@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
 const NAV_ITEMS = [
+  { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/projects',   Icon: Film, label: 'Projects' },
   { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
   { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
   { path: '/timeline',   Icon: Clock, label: 'Timeline' },
   { path: '/crew',       Icon: Users, label: 'Crew' },
   { path: '/contacts',   Icon: Clipboard, label: 'Contacts' },
+  { path: '/editors',    Icon: Video, label: 'Editors' },
   { path: '/inbox',      Icon: Mail, label: 'Inbox' },
   { path: '/gear',       Icon: Backpack, label: 'Gear' },
   { path: '/contracts',  Icon: FileText, label: 'Contracts' },
