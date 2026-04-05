@@ -169,7 +169,15 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
                 <select
                   style={IS}
                   value={contacts.filter(c => (c.types || []).includes('Client')).some(c => c.name === client) ? client : ''}
-                  onChange={e => { if (e.target.value) setClient(e.target.value); }}
+                  onChange={e => {
+                    if (!e.target.value) return;
+                    const picked = contacts.find(c => c.name === e.target.value);
+                    setClient(e.target.value);
+                    if (picked) {
+                      if (picked.name && !pocName) setPocName(picked.name);
+                      if (picked.phone && !pocPhone) setPocPhone(picked.phone);
+                    }
+                  }}
                 >
                   <option value="">— pick from contacts —</option>
                   {contacts.filter(c => (c.types || []).includes('Client')).map(c => (
@@ -328,7 +336,28 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
                 <label style={LS}>Name</label>
-                <input style={IS} value={crewForm.name} onChange={e => setCrewForm(f => ({ ...f, name: e.target.value }))} placeholder="Crew name" list="contact-names" />
+                <input
+                  style={IS}
+                  value={crewForm.name}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const match = contacts.find(c => c.name === val);
+                    if (match) {
+                      setCrewForm(f => ({
+                        ...f,
+                        name: val,
+                        role: match.role || f.role,
+                        phone: match.phone || f.phone,
+                        cost: match.rate || f.cost,
+                        rate_type: match.rate_type || f.rate_type,
+                      }));
+                    } else {
+                      setCrewForm(f => ({ ...f, name: val }));
+                    }
+                  }}
+                  placeholder="Crew name"
+                  list="contact-names"
+                />
                 <datalist id="contact-names">{contactNames.map(n => <option key={n} value={n} />)}</datalist>
               </div>
               <div>
