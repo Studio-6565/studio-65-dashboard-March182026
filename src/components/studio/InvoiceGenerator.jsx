@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fmt } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
@@ -14,8 +14,19 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
   const [studioName, setStudioName] = useState('Studio 65');
   const [studioEmail, setStudioEmail] = useState('studio65production@gmail.com');
   const [studioAddress, setStudioAddress] = useState('Toronto, ON');
+  const [paymentDetails, setPaymentDetails] = useState('');
   const [notes, setNotes] = useState('');
   const [generating, setGenerating] = useState(false);
+
+  // Load saved studio profile
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u?.studio_name) setStudioName(u.studio_name);
+      if (u?.studio_email) setStudioEmail(u.studio_email);
+      if (u?.studio_phone) setStudioAddress(prev => u.studio_phone ? `${prev} · ${u.studio_phone}` : prev);
+      if (u?.payment_details) setPaymentDetails(u.payment_details);
+    });
+  }, []);
 
   const totalExpenses = (p.expenses || []).reduce((s, e) => s + (e.amount || 0), 0);
   const lineItems = [
@@ -26,10 +37,18 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
 
   const handleSaveAndGenerate = async () => {
     setGenerating(true);
-    // Save invoice fields to project
-    const updated = { ...p, invoice_number: invoiceNum, invoice_date: invoiceDate, invoice_due_date: dueDate };
+    // Save invoice fields to project, auto-progress to Invoiced
+    const updated = {
+      ...p,
+      invoice_number: invoiceNum,
+      invoice_date: invoiceDate,
+      invoice_due_date: dueDate,
+      status: p.status === 'Delivered' || p.status === 'Booked' || p.status === 'In Production' || p.status === 'In Edit' ? 'Invoiced' : p.status,
+    };
     await base44.entities.Project.update(p.id, updated);
     onUpdate(updated);
+    // Save payment details for future invoices
+    if (paymentDetails) await base44.auth.updateMe({ payment_details: paymentDetails });
 
     // Generate PDF
     const { jsPDF } = await import('jspdf');
@@ -177,9 +196,26 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
       doc.text('✓ PAID — Thank you!', 105, y + 9, { align: 'center' });
     }
 
+    // Payment details box
+    if (paymentDetails) {
+      y += p.paid ? 20 : 26;
+      doc.setFillColor(18, 30, 18);
+      doc.roundedRect(18, y, 174, 4 + Math.ceil(paymentDetails.length / 60) * 5 + 8, 3, 3, 'F');
+      doc.setFont(COURIER, 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(123, 200, 83);
+      doc.text('PAYMENT DETAILS', 22, y + 7);
+      doc.setFont(SANS, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(180, 220, 160);
+      const wrappedPay = doc.splitTextToSize(paymentDetails, 168);
+      wrappedPay.forEach((ln, i) => { doc.text(ln, 22, y + 13 + i * 5); });
+      y += 4 + wrappedPay.length * 5 + 8;
+    }
+
     // Notes
     if (notes) {
-      y += p.paid ? 20 : 26;
+      y += 10;
       doc.setFont(COURIER, 'normal');
       doc.setFontSize(8);
       doc.setTextColor(80, 80, 80);
@@ -246,11 +282,23 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
         </div>
       </div>
 
+      {/* Payment details */}
+      <div style={{ marginBottom: 10 }}>
+        <label style={LS}>Payment Details (e-transfer / bank / PayPal)</label>
+        <textarea style={{ ...IS, resize: 'none', minHeight: 52 }} rows={2} value={paymentDetails} onChange={e => setPaymentDetails(e.target.value)} placeholder="e.g. E-transfer: studio65production@gmail.com&#10;Bank: TD, Account #12345, Transit #67890" />
+      </div>
+
       {/* Optional notes */}
       <div style={{ marginBottom: 14 }}>
-        <label style={LS}>Notes / Payment Instructions (optional)</label>
-        <textarea style={{ ...IS, resize: 'none', minHeight: 60 }} rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Please transfer to: Bank Name, Account #..." />
+        <label style={LS}>Additional Notes (optional)</label>
+        <textarea style={{ ...IS, resize: 'none', minHeight: 52 }} rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Thank you for choosing Studio 65!" />
       </div>
+
+      {p.status !== 'Invoiced' && (
+        <div style={{ marginBottom: 12, padding: '9px 12px', background: 'rgba(74,158,255,0.08)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 8, fontSize: 11, color: '#4A9EFF', fontFamily: MONO }}>
+          ℹ️ Generating will auto-update project status to <strong>Invoiced</strong>
+        </div>
+      )}
 
       <button
         onClick={handleSaveAndGenerate}

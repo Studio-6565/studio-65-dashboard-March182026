@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fmt } from '@/lib/studio';
 
 const MONO = '"DM Mono", monospace';
 
@@ -74,6 +75,45 @@ export default function AISmartNudges({ projects = [] }) {
         action: 'Draft Booking Messages',
         agent: 'bookingMsg',
         prompt: `Draft WhatsApp booking messages for crew on these upcoming shoots:\n${noConfirmed.map(p => `- ${p.name} (${p.date}): ${(p.crew || []).map(c => c.name + ' / ' + c.role).join(', ')}`).join('\n')}`,
+        context: '',
+      });
+    }
+
+    // Overdue invoices — follow-up drafter
+    const overdueInvoices = projects.filter(p =>
+      !p.archived && !p.paid && p.invoice_due_date && p.invoice_due_date < today &&
+      (p.status === 'Invoiced' || p.status === 'Delivered')
+    );
+    if (overdueInvoices.length > 0) {
+      list.push({
+        id: 'invoice_followup',
+        icon: '📬',
+        color: '#E81A1A',
+        msg: `${overdueInvoices.length} overdue invoice${overdueInvoices.length > 1 ? 's' : ''} — draft follow-up email${overdueInvoices.length > 1 ? 's' : ''}?`,
+        action: 'Draft Follow-ups',
+        agent: 'invoiceFollowUp',
+        prompt: `Draft payment follow-up emails for these overdue invoices:\n${overdueInvoices.map(p => `- ${p.name} (${p.client}): ${fmt(p.revenue)} | Invoice: ${p.invoice_number || 'N/A'} | Due: ${p.invoice_due_date} | Days overdue: ${Math.floor((new Date(today) - new Date(p.invoice_due_date)) / 86400000)}`).join('\n')}`,
+        context: '',
+      });
+    }
+
+    // New projects without a brief (no notes, no shot list)
+    const noBrief = projects.filter(p =>
+      !p.archived &&
+      (!p.notes || p.notes.length < 30) &&
+      (!p.shot_list || p.shot_list.length === 0) &&
+      p.status === 'Booked'
+    );
+    if (noBrief.length > 0) {
+      const p = noBrief[0]; // suggest for the first one
+      list.push({
+        id: `brief_${p.id}`,
+        icon: '📋',
+        color: '#A78BFA',
+        msg: `"${p.name}" has no brief yet — generate one with AI?`,
+        action: 'Generate Brief',
+        agent: 'projectBrief',
+        prompt: `Generate a full project brief for this production:\n- Project: ${p.name}\n- Client: ${p.client}\n- Date: ${p.date}${p.end_date ? ' – ' + p.end_date : ''}\n- Address: ${p.address || 'TBD'}\n- Status: ${p.status}\n- Revenue: $${p.revenue || 'TBD'}\n- Crew: ${(p.crew || []).map(c => c.name + ' (' + c.role + ')').join(', ') || 'None added yet'}\n- Deliverables: ${(p.deliverables || []).map(d => d.name).join(', ') || 'None added yet'}`,
         context: '',
       });
     }

@@ -82,6 +82,7 @@ export default function SettingsPage({ onDeleteAccount }) {
   const [studioEmail, setStudioEmail] = useState('studio65production@gmail.com');
   const [studioPhone, setStudioPhone] = useState('');
   const [studioWebsite, setStudioWebsite] = useState('');
+  const [paymentDetails, setPaymentDetails] = useState('');
   const [notifyBooking, setNotifyBooking]     = useState(true);
   const [notifyOnboarding, setNotifyOnboarding] = useState(true);
   const [notifyContracts, setNotifyContracts]  = useState(true);
@@ -98,6 +99,7 @@ export default function SettingsPage({ onDeleteAccount }) {
         if (u.studio_email) setStudioEmail(u.studio_email);
         if (u.studio_phone) setStudioPhone(u.studio_phone);
         if (u.studio_website) setStudioWebsite(u.studio_website);
+        if (u.payment_details) setPaymentDetails(u.payment_details);
         if (u.notify_booking !== undefined) setNotifyBooking(u.notify_booking);
         if (u.notify_onboarding !== undefined) setNotifyOnboarding(u.notify_onboarding);
         if (u.notify_contracts !== undefined) setNotifyContracts(u.notify_contracts);
@@ -113,6 +115,7 @@ export default function SettingsPage({ onDeleteAccount }) {
       studio_email: studioEmail,
       studio_phone: studioPhone,
       studio_website: studioWebsite,
+      payment_details: paymentDetails,
       notify_booking: notifyBooking,
       notify_onboarding: notifyOnboarding,
       notify_contracts: notifyContracts,
@@ -152,6 +155,19 @@ export default function SettingsPage({ onDeleteAccount }) {
         </Row>
         <Row label="Website">
           <FieldInput value={studioWebsite} onChange={setStudioWebsite} placeholder="https://yourstudio.com" />
+        </Row>
+        <Row label="Payment Details" hint="E-transfer email, bank info — shown on invoices">
+          <textarea
+            value={paymentDetails}
+            onChange={e => setPaymentDetails(e.target.value)}
+            placeholder="e.g. E-transfer: studio65production@gmail.com"
+            style={{
+              background: '#111', border: '1px solid #2A2A2A', borderRadius: 8,
+              padding: '8px 12px', color: '#fff', fontSize: 12,
+              outline: 'none', fontFamily: 'Syne, sans-serif', width: 200,
+              resize: 'none', minHeight: 60,
+            }}
+          />
         </Row>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button

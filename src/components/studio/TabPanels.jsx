@@ -21,6 +21,7 @@ import { base44 } from '@/api/base44Client';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import AISmartNudges from './AISmartNudges';
 import RevenueGoal from './RevenueGoal';
+import OverdueInvoices from './OverdueInvoices';
 import TodaysShoots from './TodaysShoots';
 import MorningTaskList from './MorningTaskList';
 
@@ -49,7 +50,7 @@ const chipStyle = (active) => ({
   userSelect: 'none',
 });
 
-function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, onProjectsChange, onMarkPaid, containerRef, isRefreshing, pullProgress }) {
+function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, onProjectsChange, onMarkPaid, containerRef, isRefreshing, pullProgress, onNavigate }) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
@@ -104,6 +105,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
       <TodaysShoots projects={projects} onOpenDetail={onOpenDetail} />
       <PaymentDeadlines projects={projects} />
       <UpcomingReminders projects={projects} />
+      <OverdueInvoices projects={projects} onOpenDetail={onOpenDetail} />
       <AISmartNudges projects={projects} />
       <RevenueGoal projects={projects} />
       <StatsBar projects={projects} />

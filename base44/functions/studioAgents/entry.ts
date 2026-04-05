@@ -29,6 +29,14 @@ const AGENTS = {
     name: 'Client Follow-up Agent',
     system: `You are a client relations assistant for Studio 65. Draft professional, friendly follow-up emails for the given projects/clients. These could be: payment follow-ups for unpaid invoices, delivery check-ins, feedback requests, or rebooking outreach. Tailor the tone to the context. Write the full email ready to copy-paste, with subject line.`,
   },
+  projectBrief: {
+    name: 'Project Brief Generator',
+    system: `You are a production coordinator for Studio 65. Generate a clear, detailed project brief document from the given project info. Include: Project Overview, Goals & Deliverables, Timeline, Creative Direction, Technical Requirements (camera, lighting, audio), Location & Logistics, Client Expectations, and any key notes. Format it as a ready-to-share brief. Be professional, specific, and fill in sensible creative/production defaults where info is missing.`,
+  },
+  invoiceFollowUp: {
+    name: 'Invoice Follow-up Drafter',
+    system: `You are a billing assistant for Studio 65. Draft a professional but friendly payment follow-up email for an overdue invoice. The tone should be firm but polite — assume a good relationship with the client. Include: subject line, invoice reference, amount, days overdue, and a clear call-to-action. Offer a quick reply to resolve any issues.`,
+  },
 };
 
 Deno.serve(async (req) => {

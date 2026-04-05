@@ -18,6 +18,15 @@
       #root { display: flex; flex-direction: column; }
       img, button, a, [role="button"] { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
     </style>
+    <script>
+      // Apply theme before first paint to avoid flash
+      try {
+        const t = localStorage.getItem('studio65_theme') || 'dark';
+        if (t === 'light') document.documentElement.classList.add('light');
+        else document.documentElement.classList.add('dark');
+        document.body.style.background = t === 'light' ? '#F5F5F5' : '#0A0A0A';
+      } catch(e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
