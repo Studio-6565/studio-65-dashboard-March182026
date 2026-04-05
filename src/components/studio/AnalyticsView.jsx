@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid, AreaChart, Area, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid, LineChart, Line, Legend } from 'recharts';
 import { fmt, margin, marginColor } from '@/lib/studio';
 
 const MONO = '"DM Mono", monospace';
@@ -182,25 +182,15 @@ export default function AnalyticsView({ projects }) {
             {lbl('Monthly Revenue')}
             <div style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthly}>
-                  <defs>
-                    <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#E81A1A" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#E81A1A" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="ng" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7BC853" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#7BC853" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <LineChart data={monthly}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
                   <XAxis dataKey="month" tick={{ fill: '#444', fontSize: 9, fontFamily: MONO }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                   <YAxis tick={{ fill: '#444', fontSize: 9, fontFamily: MONO }} axisLine={false} tickLine={false} tickFormatter={v => '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} width={36} />
                   <Tooltip {...TT} formatter={(v, n) => [fmt(v), n]} />
                   <Legend wrapperStyle={{ fontSize: 10, fontFamily: MONO, color: '#555' }} />
-                  <Area type="monotone" dataKey="Rev" name="Revenue" stroke="#E81A1A" strokeWidth={2} fill="url(#rg)" dot={false} />
-                  <Area type="monotone" dataKey="Net" stroke="#7BC853" strokeWidth={2} fill="url(#ng)" dot={false} />
-                </AreaChart>
+                  <Line type="monotone" dataKey="Rev" name="Revenue" stroke="#E81A1A" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="Net" stroke="#7BC853" strokeWidth={2} dot={false} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
