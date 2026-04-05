@@ -164,10 +164,9 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
   };
 
   const handleDelete = async (c) => {
-    if (!confirm('Delete ' + c.name + '?')) return;
-    await base44.entities.Contact.delete(c.id);
     onContactsChange(contacts.filter(x => x.id !== c.id));
     showToast(c.name + ' removed', 'red');
+    await base44.entities.Contact.delete(c.id);
   };
 
   const handleCancel = () => {
