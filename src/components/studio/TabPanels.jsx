@@ -26,6 +26,7 @@ import TodaysShoots from './TodaysShoots';
 import MorningTaskList from './MorningTaskList';
 import DashboardHome from '@/pages/DashboardHome';
 import EditorsDashboard from '@/pages/EditorsDashboard';
+import KanbanView from './KanbanView';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -61,6 +62,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [clientSheetOpen, setClientSheetOpen] = useState(false);
   const [statusSheetOpen, setStatusSheetOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('kanban');
 
   const clientList = ['All', ...Array.from(new Set(projects.map(p => p.client).filter(Boolean))).sort()];
   const clientOptions = clientList.map(c => ({ value: c, label: c === 'All' ? 'All Clients' : c }));
@@ -103,27 +105,36 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
   return (
     <div ref={containerRef}>
       <PullRefreshIndicator progress={pullProgress} isRefreshing={isRefreshing} />
-      <MorningTaskList />
-      <TodaysShoots projects={projects} onOpenDetail={onOpenDetail} />
-      <PaymentDeadlines projects={projects} />
-      <UpcomingReminders projects={projects} />
-      <OverdueInvoices projects={projects} onOpenDetail={onOpenDetail} />
-      <AISmartNudges projects={projects} />
-      <RevenueGoal projects={projects} />
-      <StatsBar projects={projects} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+
+      {/* View toggle + search bar */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search projects..."
           style={{
-            background: '#1E1E1E', border: '1px solid #2A2A2A',
-            borderRadius: 10, padding: '12px 14px',
-            color: '#fff', fontSize: 14, outline: 'none', width: '100%',
+            flex: 1, background: '#1E1E1E', border: '1px solid #2A2A2A',
+            borderRadius: 10, padding: '10px 14px',
+            color: '#fff', fontSize: 14, outline: 'none',
             fontFamily: 'Syne, sans-serif',
           }}
         />
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {/* View mode toggle */}
+        <div style={{ display: 'flex', background: '#1A1A1A', border: '1px solid #222', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+          {[['kanban', '⬛'], ['grid', '▦']].map(([mode, icon]) => (
+            <button key={mode} onClick={() => setViewMode(mode)} style={{
+              padding: '8px 13px', border: 'none', cursor: 'pointer', fontSize: 14,
+              background: viewMode === mode ? '#2A2A2A' : 'transparent',
+              color: viewMode === mode ? '#fff' : '#555',
+              transition: 'background 0.15s',
+            }}>{icon}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter chips (only for grid view) */}
+      {viewMode === 'grid' && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           <button onClick={() => setSortSheetOpen(true)} style={chipStyle(sortBy !== 'newest')}>↕ {sortLabel}</button>
           <button onClick={() => setClientSheetOpen(true)} style={chipStyle(clientFilter !== 'All')}>🏢 {clientLabel}</button>
           <button onClick={() => setStatusSheetOpen(true)} style={chipStyle(statusFilter !== 'All')}>● {statusLabel}</button>
@@ -131,29 +142,36 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
             {showArchived ? '✓ ' : ''}Archived
           </button>
         </div>
-      </div>
+      )}
 
-      {!filtered.length ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', color: '#666' }}>
-          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>🎬</div>
-          <div style={{ fontSize: 15, marginBottom: 8, color: '#888' }}>
-            {projects.length === 0 ? 'No projects yet.' : 'No projects match your filters.'}
-          </div>
-          {projects.length === 0 && (
-            <button
-              onClick={onNewProject}
-              style={{ marginTop: 12, padding: '14px 28px', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 48 }}
-            >+ Create First Project</button>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, alignItems: 'stretch' }}>
-          {filtered.map(p => (
-            <div key={p.id} style={{ display: 'flex', flexDirection: 'column' }}>
-              <ProjectCard project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} onMarkPaid={onMarkPaid} />
+      {/* Kanban view */}
+      {viewMode === 'kanban' && !search && (
+        <KanbanView projects={projects} onOpenDetail={onOpenDetail} />
+      )}
+
+      {/* Grid view (or search results) */}
+      {(viewMode === 'grid' || search) && (
+        !filtered.length ? (
+          <div style={{ textAlign: 'center', padding: '80px 20px', color: '#666' }}>
+            <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>🎬</div>
+            <div style={{ fontSize: 15, marginBottom: 8, color: '#888' }}>
+              {projects.length === 0 ? 'No projects yet.' : 'No projects match your filters.'}
             </div>
-          ))}
-        </div>
+            {projects.length === 0 && (
+              <button onClick={onNewProject} style={{ marginTop: 12, padding: '14px 28px', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', minHeight: 48 }}>
+                + Create First Project
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, alignItems: 'stretch' }}>
+            {filtered.map(p => (
+              <div key={p.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                <ProjectCard project={p} onClick={() => onOpenDetail(p)} onProjectUpdate={onProjectUpdate} onMarkPaid={onMarkPaid} />
+              </div>
+            ))}
+          </div>
+        )
       )}
 
       <BottomSheet open={sortSheetOpen} onClose={() => setSortSheetOpen(false)} title="Sort By" options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
