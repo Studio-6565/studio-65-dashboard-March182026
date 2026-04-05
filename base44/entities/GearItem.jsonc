@@ -46,16 +46,13 @@
         "Borrowed",
         "Rental"
       ],
-      "default": "Mine",
-      "description": "Who owns this gear"
+      "default": "Mine"
     },
     "owner_name": {
-      "type": "string",
-      "description": "Name of owner if borrowed/rental"
+      "type": "string"
     },
     "vendor_contact_id": {
-      "type": "string",
-      "description": "Contact ID of the rental vendor"
+      "type": "string"
     },
     "purchase_date": {
       "type": "string",
@@ -63,6 +60,78 @@
     },
     "purchase_price": {
       "type": "number"
+    },
+    "rental_rate": {
+      "type": "number",
+      "description": "Daily rental rate when lending this item out"
+    },
+    "rental_rate_unit": {
+      "type": "string",
+      "enum": [
+        "day",
+        "half-day",
+        "week"
+      ],
+      "default": "day"
+    },
+    "assigned_project_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Project IDs this gear is currently assigned to"
+    },
+    "maintenance_records": {
+      "type": "array",
+      "description": "Maintenance history and upcoming scheduled maintenance",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "service",
+              "repair",
+              "cleaning",
+              "calibration",
+              "inspection",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "next_due_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "overdue"
+            ],
+            "default": "scheduled"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
     },
     "notes": {
       "type": "string"

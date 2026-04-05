@@ -4,7 +4,9 @@ import { showToast } from '@/components/studio/StudioToast';
 import BottomSheet from '@/components/studio/BottomSheet';
 import ShootKits from '@/components/gear/ShootKits';
 import GearCalendar from '@/components/gear/GearCalendar';
-import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package, Download } from 'lucide-react';
+import GearMaintenanceTab from '@/components/gear/GearMaintenanceTab';
+import GearProjectAssign from '@/components/gear/GearProjectAssign';
+import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package, Download, Wrench } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -15,12 +17,13 @@ const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Repair'];
 const CONDITION_COLOR = { Excellent: '#7BC853', Good: '#4A9EFF', Fair: '#F59E0B', 'Needs Repair': '#E81A1A' };
 const CAT_ICON = { Camera, Lens: Eye, Audio: Mic2, Lighting: Lightbulb, Drone: Radio, Stabilizer: Maximize2, Storage: HardDrive, Accessories: Plug, Other: Package };
 
-const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', vendor_contact_id: '', purchase_date: '', purchase_price: '', notes: '' };
+const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', vendor_contact_id: '', purchase_date: '', purchase_price: '', rental_rate: '', rental_rate_unit: 'day', notes: '' };
 
 export default function GearPage() {
-  const [tab, setTab] = useState('inventory'); // 'inventory' | 'kits' | 'calendar'
+  const [tab, setTab] = useState('inventory'); // 'inventory' | 'kits' | 'calendar' | 'maintenance'
   const [gear, setGear] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -39,12 +42,18 @@ export default function GearPage() {
     Promise.all([
       base44.entities.GearItem.list('name', 200),
       base44.entities.Contact.list('name', 200),
-    ]).then(([g, c]) => {
+      base44.entities.Project.list('-date', 200),
+    ]).then(([g, c, p]) => {
       setGear(g);
       setContacts(c);
+      setProjects(p);
       setLoading(false);
     });
   }, []);
+
+  const handleGearUpdate = (updated) => {
+    setGear(prev => prev.map(g => g.id === updated.id ? updated : g));
+  };
 
   const activeGear = gear.filter(g => !g.archived);
   const totalValue = activeGear.reduce((s, g) => s + (g.purchase_price || 0), 0);
@@ -68,7 +77,7 @@ export default function GearPage() {
 
   const handleSave = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'red'); return; }
-    const data = { ...form, purchase_price: parseFloat(form.purchase_price) || 0 };
+    const data = { ...form, purchase_price: parseFloat(form.purchase_price) || 0, rental_rate: parseFloat(form.rental_rate) || 0 };
     if (form.ownership === 'Rental' && !form.vendor_contact_id) {
       showToast('Please select a rental vendor', 'amber');
       return;
@@ -97,7 +106,9 @@ export default function GearPage() {
       owner_name: item.owner_name || '', 
       vendor_contact_id: item.vendor_contact_id || '',
       purchase_date: item.purchase_date || '', 
-      purchase_price: item.purchase_price || '', 
+      purchase_price: item.purchase_price || '',
+      rental_rate: item.rental_rate || '',
+      rental_rate_unit: item.rental_rate_unit || 'day',
       notes: item.notes || '' 
     });
     setEditingId(item.id);
@@ -146,9 +157,9 @@ export default function GearPage() {
   );
 
   const TAB_BAR = (
-    <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, width: 'fit-content' }}>
-      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Availability' }].map(t => (
-        <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666' }}>{t.label}</button>
+    <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, flexWrap: 'wrap' }}>
+      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Availability' }, { key: 'maintenance', label: '🔧 Maintenance' }].map(t => (
+        <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666', whiteSpace: 'nowrap' }}>{t.label}</button>
       ))}
     </div>
   );
@@ -167,6 +178,15 @@ export default function GearPage() {
       <div style={{ paddingBottom: 40 }}>
         {TAB_BAR}
         <GearCalendar gear={activeGear} />
+      </div>
+    );
+  }
+
+  if (tab === 'maintenance') {
+    return (
+      <div style={{ paddingBottom: 40 }}>
+        {TAB_BAR}
+        <GearMaintenanceTab gear={activeGear} onGearUpdate={handleGearUpdate} />
       </div>
     );
   }
@@ -261,6 +281,18 @@ export default function GearPage() {
             <div>
               <label style={LS}>Purchase Date</label>
               <input style={IS} type="date" value={form.purchase_date} onChange={e => setForm(f => ({ ...f, purchase_date: e.target.value }))} />
+            </div>
+            <div>
+              <label style={LS}>Rental Rate ($/unit)</label>
+              <input style={IS} type="number" value={form.rental_rate} onChange={e => setForm(f => ({ ...f, rental_rate: e.target.value }))} placeholder="e.g. 150" />
+            </div>
+            <div>
+              <label style={LS}>Rate Unit</label>
+              <select style={IS} value={form.rental_rate_unit} onChange={e => setForm(f => ({ ...f, rental_rate_unit: e.target.value }))}>
+                <option value="day">Per Day</option>
+                <option value="half-day">Per Half-Day</option>
+                <option value="week">Per Week</option>
+              </select>
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LS}>Notes</label>
@@ -358,17 +390,26 @@ export default function GearPage() {
                       {item.serial_number && (
                         <span style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>S/N: {item.serial_number}</span>
                       )}
+                      {item.rental_rate > 0 && (
+                        <span style={{ fontFamily: MONO, fontSize: 10, color: '#A78BFA' }}>${item.rental_rate}/{item.rental_rate_unit || 'day'}</span>
+                      )}
+                      {(item.maintenance_records || []).some(r => r.status !== 'completed' && r.next_due_date) && (
+                        <span style={{ fontFamily: MONO, fontSize: 9, padding: '2px 7px', borderRadius: 4, background: 'rgba(232,26,26,0.1)', color: '#E81A1A' }}>
+                          🔧 {(item.maintenance_records || []).filter(r => r.status !== 'completed').length} pending
+                        </span>
+                      )}
                       {item.notes && (
-                        <span style={{ fontSize: 11, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>{item.notes}</span>
+                        <span style={{ fontSize: 11, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{item.notes}</span>
                       )}
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <GearProjectAssign item={item} projects={projects} onGearUpdate={handleGearUpdate} />
                     <button
                       onClick={() => handleEdit(item)}
-                      style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO, background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}
+                      style={{ padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO, background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}
                     >Edit</button>
                     <button
                       onClick={() => handleDelete(item)}
