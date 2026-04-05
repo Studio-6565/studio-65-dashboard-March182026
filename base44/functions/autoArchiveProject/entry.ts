@@ -4,11 +4,12 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { data } = body;
+    const { data, event } = body;
 
-    if (!data) return Response.json({ skipped: true });
+    if (!data && !event) return Response.json({ skipped: true });
 
     const p = data;
+    const projectId = event?.entity_id;
 
     // Check all conditions:
     // 1. Client has paid (paid === true)
@@ -21,8 +22,9 @@ Deno.serve(async (req) => {
     const deliverablesAllDone = (p.deliverables || []).length > 0 && (p.deliverables || []).every(d => d.done === true);
 
     if (clientPaid && crewAllPaid && rentalsAllPaid && deliverablesAllDone && !p.archived) {
+      const id = projectId || p.id;
       const activity = [...(p.activity || []), { msg: 'Auto-archived: all requirements met', ts: new Date().toISOString() }];
-      await base44.asServiceRole.entities.Project.update(p.id, { archived: true, activity });
+      await base44.asServiceRole.entities.Project.update(id, { archived: true, activity });
       console.log(`Auto-archived project: ${p.name} (${p.id})`);
       return Response.json({ archived: true, project: p.name });
     }
