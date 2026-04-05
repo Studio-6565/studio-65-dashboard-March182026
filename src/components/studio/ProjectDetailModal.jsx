@@ -59,10 +59,11 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const del = p.deliverables || [];
 
   const update = async (changes) => {
-    const updated = { ...p, ...changes, activity: addLog({ ...p, ...changes }, changes._logMsg || 'Project updated') };
-    delete updated._logMsg;
+    const logMsg = changes._logMsg || 'Project updated';
+    const { _logMsg, ...cleanChanges } = changes;
+    const updated = { ...p, ...cleanChanges, activity: addLog({ ...p, ...cleanChanges }, logMsg) };
+    onUpdate(updated); // optimistic update first
     await base44.entities.Project.update(p.id, updated);
-    onUpdate(updated);
   };
 
   const handleTogglePaid = async () => {
@@ -561,7 +562,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
                         {c.email && <button onClick={() => handleEmailCrewPayment(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.1)', color: '#4A9EFF' }}>Pay ✉</button>}
                         <button onClick={() => handleEditCrewStart(i)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(74,158,255,0.12)', color: '#4A9EFF' }}>Edit</button>
                         <button onClick={() => handleCrewPaid(i)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: c.paid ? 'default' : 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: c.paid ? 'rgba(123,200,83,0.18)' : 'rgba(123,200,83,0.1)', color: '#7BC853' }}>{c.paid ? 'Paid ✓' : 'Mark Paid'}</button>
-                        <button onClick={() => handleDelCrew(i)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 15, padding: '2px 5px' }}>×</button>
+                        <button onClick={() => { if (confirm(`Remove ${c.name} from crew?`)) handleDelCrew(i); }} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(232,26,26,0.15)', color: '#E81A1A' }}>Remove</button>
                       </div>
                     </div>
                   )}
