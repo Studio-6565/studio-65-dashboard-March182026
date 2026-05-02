@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import EditorAssignmentPanel from '@/components/studio/EditorAssignmentPanel';
+import VideoTimecodeReview from '@/components/studio/VideoTimecodeReview';
 
 const MONO = '"DM Mono", monospace';
 const SS = { background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -170,94 +171,7 @@ function BriefSection({ project }) {
   );
 }
 
-// ── Comment Thread ────────────────────────────────────────────────────────────
 
-function CommentThread({ upload, onUpdate }) {
-  const [input, setInput] = useState('');
-  const [timecode, setTimecode] = useState('');
-  const [sending, setSending] = useState(false);
-
-  const addComment = async () => {
-    if (!input.trim()) return;
-    setSending(true);
-    const comment = {
-      from: 'Studio 65',
-      from_role: 'studio',
-      body: input.trim(),
-      timecode: timecode.trim() || null,
-      ts: new Date().toISOString(),
-      read_by_editor: false,
-      read_by_studio: true,
-    };
-    const updated = { ...upload, comments: [...(upload.comments || []), comment], read_by_studio: true };
-    await base44.entities.EditUpload.update(upload.id, updated);
-    // Notify editor via backend function
-    base44.functions.invoke('editReviewNotify', {
-      type: 'new_comment',
-      project_name: upload.project_name,
-      editor_name: upload.editor_name,
-      version: upload.version,
-      comment_body: input.trim(),
-      timecode: timecode.trim() || null,
-    });
-    onUpdate(updated);
-    setInput('');
-    setTimecode('');
-    setSending(false);
-  };
-
-  return (
-    <div style={{ marginTop: 12 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10, maxHeight: 220, overflowY: 'auto' }}>
-        {!(upload.comments || []).length && (
-          <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', padding: '6px 0' }}>No comments yet. Leave feedback below.</div>
-        )}
-        {(upload.comments || []).map((c, i) => (
-          <div key={i} style={{
-            display: 'flex', gap: 10, padding: '9px 12px',
-            background: c.from_role === 'studio' ? 'rgba(232,26,26,0.06)' : 'rgba(74,158,255,0.06)',
-            borderLeft: `2px solid ${c.from_role === 'studio' ? '#E81A1A' : '#4A9EFF'}`,
-            borderRadius: '0 8px 8px 0',
-          }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 3 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: c.from_role === 'studio' ? '#E81A1A' : '#4A9EFF' }}>{c.from}</span>
-                {c.timecode && (
-                  <span style={{ fontFamily: MONO, fontSize: 10, padding: '1px 6px', background: 'rgba(245,158,11,0.15)', color: '#F59E0B', borderRadius: 4 }}>⏱ {c.timecode}</span>
-                )}
-                <span style={{ fontFamily: MONO, fontSize: 9, color: '#444', marginLeft: 'auto' }}>
-                  {new Date(c.ts).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div style={{ fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>{c.body}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Comment input */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-        <input
-          value={timecode}
-          onChange={e => setTimecode(e.target.value)}
-          placeholder="0:32"
-          style={{ ...SS, width: 70, flexShrink: 0, fontFamily: MONO, textAlign: 'center' }}
-        />
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') addComment(); }}
-          placeholder="Leave feedback..."
-          style={{ ...SS, flex: 1 }}
-        />
-        <button onClick={addComment} disabled={sending || !input.trim()} style={{ padding: '9px 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', opacity: (!input.trim() || sending) ? 0.5 : 1 }}>
-          {sending ? '...' : 'Post'}
-        </button>
-      </div>
-      <div style={{ fontFamily: MONO, fontSize: 9, color: '#444', marginTop: 4 }}>Optional: enter timecode (e.g. 0:32) before posting</div>
-    </div>
-  );
-}
 
 // ── Upload Card ───────────────────────────────────────────────────────────────
 
@@ -343,8 +257,8 @@ function UploadCard({ upload, onUpdate, onDelete }) {
             </div>
           )}
 
-          {/* Comment thread */}
-          <CommentThread upload={upload} onUpdate={onUpdate} />
+          {/* Video timecode review */}
+          <VideoTimecodeReview upload={upload} onUpdate={onUpdate} isStudio={true} />
 
           {/* Delete */}
           <div style={{ marginTop: 12, textAlign: 'right' }}>
