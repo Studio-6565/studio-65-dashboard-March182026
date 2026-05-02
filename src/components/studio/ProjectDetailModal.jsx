@@ -900,7 +900,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       {tab === 'shoot' && shootSub === 'reminders' && <RemindersTab project={p} />}
       {tab === 'shoot' && shootSub === 'call sheet' && <CallSheetTab project={p} onUpdate={update} />}
       {tab === 'post' && postSub === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
-      {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} />}
+      {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} contacts={contacts} />}
       {tab === 'notes & log' && notesSub === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
 
       {tab === 'notes & log' && notesSub === 'activity' && (

@@ -15,6 +15,7 @@ import LeadsPage from './pages/LeadsPage';
 import ScriptEngine from './pages/ScriptEngine';
 import ScriptAnalytics from './pages/ScriptAnalytics';
 import ContentCalendar from './pages/ContentCalendar';
+import EditorPortal from './pages/EditorPortal';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -29,11 +30,12 @@ const AuthenticatedApp = () => {
   }
 
   // Portal and client portal bypass auth requirement
-  if (window.location.pathname.startsWith('/portal') || window.location.pathname.startsWith('/client-portal')) {
+  if (window.location.pathname.startsWith('/portal') || window.location.pathname.startsWith('/client-portal') || window.location.pathname.startsWith('/editor-portal')) {
     return (
       <Routes>
         <Route path="/portal" element={<Portal />} />
         <Route path="/client-portal" element={<ClientPortal />} />
+        <Route path="/editor-portal" element={<EditorPortal />} />
       </Routes>
     );
   }
@@ -63,6 +65,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
+      <Route path="/editor-portal" element={<EditorPortal />} />
       <Route path="/leads" element={<LeadsPage />} />
       <Route path="/script-engine" element={<ScriptEngine />} />
       <Route path="/script-analytics" element={<ScriptAnalytics />} />

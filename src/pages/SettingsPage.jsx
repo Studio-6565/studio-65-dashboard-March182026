@@ -233,6 +233,7 @@ export default function SettingsPage({ onDeleteAccount }) {
           { label: 'Onboarding Portal', hint: 'Crew, clients & vendors submit info', path: '/onboarding' },
           { label: 'Crew Portal', hint: 'Your crew views shoots & chat', path: '/portal' },
           { label: 'Client Portal', hint: 'Clients review deliverables & approve', path: '/client-portal' },
+          { label: 'Editor Portal', hint: 'Editors view briefs & submit Frame.io links', path: '/editor-portal' },
         ].map(({ label, hint, path }) => (
           <Row key={path} label={label} hint={hint}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

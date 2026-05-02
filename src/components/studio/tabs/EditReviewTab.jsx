@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
+import EditorAssignmentPanel from '@/components/studio/EditorAssignmentPanel';
 
 const MONO = '"DM Mono", monospace';
 const SS = { background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -357,8 +358,8 @@ function UploadCard({ upload, onUpdate, onDelete }) {
 
 // ── Main EditReviewTab ────────────────────────────────────────────────────────
 
-export default function EditReviewTab({ project }) {
-  const [view, setView] = useState('brief'); // 'brief' | 'review'
+export default function EditReviewTab({ project, contacts }) {
+  const [view, setView] = useState('assignments'); // 'assignments' | 'brief' | 'review'
   const [uploads, setUploads] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -407,7 +408,8 @@ export default function EditReviewTab({ project }) {
       {/* Sub-nav */}
       <div style={{ display: 'flex', gap: 0, background: '#111', borderRadius: 10, padding: 3, marginBottom: 20, width: 'fit-content' }}>
         {[
-          { key: 'brief', label: '📋 Brief' },
+          { key: 'assignments', label: '📋 Assignments' },
+          { key: 'brief', label: '📝 Brief' },
           { key: 'review', label: `🎬 Review${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
         ].map(v => (
           <button key={v.key} onClick={() => setView(v.key)} style={{
@@ -424,6 +426,7 @@ export default function EditReviewTab({ project }) {
         ))}
       </div>
 
+      {view === 'assignments' && <EditorAssignmentPanel project={project} contacts={contacts} />}
       {view === 'brief' && <BriefSection project={project} />}
 
       {view === 'review' && (

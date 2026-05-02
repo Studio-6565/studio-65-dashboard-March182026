@@ -1,0 +1,307 @@
+{
+  "name": "EditAssignment",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "show_client_to_editor": {
+      "type": "boolean",
+      "default": true
+    },
+    "editor_name": {
+      "type": "string"
+    },
+    "editor_email": {
+      "type": "string"
+    },
+    "deliverable_name": {
+      "type": "string"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "Reel",
+        "TikTok",
+        "YouTube Short",
+        "Real Estate Listing",
+        "Event Recap",
+        "Podcast Clip",
+        "Corporate Video",
+        "Brand Campaign",
+        "Paid Ad",
+        "Restaurant Content",
+        "Product Video",
+        "Social Package",
+        "Other"
+      ]
+    },
+    "platform": {
+      "type": "string"
+    },
+    "aspect_ratio": {
+      "type": "string"
+    },
+    "duration_target": {
+      "type": "string"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Normal",
+        "High",
+        "Urgent"
+      ],
+      "default": "Normal"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Assigned",
+        "In Progress",
+        "Submitted for Review",
+        "Revision Requested",
+        "Approved",
+        "Final Delivered",
+        "Cancelled"
+      ],
+      "default": "Assigned"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "script": {
+      "type": "string"
+    },
+    "hook": {
+      "type": "string"
+    },
+    "cta": {
+      "type": "string"
+    },
+    "director_notes": {
+      "type": "string"
+    },
+    "music_direction": {
+      "type": "string"
+    },
+    "editing_style": {
+      "type": "string"
+    },
+    "colour_direction": {
+      "type": "string"
+    },
+    "caption_style": {
+      "type": "string"
+    },
+    "export_resolution": {
+      "type": "string"
+    },
+    "export_format": {
+      "type": "string"
+    },
+    "frame_rate": {
+      "type": "string"
+    },
+    "codec": {
+      "type": "string"
+    },
+    "naming_convention": {
+      "type": "string"
+    },
+    "audio_notes": {
+      "type": "string"
+    },
+    "raw_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "inspo_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "submissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "review_notes": {
+            "type": "string"
+          },
+          "reviewed_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "from_role": {
+            "type": "string",
+            "enum": [
+              "studio",
+              "editor"
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          },
+          "read_by_editor": {
+            "type": "boolean",
+            "default": false
+          },
+          "read_by_studio": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "rate_type": {
+      "type": "string",
+      "enum": [
+        "Flat",
+        "Hourly",
+        "Daily",
+        "Per Video",
+        "Per Project"
+      ],
+      "default": "Flat"
+    },
+    "rate_amount": {
+      "type": "number"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "Unpaid",
+        "Pending",
+        "Paid"
+      ],
+      "default": "Unpaid"
+    },
+    "payment_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payment_notes": {
+      "type": "string"
+    },
+    "revision_notes": {
+      "type": "string"
+    },
+    "revision_deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "published": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "project_id",
+    "editor_name",
+    "deliverable_name"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}
