@@ -246,7 +246,8 @@ export default function TabPanels({
   return (
     <div>
       {TABS.map(tab => (
-        <div key={tab} style={{ display: tab === activeTab ? 'block' : 'none' }}>
+        tab !== activeTab ? null :
+        <div key={tab}>
           {tab === 'projects' && (
             <ProjectsPanel
               projects={projects}
