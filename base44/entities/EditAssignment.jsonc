@@ -161,6 +161,33 @@
         }
       }
     },
+    "attached_assets": {
+      "type": "array",
+      "description": "Brand assets attached from the Asset Library",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "file_url": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "submissions": {
       "type": "array",
       "items": {

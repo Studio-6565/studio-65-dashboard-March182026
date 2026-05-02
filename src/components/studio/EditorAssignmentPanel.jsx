@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 import { Send, MessageSquare, CheckCircle2, X, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import AssetAttachPicker from './AssetAttachPicker';
 
 const MONO = '"DM Mono", monospace';
 const SS = { background: '#111', border: '1px solid #1E1E1E', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', boxSizing: 'border-box' };
@@ -64,6 +65,7 @@ function CreateAssignmentForm({ project, contacts, onCreated, onCancel }) {
 
   const [rawLinks, setRawLinks] = useState([]);
   const [inspoLinks, setInspoLinks] = useState([]);
+  const [attachedAssets, setAttachedAssets] = useState([]);
   const [rawInput, setRawInput] = useState({ label: '', url: '' });
   const [inspoInput, setInspoInput] = useState({ label: '', url: '' });
   const [saving, setSaving] = useState(false);
@@ -101,6 +103,7 @@ function CreateAssignmentForm({ project, contacts, onCreated, onCancel }) {
       client_name: project.client,
       raw_links: rawLinks,
       inspo_links: inspoLinks,
+      attached_assets: attachedAssets,
       checklist,
       submissions: [],
       messages: [],
@@ -250,6 +253,14 @@ function CreateAssignmentForm({ project, contacts, onCreated, onCancel }) {
               <input value={rawInput.url} onChange={e => setRawInput(f => ({ ...f, url: e.target.value }))} placeholder="https://drive.google.com/..." style={{ ...SS, flex: 2 }} />
               <button onClick={() => addLink('raw')} style={{ padding: '0 12px', background: '#7BC853', border: 'none', borderRadius: 8, color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
             </div>
+          </div>
+          <div>
+            <label style={LL}>Brand Assets (from Asset Library)</label>
+            <AssetAttachPicker
+              attachedAssets={attachedAssets}
+              clientName={project?.client || ''}
+              onChange={setAttachedAssets}
+            />
           </div>
           <div>
             <label style={LL}>Inspiration / Reference Links</label>

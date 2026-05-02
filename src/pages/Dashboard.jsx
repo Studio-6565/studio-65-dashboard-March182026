@@ -31,6 +31,7 @@ const TAB_LABELS = {
   '/leads': 'Sales Pipeline',
   '/inbox': 'Inbox',
   '/editors': 'Editors',
+  '/asset-library': 'Asset Library',
   '/gear': 'Gear',
   '/operations': 'Operations',
   '/agents': 'AI Agents',

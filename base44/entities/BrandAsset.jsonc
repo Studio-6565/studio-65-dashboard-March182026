@@ -1,0 +1,69 @@
+{
+  "name": "BrandAsset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Logo",
+        "Font",
+        "Sound Effect",
+        "Music",
+        "Intro Bumper",
+        "Outro Bumper",
+        "Overlay",
+        "LUT / Preset",
+        "Template",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "client": {
+      "type": "string",
+      "description": "Optional \u2014 if blank, this is a global Studio 65 asset"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "file_size": {
+      "type": "number"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "file_url"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

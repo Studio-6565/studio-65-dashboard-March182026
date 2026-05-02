@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Loader2, Send, CheckSquare, Square, ExternalLink, ChevronDown, ChevronUp, MessageSquare, CreditCard, LayoutDashboard, FileText, X } from 'lucide-react';
+import { Loader2, Send, CheckSquare, Square, ExternalLink, ChevronDown, ChevronUp, MessageSquare, CreditCard, LayoutDashboard, FileText, X, Layers } from 'lucide-react';
+import ProjectAssetsTab from '@/components/editor-portal/ProjectAssetsTab';
 
 const MONO = '"DM Mono", monospace';
 
@@ -255,8 +256,10 @@ function AssignmentDetail({ assignment, editorName, onUpdate, onBack }) {
     }
   }, [assignment.id]);
 
+  const hasAssets = (assignment.attached_assets || []).length > 0;
   const TABS = [
     { key: 'brief', label: 'Brief' },
+    { key: 'assets', label: `Assets${hasAssets ? ` (${assignment.attached_assets.length})` : ''}` },
     { key: 'materials', label: 'Materials' },
     { key: 'submit', label: 'Submit' },
     { key: 'revisions', label: 'Revisions' },
@@ -358,6 +361,11 @@ function AssignmentDetail({ assignment, editorName, onUpdate, onBack }) {
             </Section>
           )}
         </div>
+      )}
+
+      {/* ASSETS */}
+      {activeTab === 'assets' && (
+        <ProjectAssetsTab attachedAssets={assignment.attached_assets || []} />
       )}
 
       {/* MATERIALS */}
