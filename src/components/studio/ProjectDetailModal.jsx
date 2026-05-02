@@ -17,6 +17,7 @@ import ProjectAIActions from './ProjectAIActions';
 import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 import EquipmentChecklist from './tabs/EquipmentChecklist';
+import ContentSchedulerPanel from './ContentSchedulerPanel';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -376,7 +377,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   };
 
   const shootSubTab = ['crew', 'rentals', 'equipment', 'setup', 'call sheet', 'reminders'];
-  const postSubTab = ['deliverables', 'edit', 'ratings'];
+  const postSubTab = ['deliverables', 'content schedule', 'edit', 'ratings'];
   const financeSubTab = ['invoice', 'expenses', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
@@ -901,6 +902,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       {tab === 'shoot' && shootSub === 'setup' && <SetupTab project={p} onUpdate={update} />}
       {tab === 'shoot' && shootSub === 'reminders' && <RemindersTab project={p} />}
       {tab === 'shoot' && shootSub === 'call sheet' && <CallSheetTab project={p} onUpdate={update} />}
+      {tab === 'post' && postSub === 'content schedule' && <ContentSchedulerPanel project={p} contacts={contacts} />}
       {tab === 'post' && postSub === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
       {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} contacts={contacts} />}
       {tab === 'notes & log' && notesSub === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}

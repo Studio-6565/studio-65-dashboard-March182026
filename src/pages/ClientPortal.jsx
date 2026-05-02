@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, Plus, X, Calendar, Phone, Film } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, CalendarDays, Plus, X, Calendar, Phone, Film } from 'lucide-react';
+import ClientContentSchedule from '@/components/client-portal/ClientContentSchedule';
 import ClientLoginScreen from '@/components/client-portal/ClientLoginScreen';
 import ClientActionCentre from '@/components/client-portal/ClientActionCentre';
 import ClientProjectCard from '@/components/client-portal/ClientProjectCard';
@@ -17,6 +18,7 @@ const MONO = '"DM Mono", monospace';
 const TABS = [
   { key: 'home',     label: 'Home',     Icon: LayoutDashboard },
   { key: 'projects', label: 'Projects', Icon: FolderOpen },
+  { key: 'content',  label: 'Content',  Icon: CalendarDays },
   { key: 'messages', label: 'Messages', Icon: MessageSquare },
   { key: 'invoices', label: 'Invoices', Icon: CreditCard },
 ];
@@ -246,7 +248,7 @@ export default function ClientPortal() {
     return 0;
   };
 
-  const PAGE_TITLES = { home: null, projects: 'Your Projects', messages: 'Messages', invoices: 'Invoices', contracts: 'Contracts' };
+  const PAGE_TITLES = { home: null, projects: 'Your Projects', content: 'Content Schedule', messages: 'Messages', invoices: 'Invoices', contracts: 'Contracts' };
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
@@ -308,6 +310,9 @@ export default function ClientPortal() {
               uploaderName={contact.name}
             />
           </div>
+        )}
+        {tab === 'content' && (
+          <ClientContentSchedule contact={contact} />
         )}
         {tab === 'messages' && (
           <ClientMessagesTab messages={messages} projects={projects} contact={contact} onApproval={handleApproval} onMessageSent={msg => setMessages(prev => [msg, ...prev])} />

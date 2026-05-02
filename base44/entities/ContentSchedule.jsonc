@@ -1,0 +1,93 @@
+{
+  "name": "ContentSchedule",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Suggested caption/copy to post with the content"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "Instagram",
+        "TikTok",
+        "YouTube",
+        "LinkedIn",
+        "Facebook",
+        "Twitter/X",
+        "Other"
+      ],
+      "default": "Instagram"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "Reel",
+        "Post",
+        "Story",
+        "Short",
+        "Video",
+        "Carousel",
+        "Other"
+      ],
+      "default": "Reel"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "scheduled_time": {
+      "type": "string",
+      "description": "e.g. 12:00 PM"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "ready",
+        "posted",
+        "skipped"
+      ],
+      "default": "scheduled"
+    },
+    "client_posted_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name",
+    "title",
+    "scheduled_date"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}
