@@ -1,0 +1,76 @@
+{
+  "name": "ProjectFile",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Brand Assets",
+        "Deliverables",
+        "Scripts",
+        "References",
+        "Raw Footage",
+        "Contracts",
+        "Invoices",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Bytes"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "uploaded_by": {
+      "type": "string",
+      "enum": [
+        "studio",
+        "client"
+      ],
+      "default": "studio"
+    },
+    "uploader_name": {
+      "type": "string"
+    },
+    "visible_to_client": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "project_id",
+    "file_name",
+    "file_url"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

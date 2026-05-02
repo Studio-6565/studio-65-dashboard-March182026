@@ -15,6 +15,7 @@ import InvoiceGenerator from './InvoiceGenerator';
 import ProjectChat from './ProjectChat';
 import ProjectAIActions from './ProjectAIActions';
 import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
+import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -378,7 +379,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const financeSubTab = ['invoice', 'expenses', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
-  const tabs = ['overview', 'shoot', 'post', 'finance', 'notes & log'];
+  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'notes & log'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -881,6 +882,16 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
             </div>
           </div>
         </div>
+      )}
+
+      {tab === 'files' && (
+        <ProjectFilesHub
+          projectId={p.id}
+          projectName={p.name}
+          clientName={p.client}
+          isStudio={true}
+          uploaderName="Studio 65"
+        />
       )}
 
       {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}

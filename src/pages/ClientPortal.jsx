@@ -9,6 +9,7 @@ import ClientMessagesTab from '@/components/client-portal/ClientMessagesTab';
 import ClientContractsTab from '@/components/portal/ClientContractsTab';
 import ShootRequestModal from '@/components/client-portal/ShootRequestModal';
 import { ReserveDateSheet, CallBackSheet } from '@/components/client-portal/QuickRequestSheet';
+import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 
 const MONO = '"DM Mono", monospace';
 
@@ -197,6 +198,7 @@ export default function ClientPortal() {
   const [showShootRequest, setShowShootRequest] = useState(false);
   const [showReserveDate, setShowReserveDate] = useState(false);
   const [showCallBack, setShowCallBack] = useState(false);
+  const [activeProjectFiles, setActiveProjectFiles] = useState(null);
 
   const handleLogin = (c, projs, msgs, ctrs) => {
     setContact(c);
@@ -277,14 +279,35 @@ export default function ClientPortal() {
         {tab === 'home' && (
           <ClientDashboard contact={contact} projects={projects} messages={messages} contracts={contracts} onNavigate={handleNavigate} onRequestShoot={() => setShowShootRequest(true)} />
         )}
-        {tab === 'projects' && (
+        {tab === 'projects' && !activeProjectFiles && (
           projects.length === 0 ? (
             <EmptyState emoji="🎬" title="No projects yet" subtitle="Studio 65 will add your projects here once work begins. Want to get the ball rolling?" cta="Request a Shoot" onCta={() => setShowShootRequest(true)} />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {projects.map(p => <ClientProjectCard key={p.id} project={p} />)}
+              {projects.map(p => (
+                <div key={p.id}>
+                  <ClientProjectCard project={p} />
+                  <button onClick={() => setActiveProjectFiles(p)} style={{ width: '100%', marginTop: 6, padding: '10px 0', background: 'transparent', border: '1px solid #111', borderRadius: 12, color: '#333', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Mono", monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    📁 View Project Files →
+                  </button>
+                </div>
+              ))}
             </div>
           )
+        )}
+        {tab === 'projects' && activeProjectFiles && (
+          <div>
+            <button onClick={() => setActiveProjectFiles(null)} style={{ background: 'none', border: 'none', color: '#E81A1A', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 6 }}>
+              ← Back to Projects
+            </button>
+            <ProjectFilesHub
+              projectId={activeProjectFiles.id}
+              projectName={activeProjectFiles.name}
+              clientName={contact.name}
+              isStudio={false}
+              uploaderName={contact.name}
+            />
+          </div>
         )}
         {tab === 'messages' && (
           <ClientMessagesTab messages={messages} projects={projects} contact={contact} onApproval={handleApproval} onMessageSent={msg => setMessages(prev => [msg, ...prev])} />
