@@ -20,6 +20,7 @@ import DashboardHome from '@/pages/DashboardHome';
 import EditorsDashboard from '@/pages/EditorsDashboard';
 import AssetLibrary from '@/pages/AssetLibrary';
 import KanbanView from './KanbanView';
+import ScriptEngine from '@/pages/ScriptEngine';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -200,7 +201,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['dashboard', 'projects', 'analytics', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['dashboard', 'projects', 'script-engine', 'analytics', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -290,6 +291,7 @@ export default function TabPanels({
             />
           )}
           {tab === 'dashboard' && <DashboardHome projects={projects} contacts={contacts} onOpenDetail={onOpenDetail} />}
+          {tab === 'script-engine' && <ScriptEngine />}
           {tab === 'leads' && <LeadsPage />}
           {tab === 'editors' && <EditorsDashboard />}
           {tab === 'asset-library' && <AssetLibrary />}

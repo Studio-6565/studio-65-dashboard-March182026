@@ -12,7 +12,6 @@ import Portal from './pages/Portal';
 import ClientPortal from './pages/ClientPortal.jsx';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
-import ScriptEngine from './pages/ScriptEngine';
 import ScriptAnalytics from './pages/ScriptAnalytics';
 import ContentCalendar from './pages/ContentCalendar';
 import EditorPortal from './pages/EditorPortal';
@@ -69,7 +68,6 @@ const AuthenticatedApp = () => {
       <Route path="/editor-portal" element={<EditorPortal />} />
       <Route path="/leads" element={<LeadsPage />} />
 
-      <Route path="/script-engine" element={<ScriptEngine />} />
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
       <Route path="/content-calendar" element={<ContentCalendar />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
