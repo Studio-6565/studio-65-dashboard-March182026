@@ -37,7 +37,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
   const [editingCrewForm, setEditingCrewForm] = useState({});
-  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', rate_type: 'flat', phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
+  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', rate_type: 'flat', qty: 1, phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
   const [delForm, setDelForm] = useState({ name: '', due: '' });
   const [hourForm, setHourForm] = useState({ desc: '', person: '', hours: '', date: new Date().toISOString().split('T')[0] });
   const [notes, setNotes] = useState('');
@@ -251,10 +251,13 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const handleAddRental = async () => {
     if (!rentalForm.equipment.trim()) { showToast('Enter equipment name', 'red'); return; }
     const cost = parseFloat(rentalForm.cost) || 0;
+    const qty = parseFloat(rentalForm.qty) || 1;
     const newRental = {
       equipment: rentalForm.equipment.trim(),
       vendor: rentalForm.vendor.trim(),
       cost,
+      qty,
+      total_cost: cost * qty,
       rate_type: rentalForm.rate_type || 'flat',
       phone: rentalForm.phone.trim(),
       email: rentalForm.email.trim(),
@@ -264,9 +267,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       paid: false,
     };
     const rentals = [...(p.rentals || []), newRental];
-    const rental_cost = rentals.reduce((s, r) => s + (parseFloat(r.cost) || 0), 0);
+    const rental_cost = rentals.reduce((s, r) => s + ((parseFloat(r.cost) || 0) * (parseFloat(r.qty) || 1)), 0);
     await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost, _logMsg: `${rentalForm.equipment} added to rentals` });
-    setRentalForm({ equipment: '', vendor: '', cost: '', rate_type: 'flat', phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
+    setRentalForm({ equipment: '', vendor: '', cost: '', rate_type: 'flat', qty: 1, phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
     showToast(rentalForm.equipment + ' added');
   };
 
@@ -302,7 +305,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
 
   const handleDelRental = async (i) => {
     const rentals = p.rentals.filter((_, j) => j !== i);
-    const rental_cost = rentals.reduce((s, r) => s + r.cost, 0);
+    const rental_cost = rentals.reduce((s, r) => s + ((parseFloat(r.cost) || 0) * (parseFloat(r.qty) || 1)), 0);
     await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost });
   };
 
@@ -697,7 +700,10 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: r.paid ? '#7BC853' : '#F59E0B', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{r.equipment}{r.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{r.phone}</span>}</div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{r.vendor || '—'} · {fmt(r.cost)}{r.rate_type && r.rate_type !== 'flat' ? ` (${r.rate_type})` : ''}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>
+                      {r.vendor || '—'} · {r.qty && r.qty > 1 ? `${r.qty}×` : ''}{fmt(r.cost)}{r.rate_type && r.rate_type !== 'flat' ? ` (${r.rate_type})` : ''}
+                      {r.qty && r.qty > 1 ? <span style={{ color: '#fff', marginLeft: 4 }}>= {fmt((parseFloat(r.cost)||0)*(parseFloat(r.qty)||1))}</span> : ''}
+                    </div>
                     {(r.pickup_date || r.return_date) && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#555', marginTop: 2 }}>📅 {r.pickup_date ? 'Pickup: ' + r.pickup_date.replace('T', ' ') : ''}{r.return_date ? ' · Return: ' + r.return_date.replace('T', ' ') : ''}</div>}
                     {r.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 3, fontStyle: 'italic' }}>{r.notes}</div>}
                   </div>
@@ -742,6 +748,10 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
                   <input style={{ ...SS, background: '#1E1E1E' }} type={type} placeholder={ph} value={rentalForm[k]} onChange={e => setRentalForm(f => ({ ...f, [k]: e.target.value }))} />
                 </div>
               ))}
+              <div>
+                <label style={LL}>Qty</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="number" min="1" placeholder="1" value={rentalForm.qty} onChange={e => setRentalForm(f => ({ ...f, qty: e.target.value }))} />
+              </div>
               <div>
                 <label style={LL}>Rate Type</label>
                 <div style={{ display: 'flex', gap: 0, background: '#1E1E1E', borderRadius: 8, border: '1px solid #333', overflow: 'hidden' }}>

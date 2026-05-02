@@ -47,6 +47,11 @@ export default function MonthlyStatsDashboard({ projects = [] }) {
   const paidInvoices = monthProjects.filter(p => p.paid);
   const outstandingAmt = outstandingInvoices.reduce((s, p) => s + (p.revenue || 0), 0);
   const paidAmt = paidInvoices.reduce((s, p) => s + (p.revenue || 0), 0);
+  const overdueInvoices = projects.filter(p =>
+    p.status === 'Invoiced' && !p.paid &&
+    p.invoice_due_date && p.invoice_due_date < today
+  );
+  const overdueAmt = overdueInvoices.reduce((s, p) => s + (p.revenue || 0), 0);
 
   const lastRevenue = lastMonthProjects.reduce((s, p) => s + (p.revenue || 0), 0);
   const revChange = lastRevenue > 0 ? Math.round(((revenue - lastRevenue) / lastRevenue) * 100) : null;
@@ -89,6 +94,7 @@ export default function MonthlyStatsDashboard({ projects = [] }) {
         <StatCard label="Crew Cost" value={fmt(crewCost)} />
         <StatCard label="Rental Cost" value={fmt(rentalCost)} />
         <StatCard label="Misc Expenses" value={fmt(expenseCost)} />
+        <StatCard label="Overdue" value={fmt(overdueAmt)} sub={`${overdueInvoices.length} overdue`} color={overdueInvoices.length > 0 ? '#E81A1A' : '#7BC853'} />
       </div>
     </div>
   );

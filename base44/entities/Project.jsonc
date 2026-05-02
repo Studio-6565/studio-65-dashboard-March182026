@@ -13,8 +13,7 @@
     },
     "is_test": {
       "type": "boolean",
-      "default": false,
-      "description": "Marks this as test/dev data \u2014 hidden from the live Portal"
+      "default": false
     },
     "date": {
       "type": "string",
@@ -29,8 +28,7 @@
       "items": {
         "type": "string",
         "format": "date"
-      },
-      "description": "Additional shoot dates for multi-day/non-consecutive shoots"
+      }
     },
     "start_time": {
       "type": "string"
@@ -78,15 +76,27 @@
       "type": "boolean",
       "default": false
     },
+    "invoice_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "viewed",
+        "paid",
+        "partially_paid",
+        "overdue",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Detailed invoice status"
+    },
     "invoice_date": {
       "type": "string",
-      "format": "date",
-      "description": "Date invoice was sent"
+      "format": "date"
     },
     "invoice_due_date": {
       "type": "string",
-      "format": "date",
-      "description": "Invoice payment due date"
+      "format": "date"
     },
     "invoice_number": {
       "type": "string"
@@ -104,8 +114,7 @@
       "default": ""
     },
     "call_sheet_url": {
-      "type": "string",
-      "description": "Uploaded call sheet PDF URL"
+      "type": "string"
     },
     "crew": {
       "type": "array",
@@ -122,7 +131,9 @@
             "type": "string",
             "enum": [
               "flat",
-              "hourly"
+              "hourly",
+              "daily",
+              "project"
             ],
             "default": "flat"
           },
@@ -155,8 +166,7 @@
           },
           "due_date": {
             "type": "string",
-            "format": "date",
-            "description": "Payment due date for this crew member"
+            "format": "date"
           }
         }
       }
@@ -175,6 +185,23 @@
           "cost": {
             "type": "number"
           },
+          "qty": {
+            "type": "number",
+            "default": 1
+          },
+          "total_cost": {
+            "type": "number"
+          },
+          "rate_type": {
+            "type": "string",
+            "enum": [
+              "flat",
+              "daily",
+              "hourly",
+              "project"
+            ],
+            "default": "flat"
+          },
           "phone": {
             "type": "string"
           },
@@ -184,17 +211,24 @@
           "paid": {
             "type": "boolean"
           },
+          "pickup_date": {
+            "type": "string"
+          },
+          "return_date": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
           "due_date": {
             "type": "string",
-            "format": "date",
-            "description": "Payment due date for this rental"
+            "format": "date"
           }
         }
       }
     },
     "expenses": {
       "type": "array",
-      "description": "Miscellaneous project expenses",
       "items": {
         "type": "object",
         "properties": {
@@ -257,7 +291,6 @@
     },
     "equipment_checklist": {
       "type": "array",
-      "description": "Per-project equipment checklist items with checked state",
       "items": {
         "type": "object",
         "properties": {
@@ -266,6 +299,17 @@
           },
           "checked": {
             "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "needed",
+              "packed",
+              "used",
+              "returned",
+              "missing"
+            ],
+            "default": "needed"
           }
         }
       }
@@ -296,6 +340,21 @@
         },
         "notes": {
           "type": "string"
+        },
+        "photo_format": {
+          "type": "string"
+        },
+        "photo_aspect": {
+          "type": "string"
+        },
+        "photo_raw": {
+          "type": "boolean"
+        },
+        "photo_dual_camera": {
+          "type": "boolean"
+        },
+        "photo_flash": {
+          "type": "boolean"
         }
       }
     },
