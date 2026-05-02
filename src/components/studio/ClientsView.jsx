@@ -133,7 +133,9 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
   const handleSave = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'red'); return; }
     const data = { ...form, types: ['Client'] };
-    if (editingId) {
+    // editingId starting with '_proj_' means synthetic — always create
+    const isSynthetic = editingId && String(editingId).startsWith('_proj_');
+    if (editingId && !isSynthetic) {
       await base44.entities.Contact.update(editingId, data);
       onContactsChange(contacts.map(c => c.id === editingId ? { ...c, ...data } : c));
       showToast(form.name + ' updated', 'blue');
