@@ -37,8 +37,9 @@ function ClientCard({ client: c, projects, onEdit, onDelete }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-          {c.client_company && <div style={{ fontSize: 12, color: '#666', fontFamily: MONO }}>{c.client_company}</div>}
+              {c.client_company && <div style={{ fontSize: 12, color: '#666', fontFamily: MONO }}>{c.client_company}</div>}
           {!c.client_company && c.role && <div style={{ fontSize: 12, color: '#666' }}>{c.role}</div>}
+          {c._synthetic && <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', background: 'rgba(100,100,100,0.12)', border: '1px solid #333', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginTop: 4 }}>project client · no contact record</div>}
         </div>
       </div>
 
@@ -115,7 +116,15 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  const clients = contacts.filter(c => (c.types || []).includes('Client'));
+  // Include contacts tagged as Client OR any project client name not yet in contacts
+  const taggedClients = contacts.filter(c => (c.types || []).includes('Client'));
+  const taggedNames = new Set(taggedClients.map(c => c.name.toLowerCase()));
+  // Build synthetic entries for project clients with no contact record
+  const projectClientNames = [...new Set(projects.map(p => p.client).filter(Boolean))];
+  const untaggedClients = projectClientNames
+    .filter(name => !taggedNames.has(name.toLowerCase()))
+    .map(name => ({ id: '_proj_' + name, name, types: [], _synthetic: true }));
+  const clients = [...taggedClients, ...untaggedClients];
   const filtered = clients.filter(c => {
     const q = search.toLowerCase();
     return !q || c.name.toLowerCase().includes(q) || (c.client_company || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q);
@@ -150,6 +159,7 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
   };
 
   const handleDelete = async (c) => {
+    if (c._synthetic) { showToast('This client has no contact record to delete', 'amber'); return; }
     if (!confirm(`Delete ${c.name}?`)) return;
     onContactsChange(contacts.filter(x => x.id !== c.id));
     await base44.entities.Contact.delete(c.id);
