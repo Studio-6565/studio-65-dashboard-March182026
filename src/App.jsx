@@ -9,7 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Dashboard from './pages/Dashboard.jsx';
 import ContractsPage from './pages/ContractsPage.jsx';
 import Portal from './pages/Portal';
-import ClientPortal from './pages/ClientPortal';
+import ClientPortal from './pages/ClientPortal.jsx';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 import ScriptEngine from './pages/ScriptEngine';
