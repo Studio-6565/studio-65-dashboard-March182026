@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useHaptic } from '@/hooks/useHaptic';
-import { Film, Calendar, Clipboard, Mail, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, CalendarDays } from 'lucide-react';
+import { Film, Calendar, Clipboard, Mail, BarChart3, Users, Clock, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, CalendarDays, UserCheck } from 'lucide-react';
 
 // Primary tabs — always visible
 const PRIMARY_TABS = [
@@ -18,6 +18,7 @@ const MORE_TABS = [
   { path: '/content-calendar', Icon: CalendarDays, label: 'Content Calendar' },
   { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
+  { path: '/clients',    Icon: UserCheck, label: 'Clients' },
   { path: '/crew',       Icon: Users, label: 'Crew Spend' },
   { path: '/timeline',   Icon: Clock, label: 'Timeline' },
   { path: '/editors',    Icon: Video, label: 'Editors' },

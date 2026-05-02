@@ -5,6 +5,7 @@ import CalendarView from './CalendarView';
 import CrewSpendView from './CrewSpendView';
 import TimelineView from './TimelineView';
 import ContactsView from './ContactsView';
+import ClientsView from './ClientsView';
 import PullRefreshIndicator from './PullRefreshIndicator';
 import ProjectCard from './ProjectCard';
 import BottomSheet from './BottomSheet';
@@ -198,7 +199,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['dashboard', 'projects', 'analytics', 'calendar', 'crew', 'timeline', 'contacts', 'leads', 'editors', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['dashboard', 'projects', 'analytics', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -274,6 +275,9 @@ export default function TabPanels({
           {tab === 'contracts' && <ContractsPage />}
           {tab === 'inbox' && <InboxPage projects={projects} contacts={contacts} />}
           {tab === 'settings' && <SettingsPage onDeleteAccount={onDeleteAccount} />}
+          {tab === 'clients' && (
+            <ClientsView contacts={contacts} onContactsChange={onContactsChange} projects={projects} />
+          )}
           {tab === 'contacts' && (
             <ContactsTab
               contacts={contacts}

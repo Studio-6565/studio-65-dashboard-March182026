@@ -26,6 +26,7 @@ const TAB_LABELS = {
   '/calendar': 'Calendar',
   '/crew': 'Crew',
   '/timeline': 'Timeline',
+  '/clients':  'Clients',
   '/contacts': 'Contacts',
   '/leads': 'Sales Pipeline',
   '/inbox': 'Inbox',
