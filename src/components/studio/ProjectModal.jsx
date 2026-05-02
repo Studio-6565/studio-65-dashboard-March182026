@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StudioModal from './StudioModal';
 import BottomSheet from './BottomSheet';
 import { fmt, nextProjectId } from '@/lib/studio';
+import AddressAutocomplete from './AddressAutocomplete';
 
 export default function ProjectModal({ open, onClose, editingProject, templates, projects, contacts, onSave }) {
   const [form, setForm] = useState({
@@ -162,7 +163,7 @@ export default function ProjectModal({ open, onClose, editingProject, templates,
         </div>
         <div style={{ gridColumn: '1/-1' }}>
           <label style={labelStyle}>Shoot Address</label>
-          <input style={inputStyle} value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="e.g. 123 Queen St W, Toronto, ON" />
+          <AddressAutocomplete style={inputStyle} value={form.address} onChange={v => setForm(f => ({ ...f, address: v }))} />
         </div>
         <div>
           <label style={labelStyle}>Point of Contact Name</label>

@@ -37,7 +37,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
   const [editingCrewForm, setEditingCrewForm] = useState({});
-  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
+  const [rentalForm, setRentalForm] = useState({ equipment: '', vendor: '', cost: '', rate_type: 'flat', phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
   const [delForm, setDelForm] = useState({ name: '', due: '' });
   const [hourForm, setHourForm] = useState({ desc: '', person: '', hours: '', date: new Date().toISOString().split('T')[0] });
   const [notes, setNotes] = useState('');
@@ -48,6 +48,12 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   useEffect(() => {
     if (project) { setNotes(project.notes || ''); setTab('overview'); setEditingCrewIdx(null); }
   }, [project?.id]);
+
+  const [selectedCrewForCalendar, setSelectedCrewForCalendar] = useState(null);
+  const [shootSub, setShootSub] = useState('crew');
+  const [postSub, setPostSub] = useState('deliverables');
+  const [financeSub, setFinanceSub] = useState('invoice');
+  const [notesSub, setNotesSub] = useState('notes');
 
   if (!project) return null;
   const p = project;
@@ -245,10 +251,22 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const handleAddRental = async () => {
     if (!rentalForm.equipment.trim()) { showToast('Enter equipment name', 'red'); return; }
     const cost = parseFloat(rentalForm.cost) || 0;
-    const rentals = [...(p.rentals || []), { equipment: rentalForm.equipment.trim(), vendor: rentalForm.vendor.trim(), cost, phone: rentalForm.phone.trim(), email: rentalForm.email.trim(), paid: false }];
+    const newRental = {
+      equipment: rentalForm.equipment.trim(),
+      vendor: rentalForm.vendor.trim(),
+      cost,
+      rate_type: rentalForm.rate_type || 'flat',
+      phone: rentalForm.phone.trim(),
+      email: rentalForm.email.trim(),
+      pickup_date: rentalForm.pickup_date || '',
+      return_date: rentalForm.return_date || '',
+      notes: rentalForm.notes.trim(),
+      paid: false,
+    };
+    const rentals = [...(p.rentals || []), newRental];
     const rental_cost = rentals.reduce((s, r) => s + (parseFloat(r.cost) || 0), 0);
     await update({ rentals, rental_cost, net: p.revenue - p.crew_cost - rental_cost, _logMsg: `${rentalForm.equipment} added to rentals` });
-    setRentalForm({ equipment: '', vendor: '', cost: '', phone: '', email: '' });
+    setRentalForm({ equipment: '', vendor: '', cost: '', rate_type: 'flat', phone: '', email: '', pickup_date: '', return_date: '', notes: '' });
     showToast(rentalForm.equipment + ' added');
   };
 
@@ -325,7 +343,6 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   };
 
   const crewContacts = (contacts || []).filter(c => (c.types || []).includes('Crew'));
-  const [selectedCrewForCalendar, setSelectedCrewForCalendar] = useState(null);
 
   const handleEmailCrew = (c) => {
     if (!c.email) { showToast('No email saved for ' + c.name, 'red'); return; }
@@ -352,11 +369,6 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
     onContactsChange([...(contacts || []), created]);
     showToast(`${name} saved to Contacts`, 'green');
   };
-
-  const [shootSub, setShootSub] = useState('crew');
-  const [postSub, setPostSub] = useState('deliverables');
-  const [financeSub, setFinanceSub] = useState('invoice');
-  const [notesSub, setNotesSub] = useState('notes');
 
   const shootSubTab = ['crew', 'rentals', 'setup', 'call sheet', 'reminders'];
   const postSubTab = ['deliverables', 'edit', 'ratings'];
@@ -685,7 +697,9 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: r.paid ? '#7BC853' : '#F59E0B', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>{r.equipment}{r.phone && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', marginLeft: 4 }}>{r.phone}</span>}</div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{r.vendor || '—'} · {fmt(r.cost)}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', marginTop: 2 }}>{r.vendor || '—'} · {fmt(r.cost)}{r.rate_type && r.rate_type !== 'flat' ? ` (${r.rate_type})` : ''}</div>
+                    {(r.pickup_date || r.return_date) && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#555', marginTop: 2 }}>📅 {r.pickup_date ? 'Pickup: ' + r.pickup_date.replace('T', ' ') : ''}{r.return_date ? ' · Return: ' + r.return_date.replace('T', ' ') : ''}</div>}
+                    {r.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 3, fontStyle: 'italic' }}>{r.notes}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <button onClick={() => handleSaveVendorToContacts(r)} style={{ padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.1)', color: '#7BC853' }}>+ Contacts</button>
@@ -705,7 +719,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
               </div>
             )}
           </div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Add Rental Item</div>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Add Rental Vendor</div>
           {(contacts || []).some(c => (c.types || []).includes('Vendor') && (c.offerings || []).length > 0) && (
             <div style={{ marginBottom: 14 }}>
               <label style={LL}>Quick-add from vendor</label>
@@ -721,15 +735,40 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
             </div>
           )}
           <div style={{ background: '#2A2A2A', border: '1px solid #333', borderRadius: 10, padding: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px,1fr))', gap: 10, marginBottom: 10 }}>
-              {[['Equipment', 'equipment', 'e.g. Camera', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text'], ['Cost ($)', 'cost', '0', 'number']].map(([l, k, ph, type]) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px,1fr))', gap: 10, marginBottom: 10 }}>
+              {[['Rental Item', 'equipment', 'e.g. Sony FX6', 'text'], ['Vendor', 'vendor', 'e.g. BorrowLenses', 'text']].map(([l, k, ph, type]) => (
                 <div key={k}>
                   <label style={LL}>{l}</label>
                   <input style={{ ...SS, background: '#1E1E1E' }} type={type} placeholder={ph} value={rentalForm[k]} onChange={e => setRentalForm(f => ({ ...f, [k]: e.target.value }))} />
                 </div>
               ))}
+              <div>
+                <label style={LL}>Rate Type</label>
+                <div style={{ display: 'flex', gap: 0, background: '#1E1E1E', borderRadius: 8, border: '1px solid #333', overflow: 'hidden' }}>
+                  {[['flat', 'Flat'], ['daily', 'Daily'], ['hourly', 'Hourly'], ['project', 'Project']].map(([v, l]) => (
+                    <button key={v} type="button" onClick={() => setRentalForm(f => ({ ...f, rate_type: v }))}
+                      style={{ flex: 1, padding: '8px 4px', fontSize: 9, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: rentalForm.rate_type === v ? '#E81A1A' : 'transparent', color: rentalForm.rate_type === v ? '#fff' : '#666', whiteSpace: 'nowrap' }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={LL}>Cost ($)</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="number" placeholder="0" value={rentalForm.cost} onChange={e => setRentalForm(f => ({ ...f, cost: e.target.value }))} />
+              </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 10, alignItems: 'end' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+              <div>
+                <label style={LL}>Pickup Date/Time</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="datetime-local" value={rentalForm.pickup_date} onChange={e => setRentalForm(f => ({ ...f, pickup_date: e.target.value }))} />
+              </div>
+              <div>
+                <label style={LL}>Return Date/Time</label>
+                <input style={{ ...SS, background: '#1E1E1E' }} type="datetime-local" value={rentalForm.return_date} onChange={e => setRentalForm(f => ({ ...f, return_date: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
               <div>
                 <label style={LL}>WhatsApp #</label>
                 <input style={{ ...SS, background: '#1E1E1E' }} type="text" placeholder="+1 416 555 0100" value={rentalForm.phone} onChange={e => setRentalForm(f => ({ ...f, phone: e.target.value }))} />
@@ -738,8 +777,12 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
                 <label style={LL}>Email</label>
                 <input style={{ ...SS, background: '#1E1E1E' }} type="email" placeholder="vendor@example.com" value={rentalForm.email} onChange={e => setRentalForm(f => ({ ...f, email: e.target.value }))} />
               </div>
-              <button onClick={handleAddRental} style={{ height: 38, padding: '0 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
             </div>
+            <div style={{ marginBottom: 10 }}>
+              <label style={LL}>Notes</label>
+              <input style={{ ...SS, background: '#1E1E1E' }} placeholder="Pickup instructions, serial #, special requirements..." value={rentalForm.notes} onChange={e => setRentalForm(f => ({ ...f, notes: e.target.value }))} />
+            </div>
+            <button onClick={handleAddRental} style={{ width: '100%', height: 38, background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>+ Add Rental</button>
           </div>
         </div>
       )}

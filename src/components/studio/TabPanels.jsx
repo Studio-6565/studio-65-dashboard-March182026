@@ -28,6 +28,13 @@ const SORT_OPTIONS = [
   { value: 'rev_high', label: 'Highest Revenue' },
   { value: 'rev_low', label: 'Lowest Revenue' },
   { value: 'margin', label: 'Highest Margin' },
+  { value: 'upcoming', label: 'Upcoming First' },
+];
+const PAYMENT_FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'invoiced', label: 'Invoiced' },
 ];
 
 const chipStyle = (active) => ({
@@ -50,9 +57,11 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
   const [showArchived, setShowArchived] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [clientFilter, setClientFilter] = useState('All');
+  const [paymentFilter, setPaymentFilter] = useState('all');
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [clientSheetOpen, setClientSheetOpen] = useState(false);
   const [statusSheetOpen, setStatusSheetOpen] = useState(false);
+  const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState('kanban');
 
   const clientList = ['All', ...Array.from(new Set(projects.map(p => p.client).filter(Boolean))).sort()];
@@ -68,6 +77,9 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
       }
       if (statusFilter !== 'All' && p.status !== statusFilter) return false;
       if (clientFilter !== 'All' && p.client !== clientFilter) return false;
+      if (paymentFilter === 'paid' && !p.paid) return false;
+      if (paymentFilter === 'unpaid' && p.paid) return false;
+      if (paymentFilter === 'invoiced' && p.status !== 'Invoiced') return false;
       if (search) {
         const q = search.toLowerCase();
         return (p.name || '').toLowerCase().includes(q) ||
@@ -86,12 +98,22 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
         const mb = (b.revenue || 0) > 0 ? (b.net || 0) / b.revenue : 0;
         return mb - ma;
       }
+      if (sortBy === 'upcoming') {
+        const today = new Date().toISOString().split('T')[0];
+        const aFut = (a.date || '') >= today;
+        const bFut = (b.date || '') >= today;
+        if (aFut && bFut) return (a.date || '').localeCompare(b.date || '');
+        if (aFut) return -1;
+        if (bFut) return 1;
+        return new Date(b.date || 0) - new Date(a.date || 0);
+      }
       return 0;
     });
 
   const sortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Sort';
   const clientLabel = clientFilter === 'All' ? 'All Clients' : clientFilter;
   const statusLabel = statusFilter === 'All' ? 'All Status' : statusFilter;
+  const paymentLabel = PAYMENT_FILTERS.find(o => o.value === paymentFilter)?.label || 'Payment';
 
   return (
     <div ref={containerRef} style={{ paddingTop: 4 }}>
@@ -129,6 +151,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
           <button onClick={() => setSortSheetOpen(true)} style={chipStyle(sortBy !== 'newest')}>↕ {sortLabel}</button>
           <button onClick={() => setClientSheetOpen(true)} style={chipStyle(clientFilter !== 'All')}>🏢 {clientLabel}</button>
           <button onClick={() => setStatusSheetOpen(true)} style={chipStyle(statusFilter !== 'All')}>● {statusLabel}</button>
+          <button onClick={() => setPaymentSheetOpen(true)} style={chipStyle(paymentFilter !== 'all')}>💳 {paymentLabel}</button>
           <button onClick={() => setShowArchived(v => !v)} style={chipStyle(showArchived)}>
             {showArchived ? '✓ ' : ''}Archived
           </button>
@@ -168,6 +191,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
       <BottomSheet open={sortSheetOpen} onClose={() => setSortSheetOpen(false)} title="Sort By" options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
       <BottomSheet open={clientSheetOpen} onClose={() => setClientSheetOpen(false)} title="Filter by Client" options={clientOptions} value={clientFilter} onChange={setClientFilter} />
       <BottomSheet open={statusSheetOpen} onClose={() => setStatusSheetOpen(false)} title="Filter by Status" options={statusOptions} value={statusFilter} onChange={setStatusFilter} />
+      <BottomSheet open={paymentSheetOpen} onClose={() => setPaymentSheetOpen(false)} title="Payment Status" options={PAYMENT_FILTERS} value={paymentFilter} onChange={setPaymentFilter} />
     </div>
   );
 }

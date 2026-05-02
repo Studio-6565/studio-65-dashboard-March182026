@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import StudioModal from './StudioModal';
 import { fmt, nextProjectId } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
+import AddressAutocomplete from './AddressAutocomplete';
 
 const STEPS = [
   { key: 'basics',      label: 'Basic Info',           icon: '🎬' },
@@ -227,7 +228,7 @@ export default function ProjectWizard({ open, onClose, projects, contacts = [], 
           </div>
           <div>
             <label style={LS}>Shoot Address</label>
-            <input style={IS} value={address} onChange={e => setAddress(e.target.value)} placeholder="e.g. 123 Queen St W, Toronto, ON" />
+            <AddressAutocomplete style={IS} value={address} onChange={setAddress} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>

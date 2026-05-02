@@ -8,6 +8,7 @@ import RevenueGoal from '@/components/studio/RevenueGoal';
 import UpcomingReminders from '@/components/studio/UpcomingReminders';
 import PaymentDeadlines from '@/components/studio/PaymentDeadlines';
 import OverdueInvoices from '@/components/studio/OverdueInvoices';
+import MonthlyStatsDashboard from '@/components/studio/MonthlyStatsDashboard';
 
 const MONO = '"DM Mono", monospace';
 
@@ -173,6 +174,9 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
           ))}
         </div>
       )}
+
+      {/* Monthly stats */}
+      <MonthlyStatsDashboard projects={active} />
 
       {/* Key stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>

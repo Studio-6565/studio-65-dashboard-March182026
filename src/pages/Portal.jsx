@@ -52,7 +52,7 @@ function LoginScreen({ onLogin }) {
         const contacts = await base44.entities.Contact.filter({ email: userId });
         if (contacts.length) {
           const c = contacts[0];
-          const myProjects = await loadContactProjects(c);
+          const myProjects = await base44.functions.invoke('portalAuth', { action: 'get_projects', contact_id: c.id }).then(r => r.data?.projects || []);
           onLogin(c, myProjects);
         } else {
           setError('Biometric recognized but no account found. Try email or access code.');

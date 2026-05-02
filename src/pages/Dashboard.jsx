@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 
 import TabPanels from '@/components/studio/TabPanels';
 import DashboardHome from './DashboardHome';
+import { LogOut } from 'lucide-react';
 import ProjectModal from '@/components/studio/ProjectModal';
 import ProjectWizard from '@/components/studio/ProjectWizard';
 import ProjectDetailPage from './ProjectDetailPage';
@@ -232,6 +233,18 @@ export default function Dashboard() {
                 }}
               >+ New</button>
             )}
+            <button
+              onClick={() => base44.auth.logout()}
+              style={{
+                minWidth: 40, minHeight: 40, padding: '0 10px',
+                background: 'transparent', border: '1px solid #222', borderRadius: 8,
+                color: '#555', fontSize: 12, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
 
