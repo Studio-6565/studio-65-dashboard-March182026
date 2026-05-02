@@ -16,6 +16,7 @@ import ProjectChat from './ProjectChat';
 import ProjectAIActions from './ProjectAIActions';
 import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
+import EquipmentChecklist from './tabs/EquipmentChecklist';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -374,7 +375,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
     showToast(`${name} saved to Contacts`, 'green');
   };
 
-  const shootSubTab = ['crew', 'rentals', 'setup', 'call sheet', 'reminders'];
+  const shootSubTab = ['crew', 'rentals', 'equipment', 'setup', 'call sheet', 'reminders'];
   const postSubTab = ['deliverables', 'edit', 'ratings'];
   const financeSubTab = ['invoice', 'expenses', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
@@ -896,6 +897,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
 
       {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}
       {tab === 'finance' && financeSub === 'invoice' && <InvoiceGenerator project={p} onUpdate={onUpdate} />}
+      {tab === 'shoot' && shootSub === 'equipment' && <EquipmentChecklist project={p} onUpdate={update} />}
       {tab === 'shoot' && shootSub === 'setup' && <SetupTab project={p} onUpdate={update} />}
       {tab === 'shoot' && shootSub === 'reminders' && <RemindersTab project={p} />}
       {tab === 'shoot' && shootSub === 'call sheet' && <CallSheetTab project={p} onUpdate={update} />}
