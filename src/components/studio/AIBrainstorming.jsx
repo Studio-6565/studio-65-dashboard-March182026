@@ -14,10 +14,11 @@ export default function AIBrainstorming({ project, platform, goal }) {
     setLoading(true);
     try {
       // Fetch historical performance data for this client
-      const perfData = await base44.entities.ScriptPerformance.filter({
-        client: project?.client,
-        platform: platform
-      }, '-publish_date', 50);
+      const allPerf = await base44.entities.ScriptPerformance.list('-publish_date', 50);
+      const perfData = allPerf.filter(p =>
+        (!project?.client || p.client === project.client) &&
+        (!platform || p.platform === platform)
+      );
 
       if (perfData.length === 0) {
         showToast('No historical data for this client yet. Generate ideas based on platform trends.', 'amber');

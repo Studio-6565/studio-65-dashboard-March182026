@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
-import BottomSheet from '@/components/studio/BottomSheet';
+import StudioToast from '@/components/studio/StudioToast';
 import AIBrainstorming from '@/components/studio/AIBrainstorming';
+import { useNavigate } from 'react-router-dom';
 
 const MONO = '"DM Mono", monospace';
 
 export default function ScriptEngine() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState('select'); // 'select' | 'generate' | 'ideas' | 'script'
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -141,7 +143,16 @@ export default function ScriptEngine() {
   }
 
   return (
-    <div style={{ maxWidth: 960, paddingBottom: 60 }}>
+    <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
+      <StudioToast />
+      {/* Top nav */}
+      <header style={{ borderBottom: '1px solid #1A1A1A', padding: '0 20px', height: 52, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={() => navigate('/projects')} style={{ background: 'none', border: 'none', color: '#E81A1A', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>← Dashboard</button>
+        <div style={{ width: 1, height: 16, background: '#222' }} />
+        <span style={{ fontSize: 13, fontWeight: 700 }}>Script Engine</span>
+      </header>
+
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 60px' }}>
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Script Engine 🎬</div>
@@ -365,6 +376,7 @@ export default function ScriptEngine() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
