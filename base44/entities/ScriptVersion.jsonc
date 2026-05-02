@@ -1,0 +1,54 @@
+{
+  "name": "ScriptVersion",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "version_number": {
+      "type": "number"
+    },
+    "label": {
+      "type": "string",
+      "description": "User-editable label e.g. 'v3 \u2013 Softer CTA'"
+    },
+    "script_content": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "tone": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "content_type": {
+      "type": "string"
+    },
+    "selected_ideas": {
+      "type": "string",
+      "description": "JSON array of idea texts used"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "The version currently attached to the project"
+    }
+  },
+  "required": [
+    "project_id",
+    "script_content"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

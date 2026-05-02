@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import AIBrainstorming from '@/components/studio/AIBrainstorming';
+import ScriptVersionHistory from '@/components/script-engine/ScriptVersionHistory';
 
 const MONO = '"DM Mono", monospace';
 
@@ -17,7 +18,9 @@ export default function ScriptEngine() {
   const [selectedIdeas, setSelectedIdeas] = useState([]);
   const [scripts, setScripts] = useState([]);
   const [scriptOutput, setScriptOutput] = useState('');
-  
+  const [versions, setVersions] = useState([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+
   const [inputs, setInputs] = useState({
     numIdeas: '5',
     contentType: 'mix',
@@ -36,9 +39,18 @@ export default function ScriptEngine() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleProjectSelect = (project) => {
+  const handleProjectSelect = async (project) => {
     setSelectedProject(project);
     setMode('generate');
+    setLoadingVersions(true);
+    try {
+      const vs = await base44.entities.ScriptVersion.list('-version_number', 50);
+      setVersions(vs.filter(v => v.project_id === project.id));
+    } catch (e) {
+      setVersions([]);
+    } finally {
+      setLoadingVersions(false);
+    }
   };
 
   const generateIdeas = async () => {
@@ -92,7 +104,35 @@ export default function ScriptEngine() {
         context: ''
       });
 
-      setScriptOutput(res.data?.result || '');
+      const output = res.data?.result || '';
+      setScriptOutput(output);
+
+      // Save as a new version
+      const nextVersionNumber = versions.length > 0
+        ? Math.max(...versions.map(v => v.version_number)) + 1
+        : 1;
+      const newVersion = await base44.entities.ScriptVersion.create({
+        project_id: selectedProject.id,
+        project_name: selectedProject.name,
+        version_number: nextVersionNumber,
+        label: `v${nextVersionNumber} – ${inputs.platform} / ${inputs.goal}`,
+        script_content: output,
+        platform: inputs.platform,
+        tone: inputs.tone,
+        goal: inputs.goal,
+        content_type: inputs.contentType,
+        selected_ideas: JSON.stringify(ideas.filter(i => i.selected).map(i => i.text)),
+        is_active: true,
+      });
+      // Mark previous active version as inactive
+      const updatedVersions = versions.map(v => ({ ...v, is_active: false }));
+      await Promise.all(
+        versions.filter(v => v.is_active).map(v =>
+          base44.entities.ScriptVersion.update(v.id, { is_active: false })
+        )
+      );
+      setVersions([...updatedVersions, newVersion]);
+
       setMode('script');
       showToast('Scripts generated!', 'green');
     } catch (error) {
@@ -122,6 +162,7 @@ export default function ScriptEngine() {
       setSelectedProject(null);
       setIdeas([]);
       setScriptOutput('');
+      setVersions([]);
       setInputs({
         numIdeas: '5',
         contentType: 'mix',
@@ -334,8 +375,33 @@ export default function ScriptEngine() {
             borderRadius: 8, color: '#666', fontSize: 12, fontWeight: 700, cursor: 'pointer'
           }}>← Back</button>
 
+          <ScriptVersionHistory
+            projectId={selectedProject?.id}
+            versions={versions}
+            onVersionsChange={setVersions}
+            onRevertToVersion={(content) => setScriptOutput(content)}
+          />
+
           <div style={{ background: '#1A1A1A', border: '1px solid #222', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, fontFamily: MONO }}>Generated Scripts</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: MONO }}>
+                Generated Scripts
+                {versions.length > 0 && (
+                  <span style={{ marginLeft: 10, fontSize: 10, color: '#555', fontFamily: MONO }}>
+                    v{Math.max(...versions.map(v => v.version_number))} · {inputs.platform}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => { setMode('ideas'); setScriptOutput(''); }}
+                style={{
+                  padding: '6px 12px', background: 'transparent', border: '1px solid #2A2A2A',
+                  borderRadius: 7, color: '#666', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: MONO
+                }}
+              >
+                ↺ Regenerate
+              </button>
+            </div>
             <div style={{
               background: '#111', border: '1px solid #2A2A2A', borderRadius: 10, padding: 16,
               fontSize: 12, lineHeight: 1.8, color: '#ccc', whiteSpace: 'pre-wrap', maxHeight: 400, overflowY: 'auto',
