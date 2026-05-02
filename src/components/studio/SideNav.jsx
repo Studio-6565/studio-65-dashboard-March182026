@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library, Bell } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
 const MONO = '"DM Mono", monospace';
@@ -40,6 +40,7 @@ const NAV_SECTIONS = [
       { path: '/operations', Icon: CheckSquare, label: 'Operations' },
       { path: '/inbox',      Icon: Mail, label: 'Inbox' },
       { path: '/timeline',   Icon: Clock, label: 'Timeline' },
+      { path: '/client-reminders', Icon: Bell, label: 'Reminders' },
       { path: '/settings',   Icon: Settings, label: 'Settings' },
     ]
   },
