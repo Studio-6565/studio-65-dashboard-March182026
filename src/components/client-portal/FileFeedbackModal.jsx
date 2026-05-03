@@ -4,7 +4,7 @@ import { X, Send, Loader2, CheckCircle2 } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
-export default function FileFeedbackModal({ file, contact, projectName, onClose, onSubmitted }) {
+export default function FileFeedbackModal({ file, contact, projectName, projectId, onClose, onSubmitted }) {
   const [notes, setNotes] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -13,28 +13,49 @@ export default function FileFeedbackModal({ file, contact, projectName, onClose,
     if (!notes.trim()) return;
     setSending(true);
 
-    // Send a ClientMessage to the studio flagging the change request
-    await base44.entities.ClientMessage.create({
-      project_id: file.project_id,
-      project_name: projectName || file.project_name || '',
+    const pName = projectName || file.project_name || '';
+    const pId = projectId || file.project_id || '';
+
+    // 1. Create ClientMessage so it appears in the studio inbox
+    const msg = await base44.entities.ClientMessage.create({
+      project_id: pId,
+      project_name: pName,
       client_name: contact.name,
       from: 'client',
       type: 'message',
       title: `📋 Change Request: ${file.file_name}`,
       body: `**File:** ${file.file_name}\n**Category:** ${file.category}\n\n**Requested Changes:**\n${notes.trim()}`,
+      approval_status: 'revision_requested',
       read_by_studio: false,
       read_by_client: true,
     });
 
-    // Send email notification to studio
+    // 2. Update project status to "Feedback Requested"
+    if (pId) {
+      try {
+        await base44.entities.Project.update(pId, {
+          status: 'Feedback Requested',
+          activity: [
+            { msg: `📋 ${contact.name} requested changes on "${file.file_name}"`, ts: new Date().toISOString() }
+          ],
+        });
+      } catch (e) {
+        console.warn('Could not update project status:', e.message);
+      }
+    }
+
+    // 3. Trigger studio email notification via backend function
     try {
-      await base44.integrations.Core.SendEmail({
-        to: 'studio65production@gmail.com',
-        subject: `📋 Change Request on "${file.file_name}" — ${contact.name}`,
-        body: `Hi Studio 65,\n\n${contact.name} has requested changes on a delivered file.\n\n📁 File: ${file.file_name}\n📂 Category: ${file.category}\n🎬 Project: ${projectName || file.project_name || 'N/A'}\n\n📝 What needs fixing:\n${notes.trim()}\n\n— Studio 65 Client Portal`,
-      });
+      await base44.functions.invoke('clientNotifyEmail', { event: { type: 'update' }, data: msg });
     } catch (e) {
-      console.warn('Email notification failed:', e.message);
+      // Fallback: direct email
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: 'studio65production@gmail.com',
+          subject: `📋 Change Request: "${file.file_name}" — ${contact.name}`,
+          body: `Hi Studio 65,\n\n${contact.name} has requested changes on a delivered file.\n\n📁 File: ${file.file_name}\n📂 Category: ${file.category}\n🎬 Project: ${pName || 'N/A'}\n\n📝 What needs fixing:\n${notes.trim()}\n\nProject status has been updated to "Feedback Requested".\n\n— Studio 65 Client Portal`,
+        });
+      } catch {}
     }
 
     setSending(false);

@@ -14,7 +14,7 @@ const StatusTag = ({ status }) => {
   );
 };
 
-const STATUS_ORDER = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
+const STATUS_ORDER = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Feedback Requested', 'Invoiced'];
 
 function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
   const del = p.deliverables || [];

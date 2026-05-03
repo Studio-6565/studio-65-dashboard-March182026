@@ -10,11 +10,12 @@ export const marginColor = (m) => m >= 50 ? '#7BC853' : m >= 25 ? '#F59E0B' : '#
 export const marginBg = (m) => m >= 50 ? 'rgba(123,200,83,0.1)' : m >= 25 ? 'rgba(245,158,11,0.12)' : 'rgba(232,26,26,0.1)';
 
 export const STATUS_STYLE = {
-  'Booked':        { bg: 'rgba(74,158,255,0.12)',  clr: '#4A9EFF' },
-  'In Production': { bg: 'rgba(245,158,11,0.12)',  clr: '#F59E0B' },
-  'In Edit':       { bg: 'rgba(159,100,255,0.12)', clr: '#A78BFA' },
-  'Delivered':     { bg: 'rgba(123,200,83,0.12)',  clr: '#7BC853' },
-  'Invoiced':      { bg: 'rgba(232,26,26,0.12)',   clr: '#E81A1A' },
+  'Booked':             { bg: 'rgba(74,158,255,0.12)',  clr: '#4A9EFF' },
+  'In Production':      { bg: 'rgba(245,158,11,0.12)',  clr: '#F59E0B' },
+  'In Edit':            { bg: 'rgba(159,100,255,0.12)', clr: '#A78BFA' },
+  'Delivered':          { bg: 'rgba(123,200,83,0.12)',  clr: '#7BC853' },
+  'Feedback Requested': { bg: 'rgba(245,158,11,0.15)',  clr: '#F59E0B' },
+  'Invoiced':           { bg: 'rgba(232,26,26,0.12)',   clr: '#E81A1A' },
 };
 
 export const waPhone = (raw) => (raw || '').replace(/[^0-9+]/g, '');

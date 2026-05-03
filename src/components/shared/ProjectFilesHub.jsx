@@ -498,6 +498,7 @@ export default function ProjectFilesHub({ projectId, projectName, clientName, is
           file={feedbackFile}
           contact={contact}
           projectName={projectName}
+          projectId={projectId}
           onClose={() => setFeedbackFile(null)}
           onSubmitted={() => setFeedbackFile(null)}
         />

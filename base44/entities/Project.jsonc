@@ -52,6 +52,7 @@
         "In Production",
         "In Edit",
         "Delivered",
+        "Feedback Requested",
         "Invoiced"
       ],
       "default": "Booked"
