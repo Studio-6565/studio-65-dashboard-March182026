@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, MapPin, Calendar, Clock, CheckCircle2, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Calendar, Clock, CheckCircle2, ExternalLink, GitBranch } from 'lucide-react';
+import ProjectTimeline from './ProjectTimeline';
 
 const MONO = '"DM Mono", monospace';
 
@@ -225,11 +226,14 @@ export default function ClientProjectCard({ project: p, defaultExpanded = false 
 
           {/* Client notes */}
           {p.notes && (
-            <div style={{ padding: '14px 20px' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid #141414' }}>
               <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Notes from Studio 65</div>
               <div style={{ fontSize: 13, color: '#888', lineHeight: 1.8, fontStyle: 'italic' }}>{p.notes}</div>
             </div>
           )}
+
+          {/* Full timeline */}
+          <ProjectTimeline project={p} />
         </div>
       )}
     </div>

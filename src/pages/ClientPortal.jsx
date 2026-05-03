@@ -333,7 +333,7 @@ export default function ClientPortal() {
           projects.filter(p => p.revenue > 0 && (p.invoice_status !== 'draft' || p.status === 'Invoiced' || p.paid)).length === 0 ? (
             <EmptyState emoji="💳" title="No invoices yet" subtitle="You're all caught up. No payments are due right now. Invoices will appear here when Studio 65 sends them." />
           ) : (
-            <ClientInvoicesTab projects={projects} />
+            <ClientInvoicesTab projects={projects} contact={contact} />
           )
         )}
         {tab === 'contracts' && (
