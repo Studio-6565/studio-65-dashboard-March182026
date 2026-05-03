@@ -23,6 +23,7 @@ const TAB_LABELS = {
   '/dashboard': 'Dashboard',
   '/projects': 'Projects',
   '/analytics': 'Analytics',
+  '/insights': 'Studio Insights',
   '/calendar': 'Calendar',
   '/crew': 'Crew',
   '/timeline': 'Timeline',

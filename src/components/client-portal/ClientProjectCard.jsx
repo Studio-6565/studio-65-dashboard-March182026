@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, MapPin, Calendar, Clock, CheckCircle2, ExternalLink, GitBranch } from 'lucide-react';
 import ProjectTimeline from './ProjectTimeline';
+import PreProductionChecklist from './PreProductionChecklist';
 
 const MONO = '"DM Mono", monospace';
 
@@ -40,7 +41,7 @@ function fmtDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export default function ClientProjectCard({ project: p, defaultExpanded = false }) {
+export default function ClientProjectCard({ project: p, defaultExpanded = false, contact = null }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const stage = STAGE_MAP[p.status] || STAGE_MAP['Booked'];
   const curStep = stageIndex(p.status);
@@ -230,6 +231,11 @@ export default function ClientProjectCard({ project: p, defaultExpanded = false 
               <div style={{ fontFamily: MONO, fontSize: 10, color: '#444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Notes from Studio 65</div>
               <div style={{ fontSize: 13, color: '#888', lineHeight: 1.8, fontStyle: 'italic' }}>{p.notes}</div>
             </div>
+          )}
+
+          {/* Pre-production checklist — only before shoot */}
+          {['Booked', 'In Production'].includes(p.status) && contact && (
+            <PreProductionChecklist project={p} contact={contact} />
           )}
 
           {/* Full timeline */}

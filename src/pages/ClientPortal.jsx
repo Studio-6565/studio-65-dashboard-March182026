@@ -120,7 +120,7 @@ function ClientDashboard({ contact, projects, messages, contracts, onNavigate, o
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {activeProjects.slice(0, 3).map(p => <ClientProjectCard key={p.id} project={p} />)}
+            {activeProjects.slice(0, 3).map(p => <ClientProjectCard key={p.id} project={p} contact={contact} />)}
           </div>
         </div>
       )}
@@ -294,7 +294,7 @@ export default function ClientPortal() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {projects.map(p => (
                 <div key={p.id}>
-                  <ClientProjectCard project={p} />
+                  <ClientProjectCard project={p} contact={contact} />
                   <button onClick={() => setActiveProjectFiles(p)} style={{ width: '100%', marginTop: 6, padding: '10px 0', background: 'transparent', border: '1px solid #111', borderRadius: 12, color: '#333', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Mono", monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     📁 View Project Files →
                   </button>
@@ -314,6 +314,7 @@ export default function ClientPortal() {
               clientName={contact.name}
               isStudio={false}
               uploaderName={contact.name}
+              contact={contact}
             />
           </div>
         )}

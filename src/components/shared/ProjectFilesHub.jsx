@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Upload, Download, Trash2, FileText, Film, Image, Music, Archive, File, Eye, X, Loader2 } from 'lucide-react';
+import { Upload, Download, Trash2, FileText, Film, Image, Music, Archive, File, Eye, X, Loader2, CheckCircle2, MessageSquare } from 'lucide-react';
+import FileFeedbackModal from '@/components/client-portal/FileFeedbackModal';
 
 const MONO = '"DM Mono", monospace';
 
@@ -254,15 +255,16 @@ function UploadPanel({ projectId, projectName, clientName, uploaderRole, uploade
 }
 
 // ── File Card ─────────────────────────────────────────────────────────────────
-function FileCard({ file, onPreview, onDelete, isStudio }) {
+function FileCard({ file, onPreview, onDelete, isStudio, onRequestChanges, onApprove, approvedFiles }) {
   const cat = CAT_COLORS[file.category] || CAT_COLORS['Other'];
+  const isDeliverable = file.category === 'Deliverables';
+  const isApproved = approvedFiles?.[file.id];
 
   return (
-    <div style={{ background: '#080808', border: '1px solid #111', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#080808', border: `1px solid ${isApproved ? 'rgba(123,200,83,0.2)' : '#111'}`, borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       {/* Thumbnail area */}
       <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#0D0D0D', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => onPreview(file)}>
         <FileThumbnail file={file} size={56} />
-        {/* Preview overlay */}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0)', transition: 'background 0.2s' }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}
@@ -271,13 +273,17 @@ function FileCard({ file, onPreview, onDelete, isStudio }) {
             onMouseEnter={e => e.currentTarget.style.opacity = '1'}
           />
         </div>
+        {isApproved && (
+          <div style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(123,200,83,0.9)', borderRadius: 6, padding: '3px 7px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <CheckCircle2 size={10} color="#000" />
+            <span style={{ fontSize: 9, fontWeight: 700, color: '#000', fontFamily: MONO }}>APPROVED</span>
+          </div>
+        )}
       </div>
 
       {/* Info */}
       <div style={{ padding: '10px 12px', flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6, marginBottom: 6 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{file.file_name}</div>
-        </div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{file.file_name}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: MONO, fontSize: 9, padding: '2px 7px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{file.category}</span>
           {file.file_size > 0 && <span style={{ fontFamily: MONO, fontSize: 9, color: '#333' }}>{formatBytes(file.file_size)}</span>}
@@ -287,7 +293,20 @@ function FileCard({ file, onPreview, onDelete, isStudio }) {
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Feedback buttons for client on deliverables */}
+      {!isStudio && isDeliverable && !isApproved && (
+        <div style={{ display: 'flex', borderTop: '1px solid #0D0D0D', gap: 0 }}>
+          <button onClick={() => onApprove?.(file)} style={{ flex: 1, padding: '9px 0', background: 'rgba(123,200,83,0.06)', border: 'none', color: '#7BC853', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontFamily: MONO }}>
+            <CheckCircle2 size={12} /> Approve
+          </button>
+          <div style={{ width: 1, background: '#0D0D0D' }} />
+          <button onClick={() => onRequestChanges?.(file)} style={{ flex: 1, padding: '9px 0', background: 'rgba(245,158,11,0.04)', border: 'none', color: '#F59E0B', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontFamily: MONO }}>
+            <MessageSquare size={12} /> Changes
+          </button>
+        </div>
+      )}
+
+      {/* Standard actions */}
       <div style={{ display: 'flex', borderTop: '1px solid #0D0D0D' }}>
         <button onClick={() => onPreview(file)} style={{ flex: 1, padding: '9px 0', background: 'transparent', border: 'none', color: '#555', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontFamily: MONO }}>
           <Eye size={12} /> View
@@ -310,12 +329,16 @@ function FileCard({ file, onPreview, onDelete, isStudio }) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function ProjectFilesHub({ projectId, projectName, clientName, isStudio = true, uploaderName = 'Studio 65' }) {
+export default function ProjectFilesHub({ projectId, projectName, clientName, isStudio = true, uploaderName = 'Studio 65', contact = null }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   const [preview, setPreview] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [feedbackFile, setFeedbackFile] = useState(null);
+  const [approvedFiles, setApprovedFiles] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`approved_${projectId}`) || '{}'); } catch { return {}; }
+  });
 
   useEffect(() => {
     if (!projectId) return;
@@ -337,6 +360,27 @@ export default function ProjectFilesHub({ projectId, projectName, clientName, is
     if (!confirm(`Delete "${file.file_name}"?`)) return;
     await base44.entities.ProjectFile.delete(file.id);
     setFiles(prev => prev.filter(f => f.id !== file.id));
+  };
+
+  const handleApprove = async (file) => {
+    const next = { ...approvedFiles, [file.id]: true };
+    setApprovedFiles(next);
+    localStorage.setItem(`approved_${projectId}`, JSON.stringify(next));
+    // Notify studio
+    if (contact) {
+      await base44.entities.ClientMessage.create({
+        project_id: projectId,
+        project_name: projectName,
+        client_name: contact.name,
+        from: 'client',
+        type: 'approval_request',
+        title: `✅ Approved: ${file.file_name}`,
+        body: `${contact.name} has approved the deliverable: **${file.file_name}**`,
+        approval_status: 'approved',
+        read_by_studio: false,
+        read_by_client: true,
+      });
+    }
   };
 
   const displayed = activeCategory === 'All' ? files : files.filter(f => f.category === activeCategory);
@@ -437,6 +481,9 @@ export default function ProjectFilesHub({ projectId, projectName, clientName, is
               onPreview={setPreview}
               onDelete={isStudio || f.uploaded_by === 'client' ? handleDelete : null}
               isStudio={isStudio}
+              onRequestChanges={!isStudio ? setFeedbackFile : null}
+              onApprove={!isStudio ? handleApprove : null}
+              approvedFiles={approvedFiles}
             />
           ))}
         </div>
@@ -444,6 +491,17 @@ export default function ProjectFilesHub({ projectId, projectName, clientName, is
 
       {/* Preview modal */}
       {preview && <PreviewModal file={preview} onClose={() => setPreview(null)} />}
+
+      {/* Feedback modal */}
+      {feedbackFile && contact && (
+        <FileFeedbackModal
+          file={feedbackFile}
+          contact={contact}
+          projectName={projectName}
+          onClose={() => setFeedbackFile(null)}
+          onSubmitted={() => setFeedbackFile(null)}
+        />
+      )}
     </div>
   );
 }
