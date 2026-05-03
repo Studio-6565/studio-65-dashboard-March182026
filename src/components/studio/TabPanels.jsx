@@ -21,6 +21,7 @@ import EditorsDashboard from '@/pages/EditorsDashboard';
 import AssetLibrary from '@/pages/AssetLibrary';
 import KanbanView from './KanbanView';
 import ScriptEngine from '@/pages/ScriptEngine';
+import StudioAnalytics from '@/pages/StudioAnalytics';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -262,7 +263,7 @@ export default function TabPanels({
               pullProgress={pullProgress}
             />
           )}
-          {tab === 'analytics' && <AnalyticsView projects={projects} />}
+          {tab === 'analytics' && <StudioAnalytics />}
           {tab === 'calendar' && <CalendarView projects={projects} onOpenDetail={onOpenDetail} />}
           {tab === 'crew' && (
             <div>

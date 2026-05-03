@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     (c.types || []).includes('Client')
   );
 
-  const portalUrl = `${Deno.env.get('APP_URL') || 'https://your-app.base44.app'}/client-portal`;
+  const portalUrl = `${Deno.env.get('BASE44_APP_URL') || 'https://app.studio65.ca'}/client-portal`;
 
   // Studio sent something to client — notify client
   if (msg.from === 'studio' && clientContact?.email) {
