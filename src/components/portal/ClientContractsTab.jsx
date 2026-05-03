@@ -106,9 +106,19 @@ function ContractViewer({ contract, onSign, onDecline, onBack }) {
       )}
 
       {contract.status === 'signed' && (
-        <div style={{ padding: '16px 20px', background: 'rgba(123,200,83,0.06)', border: '1px solid rgba(123,200,83,0.25)', borderRadius: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#7BC853' }}>✓ This contract has been signed</div>
-          <div style={{ fontSize: 12, color: '#666', fontFamily: MONO, marginTop: 4 }}>Signed by {contract.signature_name} on {new Date(contract.signed_at).toLocaleDateString()}</div>
+        <div style={{ padding: '20px', background: 'rgba(123,200,83,0.06)', border: '1px solid rgba(123,200,83,0.25)', borderRadius: 12 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#7BC853', marginBottom: 6 }}>✓ Contract Signed</div>
+          <div style={{ fontSize: 12, color: '#666', fontFamily: MONO, marginBottom: 10 }}>
+            Signed by <strong style={{ color: '#aaa' }}>{contract.signature_name}</strong> on {new Date(contract.signed_at).toLocaleDateString()}
+          </div>
+          {contract.project_name && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(74,158,255,0.07)', border: '1px solid rgba(74,158,255,0.2)', borderRadius: 10 }}>
+              <span style={{ fontSize: 15 }}>🎬</span>
+              <div style={{ fontSize: 12, color: '#4A9EFF' }}>
+                <strong>{contract.project_name}</strong> has been moved to <strong>In Production</strong>. The studio team has been notified.
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -135,6 +145,25 @@ export default function ClientContractsTab({ contracts, contact, onContractsChan
     await base44.entities.Contract.update(contract.id, updated);
     onContractsChange(prev => prev.map(c => c.id === contract.id ? updated : c));
     setViewing(updated);
+
+    // Update project status to "In Production" if the contract is linked to a project
+    if (contract.project_id) {
+      try {
+        await base44.entities.Project.update(contract.project_id, {
+          status: 'In Production',
+          activity: [{ msg: `📝 Contract signed by ${signName} — project moved to In Production`, ts: new Date().toISOString() }],
+        });
+      } catch (e) {
+        console.warn('Could not update project status:', e.message);
+      }
+    }
+
+    // Notify studio team via email
+    try {
+      await base44.functions.invoke('contractSignedNotify', { data: updated });
+    } catch (e) {
+      console.warn('Notify email failed:', e.message);
+    }
   };
 
   const handleDecline = async (contract, reason) => {
