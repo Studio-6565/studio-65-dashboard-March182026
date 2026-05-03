@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
@@ -42,10 +42,16 @@ Deno.serve(async (req) => {
       `Projects this month:\n${projectLines}\n\n` +
       `— Studio 65 Automated Report`;
 
+    // Send to the admin user's registered email
+    const users = await base44.asServiceRole.entities.User.list('email', 10);
+    const adminUser = users.find(u => u.role === 'admin');
+    const toEmail = adminUser?.email || 'studio65production@gmail.com';
+
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: 'studio65production@gmail.com',
+      to: toEmail,
       subject: `📊 Monthly Report — ${monthName} — Studio 65`,
       body,
+      from_name: 'Studio 65',
     });
 
     return Response.json({ sent: true, month: monthName, projects: monthly.length, revenue: totalRevenue });

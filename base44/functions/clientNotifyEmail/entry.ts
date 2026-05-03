@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -7,9 +7,11 @@ Deno.serve(async (req) => {
   const msg = data;
   if (!msg) return Response.json({ skipped: 'no data' });
 
+  // Find admin user for studio notifications
+  const users = await base44.asServiceRole.entities.User.list('email', 10);
+  const adminUser = users.find(u => u.role === 'admin');
+
   // Find the client's email from Contacts
-  const contacts = await base44.asServiceRole.entities.Contact.filter({ portal_password: '' });
-  // Search by name
   const allContacts = await base44.asServiceRole.entities.Contact.list('name', 500);
   const clientContact = allContacts.find(c =>
     c.name?.toLowerCase() === msg.client_name?.toLowerCase() &&
@@ -47,9 +49,9 @@ Deno.serve(async (req) => {
     }[msg.approval_status] || msg.approval_status;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: 'contact@studio65.ca',
+      to: adminUser?.email || 'studio65production@gmail.com',
       subject: `${msg.client_name} ${statusLabel} — ${msg.title || msg.project_name || 'a request'}`,
-      body: `Client: ${msg.client_name}\nProject: ${msg.project_name || '—'}\nStatus: ${statusLabel}\n\n${msg.approval_note ? `Their note:\n"${msg.approval_note}"\n\n` : ''}Log in to view: https://app.base44.app`,
+      body: `Client: ${msg.client_name}\nProject: ${msg.project_name || '—'}\nStatus: ${statusLabel}\n\n${msg.approval_note ? `Their note:\n"${msg.approval_note}"\n\n` : ''}Log in to view: https://app.studio65.ca`,
       from_name: 'Studio 65 Portal',
     });
 
