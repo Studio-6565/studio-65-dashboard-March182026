@@ -49,6 +49,75 @@
     "portal_password": {
       "type": "string"
     },
+    "portal_users": {
+      "type": "array",
+      "description": "Additional staff/team members who can access this client's portal",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "access_code": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "description": "e.g. Marketing Manager, Owner"
+          }
+        }
+      }
+    },
+    "brand_profile": {
+      "type": "object",
+      "description": "Client brand guidelines and identity",
+      "properties": {
+        "primary_color": {
+          "type": "string",
+          "description": "Hex color e.g. #FF0000"
+        },
+        "secondary_color": {
+          "type": "string"
+        },
+        "accent_color": {
+          "type": "string"
+        },
+        "font_primary": {
+          "type": "string",
+          "description": "Primary brand font"
+        },
+        "font_secondary": {
+          "type": "string"
+        },
+        "tone_of_voice": {
+          "type": "string",
+          "description": "e.g. Bold and energetic, professional, friendly"
+        },
+        "target_audience": {
+          "type": "string"
+        },
+        "content_pillars": {
+          "type": "string",
+          "description": "Key content themes, comma-separated"
+        },
+        "competitors": {
+          "type": "string"
+        },
+        "do_not_use": {
+          "type": "string",
+          "description": "Things to avoid \u2014 visuals, words, styles"
+        },
+        "logo_url": {
+          "type": "string"
+        },
+        "brand_notes": {
+          "type": "string"
+        }
+      }
+    },
     "offerings": {
       "type": "array",
       "description": "Items/gear this vendor offers for rent or sale",

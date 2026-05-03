@@ -13,12 +13,35 @@ Deno.serve(async (req) => {
 
     // ── CLIENT portal: login_by_code ──────────────────────────────────────────
     if (action === 'client_login_by_code') {
+      // First try main portal_password
       const contacts = await base44.asServiceRole.entities.Contact.filter({ portal_password });
       const clients = contacts.filter(c => !c.is_test && (c.types || []).includes('Client'));
-      if (!clients.length) return Response.json({ error: 'Invalid access code' }, { status: 401 });
-      const contact = clients[0];
-      const data = await _loadClientData(base44, contact);
-      return Response.json({ contact, ...data });
+
+      if (clients.length) {
+        const contact = clients[0];
+        const data = await _loadClientData(base44, contact);
+        return Response.json({ contact, ...data });
+      }
+
+      // Then try portal_users access codes across all clients
+      const allClients = await base44.asServiceRole.entities.Contact.list('name', 500);
+      const matchingClient = allClients.find(c =>
+        !c.is_test &&
+        (c.types || []).includes('Client') &&
+        (c.portal_users || []).some(u => u.access_code === portal_password)
+      );
+      if (!matchingClient) return Response.json({ error: 'Invalid access code' }, { status: 401 });
+
+      // Find the portal user for display name
+      const portalUser = (matchingClient.portal_users || []).find(u => u.access_code === portal_password);
+      // Return a merged contact — the base contact info but with the portal user's name
+      const contactForUser = {
+        ...matchingClient,
+        _portal_user_name: portalUser.name,
+        _portal_user_role: portalUser.role || '',
+      };
+      const data = await _loadClientData(base44, matchingClient);
+      return Response.json({ contact: contactForUser, ...data });
     }
 
     // ── CLIENT portal: check_email ────────────────────────────────────────────

@@ -45,7 +45,7 @@ function EmptyState({ emoji, title, subtitle, cta, onCta }) {
 // ── Dashboard Home ─────────────────────────────────────────────────────────────
 function ClientDashboard({ contact, projects, messages, contracts, onNavigate, onRequestShoot }) {
   const today = new Date().toISOString().split('T')[0];
-  const firstName = contact.name.split(' ')[0];
+  const firstName = (contact._portal_user_name || contact.name).split(' ')[0];
 
   const activeProjects = projects.filter(p => !['Delivered', 'Invoiced'].includes(p.status) || !p.paid);
   const upcomingShoot = projects.filter(p => p.date && p.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0];
@@ -266,8 +266,10 @@ export default function ClientPortal() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{contact.name}</div>
-              {contact.client_company && <div style={{ fontSize: 10, color: '#444', fontFamily: MONO }}>{contact.client_company}</div>}
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{contact._portal_user_name || contact.name}</div>
+              <div style={{ fontSize: 10, color: '#444', fontFamily: MONO }}>
+                {contact._portal_user_role || contact.client_company || ''}
+              </div>
             </div>
             <button onClick={handleSignOut} style={{ width: 32, height: 32, borderRadius: 10, background: '#0D0D0D', border: '1px solid #1A1A1A', color: '#444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Sign out">
               <X size={14} />

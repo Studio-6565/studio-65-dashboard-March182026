@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 import { waLink } from '@/lib/studio';
-import { ExternalLink, Copy, Mail, MessageCircle, User } from 'lucide-react';
+import { ExternalLink, Copy, Mail, MessageCircle, User, Plus, Trash2, Users, Palette } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', boxSizing: 'border-box' };
@@ -11,6 +11,13 @@ const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform
 const emptyForm = {
   name: '', types: ['Client'], role: '', phone: '', email: '', notes: '', portal_password: '',
   client_company: '', client_project_type: '', client_budget: '', client_how_found: '',
+  portal_users: [],
+  brand_profile: {
+    primary_color: '', secondary_color: '', accent_color: '',
+    font_primary: '', font_secondary: '', tone_of_voice: '',
+    target_audience: '', content_pillars: '', competitors: '',
+    do_not_use: '', logo_url: '', brand_notes: '',
+  },
 };
 
 function ClientCard({ client: c, projects, onEdit, onDelete }) {
@@ -115,6 +122,8 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [formTab, setFormTab] = useState('info'); // 'info' | 'brand' | 'portal'
+  const [newPortalUser, setNewPortalUser] = useState({ name: '', email: '', access_code: '', role: '' });
 
   // Include contacts tagged as Client OR any project client name not yet in contacts
   const taggedClients = contacts.filter(c => (c.types || []).includes('Client'));
@@ -132,7 +141,7 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
 
   const handleSave = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'red'); return; }
-    const data = { ...form, types: ['Client'] };
+    const data = { ...form, types: ['Client'], portal_users: form.portal_users || [], brand_profile: form.brand_profile || {} };
     // editingId starting with '_proj_' means synthetic — always create
     const isSynthetic = editingId && String(editingId).startsWith('_proj_');
     if (editingId && !isSynthetic) {
@@ -154,6 +163,14 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
       portal_password: c.portal_password || '',
       client_company: c.client_company || '', client_project_type: c.client_project_type || '',
       client_budget: c.client_budget || '', client_how_found: c.client_how_found || '',
+      portal_users: c.portal_users || [],
+      brand_profile: {
+        primary_color: '', secondary_color: '', accent_color: '',
+        font_primary: '', font_secondary: '', tone_of_voice: '',
+        target_audience: '', content_pillars: '', competitors: '',
+        do_not_use: '', logo_url: '', brand_notes: '',
+        ...(c.brand_profile || {}),
+      },
     });
     setEditingId(c.id);
     setShowForm(true);
@@ -188,37 +205,162 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
       {/* Form */}
       {showForm && (
         <div style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 14, padding: 20, marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>{editingId ? 'Edit Client' : 'New Client'}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div><label style={labelStyle}>Full Name</label><input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Jane Smith" autoFocus /></div>
-              <div><label style={labelStyle}>Company / Brand</label><input style={inputStyle} value={form.client_company} onChange={e => setForm(f => ({ ...f, client_company: e.target.value }))} placeholder="Acme Corp" /></div>
-              <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="jane@company.com" /></div>
-              <div><label style={labelStyle}>Phone / WhatsApp</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
-              <div><label style={labelStyle}>Project Type</label><input style={inputStyle} value={form.client_project_type} onChange={e => setForm(f => ({ ...f, client_project_type: e.target.value }))} placeholder="e.g. Brand video" /></div>
-              <div><label style={labelStyle}>Budget Range</label><input style={inputStyle} value={form.client_budget} onChange={e => setForm(f => ({ ...f, client_budget: e.target.value }))} placeholder="e.g. $2k–$5k" /></div>
-              <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>How They Found Us</label><input style={inputStyle} value={form.client_how_found} onChange={e => setForm(f => ({ ...f, client_how_found: e.target.value }))} placeholder="e.g. Instagram, referral" /></div>
-              <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 56 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
-            </div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{editingId ? 'Edit Client' : 'New Client'}</div>
 
-            {/* Portal access */}
-            <div>
-              <label style={labelStyle}>Portal Access Code</label>
-              <input style={inputStyle} value={form.portal_password} onChange={e => setForm(f => ({ ...f, portal_password: e.target.value }))} placeholder="e.g. acme2025 (client uses this to log in)" />
-              {form.portal_password && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: '#A78BFA', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{window.location.origin}/client-portal?code={form.portal_password}</span>
-                  <button type="button" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/client-portal?code=${form.portal_password}`); showToast('Copied!', 'blue'); }} style={{ padding: '3px 10px', borderRadius: 5, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)', color: '#A78BFA', fontSize: 10, cursor: 'pointer', fontFamily: MONO, whiteSpace: 'nowrap' }}>Copy Link</button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={handleSave} style={{ flex: 1, padding: '11px 0', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                {editingId ? 'Save Changes' : 'Add Client'}
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 4, background: '#111', border: '1px solid #222', borderRadius: 8, padding: 3, marginBottom: 18, width: 'fit-content' }}>
+            {[
+              { key: 'info', label: 'Info', Icon: User },
+              { key: 'brand', label: 'Brand', Icon: Palette },
+              { key: 'portal', label: 'Portal Users', Icon: Users },
+            ].map(t => (
+              <button key={t.key} onClick={() => setFormTab(t.key)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: MONO, background: formTab === t.key ? '#E81A1A' : 'transparent', color: formTab === t.key ? '#fff' : '#555', whiteSpace: 'nowrap' }}>
+                <t.Icon size={12} /> {t.label}
               </button>
-              <button onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }} style={{ padding: '11px 18px', background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, color: '#fff', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+            ))}
+          </div>
+
+          {/* ── Info Tab ── */}
+          {formTab === 'info' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div><label style={labelStyle}>Full Name</label><input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Jane Smith" autoFocus /></div>
+                <div><label style={labelStyle}>Company / Brand</label><input style={inputStyle} value={form.client_company} onChange={e => setForm(f => ({ ...f, client_company: e.target.value }))} placeholder="Acme Corp" /></div>
+                <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="jane@company.com" /></div>
+                <div><label style={labelStyle}>Phone / WhatsApp</label><input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 416 555 0100" /></div>
+                <div><label style={labelStyle}>Project Type</label><input style={inputStyle} value={form.client_project_type} onChange={e => setForm(f => ({ ...f, client_project_type: e.target.value }))} placeholder="e.g. Brand video" /></div>
+                <div><label style={labelStyle}>Budget Range</label><input style={inputStyle} value={form.client_budget} onChange={e => setForm(f => ({ ...f, client_budget: e.target.value }))} placeholder="e.g. $2k–$5k" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>How They Found Us</label><input style={inputStyle} value={form.client_how_found} onChange={e => setForm(f => ({ ...f, client_how_found: e.target.value }))} placeholder="e.g. Instagram, referral" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 56 }} rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Anything useful..." /></div>
+              </div>
             </div>
+          )}
+
+          {/* ── Brand Tab ── */}
+          {formTab === 'brand' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                {[
+                  { key: 'primary_color', label: 'Primary Color', placeholder: '#E81A1A' },
+                  { key: 'secondary_color', label: 'Secondary Color', placeholder: '#1E1E1E' },
+                  { key: 'accent_color', label: 'Accent Color', placeholder: '#F59E0B' },
+                ].map(f => (
+                  <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label style={labelStyle}>{f.label}</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input
+                        type="color"
+                        value={form.brand_profile[f.key] || '#000000'}
+                        onChange={e => setForm(prev => ({ ...prev, brand_profile: { ...prev.brand_profile, [f.key]: e.target.value } }))}
+                        style={{ width: 36, height: 36, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none', padding: 2 }}
+                      />
+                      <input
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={form.brand_profile[f.key] || ''}
+                        onChange={e => setForm(prev => ({ ...prev, brand_profile: { ...prev.brand_profile, [f.key]: e.target.value } }))}
+                        placeholder={f.placeholder}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div><label style={labelStyle}>Primary Font</label><input style={inputStyle} value={form.brand_profile.font_primary || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, font_primary: e.target.value } }))} placeholder="e.g. Helvetica Neue" /></div>
+                <div><label style={labelStyle}>Secondary Font</label><input style={inputStyle} value={form.brand_profile.font_secondary || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, font_secondary: e.target.value } }))} placeholder="e.g. Georgia" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Logo URL</label><input style={inputStyle} value={form.brand_profile.logo_url || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, logo_url: e.target.value } }))} placeholder="https://..." /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Tone of Voice</label><input style={inputStyle} value={form.brand_profile.tone_of_voice || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, tone_of_voice: e.target.value } }))} placeholder="e.g. Bold & energetic, Warm & approachable" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Target Audience</label><input style={inputStyle} value={form.brand_profile.target_audience || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, target_audience: e.target.value } }))} placeholder="e.g. 25–40 year old health-conscious professionals" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Content Pillars</label><input style={inputStyle} value={form.brand_profile.content_pillars || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, content_pillars: e.target.value } }))} placeholder="e.g. Education, Behind the scenes, Testimonials" /></div>
+                <div><label style={labelStyle}>Competitors</label><input style={inputStyle} value={form.brand_profile.competitors || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, competitors: e.target.value } }))} placeholder="e.g. Brand A, Brand B" /></div>
+                <div><label style={labelStyle}>Do NOT Use</label><input style={inputStyle} value={form.brand_profile.do_not_use || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, do_not_use: e.target.value } }))} placeholder="e.g. red colours, cursive fonts" /></div>
+                <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Brand Notes</label><textarea style={{ ...inputStyle, resize: 'none', minHeight: 72 }} rows={3} value={form.brand_profile.brand_notes || ''} onChange={e => setForm(p => ({ ...p, brand_profile: { ...p.brand_profile, brand_notes: e.target.value } }))} placeholder="Any other brand direction, references, or important context..." /></div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Portal Users Tab ── */}
+          {formTab === 'portal' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Main access code */}
+              <div>
+                <label style={labelStyle}>Main Portal Access Code</label>
+                <input style={inputStyle} value={form.portal_password} onChange={e => setForm(f => ({ ...f, portal_password: e.target.value }))} placeholder="e.g. acme2025" />
+                {form.portal_password && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: MONO, fontSize: 10, color: '#A78BFA', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{window.location.origin}/client-portal?code={form.portal_password}</span>
+                    <button type="button" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/client-portal?code=${form.portal_password}`); showToast('Copied!', 'blue'); }} style={{ padding: '3px 10px', borderRadius: 5, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)', color: '#A78BFA', fontSize: 10, cursor: 'pointer', fontFamily: MONO, whiteSpace: 'nowrap' }}>Copy Link</button>
+                  </div>
+                )}
+              </div>
+
+              {/* Additional portal users */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Additional Portal Users ({(form.portal_users || []).length})</label>
+                </div>
+
+                {(form.portal_users || []).length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                    {(form.portal_users || []).map((u, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#2A2A2A', borderRadius: 8, border: '1px solid #333' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>{u.name}</div>
+                          <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', marginTop: 2 }}>
+                            {u.role && <span style={{ marginRight: 8 }}>{u.role}</span>}
+                            {u.email && <span style={{ marginRight: 8 }}>✉ {u.email}</span>}
+                            <span style={{ color: '#A78BFA' }}>🔑 {u.access_code}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/client-portal?code=${u.access_code}`);
+                            showToast('Link copied!', 'blue');
+                          }}
+                          style={{ padding: '5px 8px', borderRadius: 6, background: 'rgba(74,158,255,0.1)', border: 'none', color: '#4A9EFF', cursor: 'pointer', fontSize: 10, fontFamily: MONO }}
+                        >
+                          <Copy size={11} />
+                        </button>
+                        <button
+                          onClick={() => setForm(f => ({ ...f, portal_users: f.portal_users.filter((_, j) => j !== i) }))}
+                          style={{ padding: '5px 8px', borderRadius: 6, background: 'rgba(232,26,26,0.1)', border: 'none', color: '#E81A1A', cursor: 'pointer' }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add new portal user */}
+                <div style={{ background: '#111', border: '1px solid #222', borderRadius: 10, padding: 14 }}>
+                  <div style={{ fontFamily: MONO, fontSize: 10, color: '#555', marginBottom: 10, textTransform: 'uppercase' }}>Add Portal User</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                    <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={newPortalUser.name} onChange={e => setNewPortalUser(u => ({ ...u, name: e.target.value }))} placeholder="Alex Johnson" /></div>
+                    <div><label style={labelStyle}>Role / Title</label><input style={inputStyle} value={newPortalUser.role} onChange={e => setNewPortalUser(u => ({ ...u, role: e.target.value }))} placeholder="Marketing Manager" /></div>
+                    <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={newPortalUser.email} onChange={e => setNewPortalUser(u => ({ ...u, email: e.target.value }))} placeholder="alex@company.com" /></div>
+                    <div><label style={labelStyle}>Access Code *</label><input style={inputStyle} value={newPortalUser.access_code} onChange={e => setNewPortalUser(u => ({ ...u, access_code: e.target.value }))} placeholder="e.g. alex2025" /></div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!newPortalUser.name.trim() || !newPortalUser.access_code.trim()) { showToast('Name and access code required', 'red'); return; }
+                      setForm(f => ({ ...f, portal_users: [...(f.portal_users || []), { ...newPortalUser }] }));
+                      setNewPortalUser({ name: '', email: '', access_code: '', role: '' });
+                      showToast('Portal user added');
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'rgba(123,200,83,0.12)', border: '1px solid rgba(123,200,83,0.25)', borderRadius: 8, color: '#7BC853', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    <Plus size={13} /> Add User
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+            <button onClick={handleSave} style={{ flex: 1, padding: '11px 0', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+              {editingId ? 'Save Changes' : 'Add Client'}
+            </button>
+            <button onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); setFormTab('info'); }} style={{ padding: '11px 18px', background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, color: '#fff', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       )}
