@@ -1,5 +1,6 @@
 import React, { useRef, useState, memo } from 'react';
 import { fmt, crewOwed, margin, marginColor, marginBg, STATUS_STYLE, fmtDateRange } from '@/lib/studio';
+import { PREPROD_TASKS } from '@/components/client-portal/PreProductionChecklist';
 import ProjectStatusNudge from './ProjectStatusNudge';
 import { base44 } from '@/api/base44Client';
 
@@ -166,6 +167,27 @@ function ProjectCard({ project: p, onClick, onMarkPaid, onProjectUpdate }) {
           <div style={{ fontSize: 12, fontWeight: 600, color: owed > 0 ? '#E81A1A' : '#7BC853' }}>{fmt(owed)}</div>
         </div>
       </div>
+
+      {/* Pre-production checklist progress — shown for Booked / In Production */}
+      {['Booked', 'In Production'].includes(p.status) && (() => {
+        const cl = p.preprod_checklist || {};
+        const doneN = PREPROD_TASKS.filter(t => cl[t.id]).length;
+        const total = PREPROD_TASKS.length;
+        const prepPct = Math.round(doneN / total * 100);
+        return (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666' }}>Pre-production — {doneN}/{total}</div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: prepPct === 100 ? '#7BC853' : prepPct > 0 ? '#F59E0B' : '#444' }}>
+                {prepPct}%
+              </div>
+            </div>
+            <div style={{ height: 3, background: '#2A2A2A', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 2, background: prepPct === 100 ? '#7BC853' : '#F59E0B', width: `${prepPct}%`, transition: 'width 0.4s' }} />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Status nudge — stays at bottom */}
       <ProjectStatusNudge project={p} onClick={onClick} />

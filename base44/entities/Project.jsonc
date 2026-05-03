@@ -57,6 +57,13 @@
       ],
       "default": "Booked"
     },
+    "preprod_checklist": {
+      "type": "object",
+      "description": "Map of pre-production task IDs to boolean completion state. Set by client via portal.",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
     "revenue": {
       "type": "number",
       "default": 0
@@ -88,8 +95,7 @@
         "overdue",
         "cancelled"
       ],
-      "default": "draft",
-      "description": "Detailed invoice status"
+      "default": "draft"
     },
     "invoice_date": {
       "type": "string",
