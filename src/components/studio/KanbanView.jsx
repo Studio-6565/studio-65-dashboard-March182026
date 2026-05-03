@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { fmt } from '@/lib/studio';
+import { base44 } from '@/api/base44Client';
 
 const STATUSES = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
 
@@ -11,25 +13,30 @@ const STATUS_STYLE = {
   'Invoiced':      { color: '#E81A1A', bg: 'rgba(232,26,26,0.1)',   border: 'rgba(232,26,26,0.25)' },
 };
 
-function KanbanCard({ project, onClick }) {
+function KanbanCard({ project, onClick, dragHandleProps, draggableProps, innerRef, isDragging }) {
   const st = STATUS_STYLE[project.status] || STATUS_STYLE['Booked'];
   const margin = project.revenue > 0 ? Math.round((project.net / project.revenue) * 100) : 0;
 
   return (
     <div
+      ref={innerRef}
+      {...draggableProps}
+      {...dragHandleProps}
       onClick={onClick}
       style={{
-        background: '#1A1A1A',
+        background: isDragging ? '#2A2A2A' : '#1A1A1A',
         border: '1px solid #252525',
         borderTop: `2px solid ${st.color}`,
         borderRadius: 10,
         padding: '12px 14px',
-        cursor: 'pointer',
+        cursor: 'grab',
         marginBottom: 8,
-        transition: 'border-color 0.15s, background 0.15s',
+        boxShadow: isDragging ? '0 8px 32px rgba(0,0,0,0.5)' : 'none',
+        opacity: isDragging ? 0.95 : 1,
+        transition: 'background 0.15s, box-shadow 0.15s',
+        userSelect: 'none',
+        ...draggableProps?.style,
       }}
-      onMouseEnter={e => e.currentTarget.style.background = '#222'}
-      onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}
     >
       <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, lineHeight: 1.3 }}>{project.name}</div>
       <div style={{ fontSize: 11, color: '#666', fontFamily: '"DM Mono", monospace', marginBottom: 8 }}>
@@ -69,7 +76,7 @@ function KanbanCard({ project, onClick }) {
   );
 }
 
-function KanbanColumn({ status, projects, onOpenDetail }) {
+function KanbanColumn({ status, projects, onOpenDetail, isDragOver }) {
   const st = STATUS_STYLE[status];
   const totalRev = projects.reduce((s, p) => s + (p.revenue || 0), 0);
 
@@ -78,10 +85,11 @@ function KanbanColumn({ status, projects, onOpenDetail }) {
       minWidth: 240,
       maxWidth: 280,
       flex: '0 0 240px',
-      background: '#111',
+      background: isDragOver ? '#161616' : '#111',
       borderRadius: 12,
       padding: '14px 12px',
-      border: '1px solid #1A1A1A',
+      border: isDragOver ? `1px solid ${st.border}` : '1px solid #1A1A1A',
+      transition: 'background 0.15s, border-color 0.15s',
     }}>
       {/* Column header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -95,47 +103,90 @@ function KanbanColumn({ status, projects, onOpenDetail }) {
         </div>
       </div>
 
-      {/* Cards */}
-      <div>
-        {projects.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#333', fontSize: 12, fontFamily: '"DM Mono", monospace' }}>
-            empty
+      {/* Droppable cards area */}
+      <Droppable droppableId={status}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{ minHeight: 60 }}
+          >
+            {projects.length === 0 && !snapshot.isDraggingOver ? (
+              <div style={{ textAlign: 'center', padding: '24px 0', color: '#333', fontSize: 12, fontFamily: '"DM Mono", monospace' }}>
+                empty
+              </div>
+            ) : (
+              projects.map((p, index) => (
+                <Draggable key={p.id} draggableId={p.id} index={index}>
+                  {(dragProvided, dragSnapshot) => (
+                    <KanbanCard
+                      project={p}
+                      onClick={() => onOpenDetail(p)}
+                      innerRef={dragProvided.innerRef}
+                      draggableProps={dragProvided.draggableProps}
+                      dragHandleProps={dragProvided.dragHandleProps}
+                      isDragging={dragSnapshot.isDragging}
+                    />
+                  )}
+                </Draggable>
+              ))
+            )}
+            {provided.placeholder}
           </div>
-        ) : (
-          projects.map(p => (
-            <KanbanCard key={p.id} project={p} onClick={() => onOpenDetail(p)} />
-          ))
         )}
-      </div>
+      </Droppable>
     </div>
   );
 }
 
-export default function KanbanView({ projects, onOpenDetail }) {
-  const active = projects.filter(p => !p.archived);
+export default function KanbanView({ projects, onOpenDetail, onProjectUpdate }) {
+  const [localProjects, setLocalProjects] = useState(null);
+
+  const active = (localProjects ?? projects).filter(p => !p.archived);
 
   const byStatus = STATUSES.reduce((acc, s) => {
     acc[s] = active.filter(p => (p.status || 'Booked') === s).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
     return acc;
   }, {});
 
+  const handleDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId) return;
+
+    const newStatus = destination.droppableId;
+    const allProjects = localProjects ?? projects;
+
+    // Optimistic update
+    const updated = allProjects.map(p => p.id === draggableId ? { ...p, status: newStatus } : p);
+    setLocalProjects(updated);
+
+    // Persist to backend
+    await base44.entities.Project.update(draggableId, { status: newStatus });
+
+    // Notify parent so other views stay in sync
+    if (onProjectUpdate) onProjectUpdate(draggableId, { status: newStatus });
+  };
+
   return (
-    <div style={{
-      display: 'flex',
-      gap: 12,
-      overflowX: 'auto',
-      paddingBottom: 20,
-      scrollbarWidth: 'thin',
-      scrollbarColor: '#333 transparent',
-    }}>
-      {STATUSES.map(status => (
-        <KanbanColumn
-          key={status}
-          status={status}
-          projects={byStatus[status]}
-          onOpenDetail={onOpenDetail}
-        />
-      ))}
-    </div>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div style={{
+        display: 'flex',
+        gap: 12,
+        overflowX: 'auto',
+        paddingBottom: 20,
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#333 transparent',
+      }}>
+        {STATUSES.map(status => (
+          <KanbanColumn
+            key={status}
+            status={status}
+            projects={byStatus[status]}
+            onOpenDetail={onOpenDetail}
+          />
+        ))}
+      </div>
+    </DragDropContext>
   );
 }

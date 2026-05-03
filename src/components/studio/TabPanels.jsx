@@ -164,7 +164,13 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
       {/* Kanban view */}
       {viewMode === 'kanban' && !search && (
-        <KanbanView projects={projects} onOpenDetail={onOpenDetail} />
+        <KanbanView
+          projects={projects}
+          onOpenDetail={onOpenDetail}
+          onProjectUpdate={(id, changes) => {
+            if (onProjectsChange) onProjectsChange(prev => prev.map(p => p.id === id ? { ...p, ...changes } : p));
+          }}
+        />
       )}
 
       {/* Grid view (or search results) */}
