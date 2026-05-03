@@ -7,6 +7,7 @@ import GearCalendar from '@/components/gear/GearCalendar';
 import GearMaintenanceTab from '@/components/gear/GearMaintenanceTab';
 import GearProjectAssign from '@/components/gear/GearProjectAssign';
 import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package, Download, Wrench } from 'lucide-react';
+import RentalAvailabilityDashboard from '@/components/gear/RentalAvailabilityDashboard';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -158,7 +159,7 @@ export default function GearPage() {
 
   const TAB_BAR = (
     <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, flexWrap: 'wrap' }}>
-      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Availability' }, { key: 'maintenance', label: '🔧 Maintenance' }].map(t => (
+      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Calendar' }, { key: 'rentals', label: '🔁 Rentals' }, { key: 'maintenance', label: '🔧 Maintenance' }].map(t => (
         <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666', whiteSpace: 'nowrap' }}>{t.label}</button>
       ))}
     </div>
@@ -178,6 +179,19 @@ export default function GearPage() {
       <div style={{ paddingBottom: 40 }}>
         {TAB_BAR}
         <GearCalendar gear={activeGear} />
+      </div>
+    );
+  }
+
+  if (tab === 'rentals') {
+    return (
+      <div style={{ paddingBottom: 40 }}>
+        {TAB_BAR}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 4 }}>Rental Availability</div>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#444' }}>Equipment booked across projects — conflicts highlighted automatically</div>
+        </div>
+        <RentalAvailabilityDashboard projects={projects} />
       </div>
     );
   }
