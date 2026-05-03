@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, CalendarDays, Plus, X, Calendar, Phone, Film, PlayCircle } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, CalendarDays, Plus, X, Calendar, Phone, Film, PlayCircle, ClipboardCheck } from 'lucide-react';
+import ClientApprovalsTab from '@/components/client-portal/ClientApprovalsTab';
 import ClientContentSchedule from '@/components/client-portal/ClientContentSchedule';
 import ClientEditReview from '@/components/client-portal/ClientEditReview';
 import ClientLoginScreen from '@/components/client-portal/ClientLoginScreen';
@@ -17,12 +18,12 @@ const MONO = '"DM Mono", monospace';
 
 // ── Bottom nav tabs ───────────────────────────────────────────────────────────
 const TABS = [
-  { key: 'home',     label: 'Home',     Icon: LayoutDashboard },
-  { key: 'projects', label: 'Projects', Icon: FolderOpen },
-  { key: 'review',   label: 'Review',   Icon: PlayCircle },
-  { key: 'content',  label: 'Content',  Icon: CalendarDays },
-  { key: 'messages', label: 'Messages', Icon: MessageSquare },
-  { key: 'invoices', label: 'Invoices', Icon: CreditCard },
+  { key: 'home',      label: 'Home',     Icon: LayoutDashboard },
+  { key: 'projects',  label: 'Projects', Icon: FolderOpen },
+  { key: 'approvals', label: 'Approvals', Icon: ClipboardCheck },
+  { key: 'review',    label: 'Review',   Icon: PlayCircle },
+  { key: 'messages',  label: 'Messages', Icon: MessageSquare },
+  { key: 'invoices',  label: 'Invoices', Icon: CreditCard },
 ];
 
 // ── Premium Empty State ────────────────────────────────────────────────────────
@@ -245,12 +246,13 @@ export default function ClientPortal() {
   const unpaidInvoices = projects.filter(p => !p.paid && p.revenue > 0 && p.status === 'Invoiced').length;
 
   const getBadge = (key) => {
-    if (key === 'messages') return unreadMessages + pendingApprovals;
+    if (key === 'messages') return unreadMessages;
+    if (key === 'approvals') return pendingApprovals;
     if (key === 'invoices') return unpaidInvoices;
     return 0;
   };
 
-  const PAGE_TITLES = { home: null, projects: 'Your Projects', review: 'Review Cuts', content: 'Content Schedule', messages: 'Messages', invoices: 'Invoices', contracts: 'Contracts' };
+  const PAGE_TITLES = { home: null, projects: 'Your Projects', approvals: 'Approvals', review: 'Review Cuts', content: 'Content Schedule', messages: 'Messages', invoices: 'Invoices', contracts: 'Contracts' };
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', fontFamily: 'Syne, sans-serif' }}>
@@ -312,6 +314,9 @@ export default function ClientPortal() {
               uploaderName={contact.name}
             />
           </div>
+        )}
+        {tab === 'approvals' && (
+          <ClientApprovalsTab messages={messages} onApproval={handleApproval} />
         )}
         {tab === 'review' && (
           <ClientEditReview contact={contact} projects={projects} />
