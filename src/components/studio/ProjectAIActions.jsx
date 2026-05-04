@@ -10,6 +10,7 @@ const ACTIONS = {
   ],
   deliverables: [
     { id: 'followUp', icon: '✉️', label: 'Draft Follow-up Email', desc: 'Client follow-up for pending deliverables' },
+    { id: 'postShootEmail', icon: '🙏', label: 'Post-Shoot Follow-up', desc: 'Warm AI-crafted post-shoot email to client' },
   ],
   invoice: [
     { id: 'invoiceEmail', icon: '💳', label: 'Write Invoice Email', desc: 'Professional invoice email for this project' },
@@ -42,6 +43,7 @@ const PROMPTS = {
   bookingMsg: (p) => `Write individual WhatsApp booking confirmation messages for each crew member listed. Include project name, date, call time, location, role and pay. Keep them friendly and concise.`,
   crewMatcher: (p) => `Based on this project (${p.name}, ${p.date}, roles needed: ${(p.crew || []).map(c => c.role).join(', ') || 'TBD'}), suggest which crew members from the contacts list would be best suited. Explain why.`,
   briefSummary: (p) => `Give a concise status summary of this project. Highlight what's done, what's pending, any financial concerns, and any overdue items. Keep it under 150 words.`,
+  postShootEmail: (p) => `Write a warm, personal post-shoot follow-up email from Rathan at Studio 65 to ${p.client} after the project "${p.name}" (shot on ${p.date || 'recently'}). Thank them for a great day on set, briefly mention one or two details from the project context (deliverables, location, crew), let them know what happens next (editing is underway, timeline), and invite them to share any initial thoughts. Sign off warmly. Keep it concise — max 200 words. Do NOT be generic.`,
 };
 
 export default function ProjectAIActions({ project, contacts = [], tab }) {

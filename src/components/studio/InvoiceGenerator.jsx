@@ -27,7 +27,9 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
   const [studioAddress, setStudioAddress] = useState('Toronto, ON');
   const [paymentDetails, setPaymentDetails] = useState('');
   const [notes, setNotes] = useState('');
-  const [taxRate, setTaxRate] = useState(0);
+  const [invoiceType, setInvoiceType] = useState('final'); // 'final' | 'deposit'
+  const [depositPct, setDepositPct] = useState(50);
+  const [taxRate, setTaxRate] = useState(13); // HST default
   const [discount, setDiscount] = useState(0);
   const [customLineItems, setCustomLineItems] = useState([]);
   const [newItem, setNewItem] = useState({ desc: '', qty: 1, rate: '' });
@@ -42,10 +44,14 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
   }, []);
 
   // Core line items from project
-  const coreItems = [
-    { desc: `Production Services — ${p.name}`, qty: 1, rate: p.revenue || 0 },
-    ...(p.expenses || []).map(e => ({ desc: `${e.category || 'Expense'}: ${e.desc}`, qty: 1, rate: e.amount || 0 })),
-  ];
+  const fullAmount = p.revenue || 0;
+  const depositAmount = Math.round(fullAmount * depositPct / 100 * 100) / 100;
+  const coreItems = invoiceType === 'deposit'
+    ? [{ desc: `Deposit (${depositPct}%) — ${p.name}`, qty: 1, rate: depositAmount }]
+    : [
+        { desc: `Production Services — ${p.name}`, qty: 1, rate: fullAmount },
+        ...(p.expenses || []).map(e => ({ desc: `${e.category || 'Expense'}: ${e.desc}`, qty: 1, rate: e.amount || 0 })),
+      ];
 
   const allItems = [...coreItems, ...customLineItems];
   const subtotal = allItems.reduce((s, l) => s + (l.qty || 1) * (l.rate || 0), 0);
@@ -99,7 +105,7 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
     doc.setFillColor(232, 26, 26);
     doc.rect(0, 0, 210, 22, 'F');
     doc.setFont(SANS, 'bold'); doc.setFontSize(14); doc.setTextColor(255, 255, 255);
-    doc.text('INVOICE', 20, 14);
+    doc.text(invoiceType === 'deposit' ? 'DEPOSIT INVOICE' : 'INVOICE', 20, 14);
     doc.setFont(COURIER, 'normal'); doc.setFontSize(9); doc.setTextColor(255, 200, 200);
     doc.text(invoiceNum, 190, 14, { align: 'right' });
 
@@ -225,6 +231,36 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
     <div>
       <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 14 }}>Invoice Generator</div>
 
+      {/* Invoice Type toggle */}
+      <div style={{ background: '#1A1A1A', borderRadius: 10, padding: 14, marginBottom: 12 }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Invoice Type</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: invoiceType === 'deposit' ? 12 : 0 }}>
+          {[{ key: 'final', label: '📄 Final Invoice', sub: 'Full amount due' }, { key: 'deposit', label: '💳 Deposit Invoice', sub: 'Upfront partial payment' }].map(t => (
+            <button key={t.key} onClick={() => setInvoiceType(t.key)} style={{ flex: 1, padding: '10px 14px', borderRadius: 10, cursor: 'pointer', border: `1px solid ${invoiceType === t.key ? (t.key === 'deposit' ? 'rgba(245,158,11,0.4)' : 'rgba(74,158,255,0.4)') : '#222'}`, background: invoiceType === t.key ? (t.key === 'deposit' ? 'rgba(245,158,11,0.08)' : 'rgba(74,158,255,0.08)') : 'transparent', color: invoiceType === t.key ? (t.key === 'deposit' ? '#F59E0B' : '#4A9EFF') : '#444', textAlign: 'left' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2 }}>{t.label}</div>
+              <div style={{ fontFamily: MONO, fontSize: 9, opacity: 0.7 }}>{t.sub}</div>
+            </button>
+          ))}
+        </div>
+        {invoiceType === 'deposit' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 6 }}>Deposit %</div>
+              <input style={IS} type="number" min="1" max="100" value={depositPct} onChange={e => setDepositPct(parseFloat(e.target.value) || 50)} placeholder="50" />
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
+              {[25, 50, 75].map(pct => (
+                <button key={pct} onClick={() => setDepositPct(pct)} style={{ padding: '7px 12px', borderRadius: 7, border: `1px solid ${depositPct === pct ? 'rgba(245,158,11,0.4)' : '#222'}`, background: depositPct === pct ? 'rgba(245,158,11,0.12)' : 'transparent', color: depositPct === pct ? '#F59E0B' : '#555', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: MONO }}>{pct}%</button>
+              ))}
+            </div>
+            <div style={{ padding: '8px 14px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 8, marginTop: 16, whiteSpace: 'nowrap' }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', marginBottom: 2 }}>DEPOSIT DUE</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#F59E0B' }}>{`$${depositAmount.toLocaleString('en-CA', { minimumFractionDigits: 0 })}`}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Studio Info */}
       <div style={{ background: '#1A1A1A', borderRadius: 10, padding: 14, marginBottom: 12 }}>
         <div style={{ fontFamily: MONO, fontSize: 9, color: '#555', textTransform: 'uppercase', marginBottom: 10 }}>Studio Info</div>
@@ -323,6 +359,11 @@ export default function InvoiceGenerator({ project: p, onUpdate }) {
           </div>
           <div>
             <label style={LS}>Tax / HST (%)</label>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+              {[{ label: 'None', val: 0 }, { label: 'HST 13%', val: 13 }, { label: 'GST 5%', val: 5 }, { label: 'GST+PST', val: 12 }].map(t => (
+                <button key={t.label} onClick={() => setTaxRate(t.val)} style={{ flex: 1, padding: '5px 4px', borderRadius: 5, border: `1px solid ${taxRate === t.val ? 'rgba(123,200,83,0.4)' : '#222'}`, background: taxRate === t.val ? 'rgba(123,200,83,0.1)' : 'transparent', color: taxRate === t.val ? '#7BC853' : '#555', fontSize: 9, fontWeight: 700, cursor: 'pointer', fontFamily: MONO, whiteSpace: 'nowrap' }}>{t.label}</button>
+              ))}
+            </div>
             <input style={IS} type="number" min="0" value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} placeholder="0" />
           </div>
         </div>

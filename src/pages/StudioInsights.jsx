@@ -111,6 +111,30 @@ export default function StudioInsights() {
     .sort((a, b) => b.total - a.total)
     .slice(0, 15);
 
+  // ── 4. Profitability by content/shoot type ──────────────────────────────────
+  const shootTypeMap = {};
+  inRange.forEach(p => {
+    // Try to derive shoot type from project name keywords or use status group
+    const nameLower = (p.name || '').toLowerCase();
+    let type = 'Other';
+    if (nameLower.includes('reel') || nameLower.includes('instagram')) type = 'Reel';
+    else if (nameLower.includes('wedding')) type = 'Wedding';
+    else if (nameLower.includes('corporate') || nameLower.includes('corp')) type = 'Corporate';
+    else if (nameLower.includes('real estate') || nameLower.includes('realty') || nameLower.includes('listing')) type = 'Real Estate';
+    else if (nameLower.includes('restaurant') || nameLower.includes('food')) type = 'Restaurant';
+    else if (nameLower.includes('event')) type = 'Event';
+    else if (nameLower.includes('product')) type = 'Product';
+    else if (nameLower.includes('podcast')) type = 'Podcast';
+    if (!shootTypeMap[type]) shootTypeMap[type] = { type, revenue: 0, net: 0, projects: 0 };
+    shootTypeMap[type].revenue += p.revenue || 0;
+    shootTypeMap[type].net += p.net || 0;
+    shootTypeMap[type].projects += 1;
+  });
+  const shootTypeData = Object.values(shootTypeMap)
+    .filter(d => d.revenue > 0)
+    .map(d => ({ ...d, margin: d.revenue > 0 ? Math.round((d.net / d.revenue) * 100) : 0 }))
+    .sort((a, b) => b.net - a.net);
+
   // ── Summary stats ───────────────────────────────────────────────────────────
   const totalBilled = inRange.reduce((s, p) => s + (p.revenue || 0), 0);
   const totalPaid = inRange.filter(p => p.paid).reduce((s, p) => s + (p.revenue || 0), 0);
@@ -201,7 +225,54 @@ export default function StudioInsights() {
         </div>
       </div>
 
-      {/* Table 3: Client Lifetime Value */}
+      {/* Chart 3: Profitability by Shoot Type */}
+      {shootTypeData.length > 0 && (
+        <div style={{ background: '#0D0D0D', border: '1px solid #1A1A1A', borderRadius: 16, padding: '22px 20px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <DollarSign size={16} color="#7BC853" />
+            <div style={{ fontSize: 14, fontWeight: 700 }}>Profitability by Shoot Type</div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr>
+                  {['Type', 'Projects', 'Revenue', 'Net Profit', 'Margin'].map(h => (
+                    <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Projects' ? 'center' : 'left', fontFamily: MONO, fontSize: 9, color: '#444', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid #141414', whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {shootTypeData.map((d, i) => (
+                  <tr key={d.type} style={{ borderBottom: '1px solid #0D0D0D' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#111'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '11px 14px', fontWeight: 700, color: '#fff' }}>{d.type}</td>
+                    <td style={{ padding: '11px 14px', fontFamily: MONO, fontSize: 11, color: '#555', textAlign: 'center' }}>{d.projects}</td>
+                    <td style={{ padding: '11px 14px', fontFamily: MONO, fontSize: 12, color: '#fff' }}>{fmt(d.revenue)}</td>
+                    <td style={{ padding: '11px 14px', fontFamily: MONO, fontSize: 12, color: d.net >= 0 ? '#7BC853' : '#E81A1A', fontWeight: 700 }}>{fmt(d.net)}</td>
+                    <td style={{ padding: '11px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ flex: 1, height: 4, background: '#1A1A1A', borderRadius: 2, overflow: 'hidden', minWidth: 50 }}>
+                          <div style={{ height: '100%', width: `${Math.max(0, d.margin)}%`, background: d.margin >= 50 ? '#7BC853' : d.margin >= 25 ? '#F59E0B' : '#E81A1A', borderRadius: 2 }} />
+                        </div>
+                        <span style={{ fontFamily: MONO, fontSize: 10, color: d.margin >= 50 ? '#7BC853' : d.margin >= 25 ? '#F59E0B' : '#E81A1A', fontWeight: 700, flexShrink: 0 }}>{d.margin}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ marginTop: 14, padding: '10px 14px', background: '#111', border: '1px solid #1A1A1A', borderRadius: 8 }}>
+            <div style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>
+              💡 Shoot types are detected from project names. Include keywords like "Reel", "Wedding", "Corporate", "Real Estate", "Event", "Product", "Restaurant" in project names for accurate categorisation.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table 4: Client Lifetime Value */}
       <div style={{ background: '#0D0D0D', border: '1px solid #1A1A1A', borderRadius: 16, padding: '22px 20px', marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <Users size={16} color="#4A9EFF" />
