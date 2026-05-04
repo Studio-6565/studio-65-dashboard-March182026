@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
+import SurveyResultsPanel from '@/components/studio/SurveyResultsPanel';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -39,7 +40,7 @@ export default function OperationsPage() {
   const [checklistForm, setChecklistForm] = useState({ name: '', items: [] });
   const [checklistInput, setChecklistInput] = useState('');
 
-  const [activeTab, setActiveTab] = useState('shots');
+  const [activeTab, setActiveTab] = useState('shots'); // 'shots' | 'checklists' | 'surveys'
 
   useEffect(() => {
     Promise.all([
@@ -131,13 +132,17 @@ export default function OperationsPage() {
 
       {/* Tab */}
       <div style={{ display: 'flex', gap: 3, background: '#111', border: '1px solid #222', borderRadius: 8, padding: 3, width: 'fit-content', marginBottom: 16 }}>
-        {['shots', 'checklists'].map(t => (
-          <button key={t} onClick={() => setActiveTab(t)} style={{
+        {[
+          { key: 'shots', label: 'Shot Lists' },
+          { key: 'checklists', label: 'Pre-Shoot Checklists' },
+          { key: 'surveys', label: '⭐ Client Surveys' },
+        ].map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
             padding: '5px 16px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
             border: 'none', fontFamily: MONO,
-            background: activeTab === t ? '#E81A1A' : 'transparent',
-            color: activeTab === t ? '#fff' : '#555',
-          }}>{t === 'shots' ? 'Shot Lists' : 'Pre-Shoot Checklists'}</button>
+            background: activeTab === t.key ? '#E81A1A' : 'transparent',
+            color: activeTab === t.key ? '#fff' : '#555',
+          }}>{t.label}</button>
         ))}
       </div>
 
@@ -217,6 +222,9 @@ export default function OperationsPage() {
           )}
         </div>
       )}
+
+      {/* ── SURVEYS ── */}
+      {activeTab === 'surveys' && <SurveyResultsPanel />}
 
       {/* ── CHECKLIST TEMPLATES ── */}
       {activeTab === 'checklists' && (

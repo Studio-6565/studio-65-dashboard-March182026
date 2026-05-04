@@ -1,0 +1,67 @@
+{
+  "name": "ClientSurvey",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "completed"
+      ],
+      "default": "sent"
+    },
+    "overall_rating": {
+      "type": "number",
+      "description": "1\u20135 stars"
+    },
+    "communication_rating": {
+      "type": "number"
+    },
+    "quality_rating": {
+      "type": "number"
+    },
+    "turnaround_rating": {
+      "type": "number"
+    },
+    "would_recommend": {
+      "type": "boolean"
+    },
+    "favorite_part": {
+      "type": "string"
+    },
+    "improvement": {
+      "type": "string"
+    },
+    "testimonial": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "client_name"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {}
+  }
+}

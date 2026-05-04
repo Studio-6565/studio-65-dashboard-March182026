@@ -803,7 +803,30 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       {/* POST sub-tabs */}
       {tab === 'post' && postSub === 'deliverables' && (
         <div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10 }}>Deliverables</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#666', textTransform: 'uppercase' }}>Deliverables</div>
+            {del.filter(d => d.done).length > 0 && (
+              <button
+                onClick={async () => {
+                  const readyNames = del.filter(d => d.done).map(d => d.name);
+                  const sendSurvey = confirm('Also send a satisfaction survey to the client?');
+                  showToast('Notifying client...', 'blue');
+                  const res = await base44.functions.invoke('deliverableNotify', {
+                    project_id: p.id,
+                    deliverable_names: readyNames,
+                    send_survey: sendSurvey,
+                  });
+                  if (res.data?.success) {
+                    showToast('Client notified' + (res.data.surveyId ? ' + survey sent' : '') + ' ✓', 'green');
+                    await update({ status: 'Delivered', _logMsg: 'Deliverables marked ready — client notified' });
+                  }
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: '"DM Mono", monospace', background: 'rgba(123,200,83,0.12)', color: '#7BC853' }}
+              >
+                📣 Notify Client →
+              </button>
+            )}
+          </div>
           <div style={{ maxHeight: 240, overflowY: 'auto', marginBottom: 16 }}>
             {!del.length ? <div style={{ color: '#666', fontSize: 13, padding: '8px 0' }}>No deliverables yet.</div> :
               del.map((d, i) => (
