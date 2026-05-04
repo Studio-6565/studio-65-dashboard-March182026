@@ -9,6 +9,7 @@ import UpcomingReminders from '@/components/studio/UpcomingReminders';
 import PaymentDeadlines from '@/components/studio/PaymentDeadlines';
 import OverdueInvoices from '@/components/studio/OverdueInvoices';
 import MonthlyStatsDashboard from '@/components/studio/MonthlyStatsDashboard';
+import ProjectProfitChart from '@/components/studio/ProjectProfitChart';
 
 const MONO = '"DM Mono", monospace';
 
@@ -226,6 +227,9 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: '#7BC853', opacity: 0.7 }} /><span style={{ fontSize: 10, color: '#555', fontFamily: MONO }}>Net</span></div>
         </div>
       </div>
+
+      {/* Project profit trend */}
+      <ProjectProfitChart projects={active} />
 
       {/* Two column layout for lists */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px,1fr))', gap: 12, marginBottom: 16 }}>
