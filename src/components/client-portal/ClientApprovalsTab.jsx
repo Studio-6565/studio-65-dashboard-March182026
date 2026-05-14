@@ -14,6 +14,7 @@ const TYPE_LABEL = {
   script:           { icon: '📝', label: 'Script' },
   approval_request: { icon: '✅', label: 'Approval Request' },
   file:             { icon: '📎', label: 'Document' },
+  change_order:     { icon: '📋', label: 'Change Order' },
 };
 
 function ApprovalCard({ msg, onApproval }) {
@@ -195,7 +196,7 @@ function ApprovalCard({ msg, onApproval }) {
 
 export default function ClientApprovalsTab({ messages, onApproval }) {
   const approvalItems = messages.filter(m =>
-    m.from === 'studio' && (m.type === 'script' || m.type === 'approval_request')
+    m.from === 'studio' && (m.type === 'script' || m.type === 'approval_request' || m.type === 'change_order')
   ).sort((a, b) => {
     // Pending first, then by date desc
     const aP = !a.approval_status || a.approval_status === 'pending';

@@ -966,6 +966,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       {tab === 'post' && postSub === 'content schedule' && <ContentSchedulerPanel project={p} contacts={contacts} />}
       {tab === 'post' && postSub === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
       {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} contacts={contacts} />}
+      {tab === 'change orders' && <ChangeOrdersTab project={p} onUpdate={update} />}
       {tab === 'notes & log' && notesSub === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
 
       {tab === 'notes & log' && notesSub === 'activity' && (
