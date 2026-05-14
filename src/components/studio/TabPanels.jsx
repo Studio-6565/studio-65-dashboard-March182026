@@ -211,7 +211,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'capacity', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'capacity', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -274,7 +274,6 @@ export default function TabPanels({
           )}
           {tab === 'analytics' && <StudioAnalytics />}
           {tab === 'insights' && <StudioInsights />}
-          {tab === 'capacity' && <CapacityPage />}
           {tab === 'calendar' && <CalendarView projects={projects} onOpenDetail={onOpenDetail} />}
           {tab === 'crew' && (
             <div>
@@ -306,6 +305,7 @@ export default function TabPanels({
           {tab === 'script-engine' && <ScriptEngine />}
           {tab === 'content-calendar' && <ContentCalendar />}
           {tab === 'leads' && <LeadsPage />}
+          {tab === 'capacity' && <CapacityPage />}
           {tab === 'editors' && <EditorsDashboard />}
           {tab === 'asset-library' && <AssetLibrary />}
         </div>

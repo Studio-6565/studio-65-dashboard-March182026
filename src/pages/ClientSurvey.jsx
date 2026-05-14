@@ -51,6 +51,10 @@ export default function ClientSurveyPage() {
     testimonial: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showReferral, setShowReferral] = useState(false);
+  const [referralForm, setReferralForm] = useState({ name: '', email: '', context: '' });
+  const [referralSubmitting, setReferralSubmitting] = useState(false);
+  const [referralDone, setReferralDone] = useState(false);
 
   useEffect(() => {
     if (!surveyId) { setLoading(false); return; }
@@ -74,8 +78,38 @@ export default function ClientSurveyPage() {
       completed_at: new Date().toISOString(),
     };
     await base44.entities.ClientSurvey.update(surveyId, updated);
-    setSubmitted(true);
     setSubmitting(false);
+    // High rating (9 or 10 mapped from 5-star: 4 or 5 stars) → show referral screen
+    if (form.overall_rating >= 4) {
+      setShowReferral(true);
+    } else {
+      setSubmitted(true);
+    }
+  };
+
+  const handleReferralSubmit = async () => {
+    if (!referralForm.name.trim() && !referralForm.email.trim()) {
+      setSubmitted(true);
+      return;
+    }
+    setReferralSubmitting(true);
+    // Create a lead in the pipeline tagged as Referral
+    await base44.entities.ClientLead.create({
+      company: referralForm.name.trim(),
+      contact_name: referralForm.name.trim(),
+      email: referralForm.email.trim(),
+      status: 'prospect',
+      notes: `Referral from ${survey.client_name}. Context: ${referralForm.context}\n\n[Source: post-project survey for ${survey.project_name}]`,
+      first_contact_date: new Date().toISOString().split('T')[0],
+      activity: [{
+        type: 'note',
+        message: `Referred by ${survey.client_name} via post-project survey (${survey.project_name})`,
+        date: new Date().toISOString(),
+      }],
+    });
+    setReferralSubmitting(false);
+    setReferralDone(true);
+    setTimeout(() => setSubmitted(true), 1800);
   };
 
   if (loading) {
@@ -107,6 +141,57 @@ export default function ClientSurveyPage() {
       </div>
 
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 20px' }}>
+
+        {/* Referral screen */}
+        {showReferral && !submitted && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 52, marginBottom: 16 }}>🤝</div>
+            <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 10, letterSpacing: '-0.02em' }}>Know someone who'd benefit?</div>
+            <div style={{ fontSize: 14, color: '#666', marginBottom: 32, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 32px' }}>
+              We'd love to work with more people like you. If you know someone who could use our video production services, we'd be grateful for the introduction.
+            </div>
+            {referralDone ? (
+              <div style={{ padding: '20px', background: 'rgba(123,200,83,0.1)', border: '1px solid rgba(123,200,83,0.3)', borderRadius: 14, marginBottom: 20 }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>✓</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#7BC853' }}>Thanks for the referral!</div>
+              </div>
+            ) : (
+              <div style={{ background: '#0D0D0D', border: '1px solid #111', borderRadius: 16, padding: '24px 20px', textAlign: 'left', marginBottom: 16 }}>
+                {[
+                  { key: 'name', label: 'Their name or company', placeholder: 'Jane Smith / Acme Corp' },
+                  { key: 'email', label: 'Their email (optional)', placeholder: 'jane@acme.com' },
+                  { key: 'context', label: 'What are they looking for?', placeholder: 'Corporate videos, social content, event coverage...' },
+                ].map(f => (
+                  <div key={f.key} style={{ marginBottom: 16 }}>
+                    <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>{f.label}</div>
+                    <input
+                      value={referralForm[f.key]}
+                      onChange={e => setReferralForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                      placeholder={f.placeholder}
+                      style={{ width: '100%', background: '#111', border: '1px solid #1A1A1A', borderRadius: 10, padding: '12px 14px', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'Syne, sans-serif', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+                <button
+                  onClick={handleReferralSubmit}
+                  disabled={referralSubmitting}
+                  style={{ width: '100%', padding: '14px 0', background: '#E81A1A', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 800, cursor: 'pointer', opacity: referralSubmitting ? 0.6 : 1 }}
+                >
+                  {referralSubmitting ? 'Sending...' : 'Send Introduction →'}
+                </button>
+              </div>
+            )}
+            {!referralDone && (
+              <button
+                onClick={() => setSubmitted(true)}
+                style={{ background: 'none', border: 'none', color: '#444', fontSize: 13, cursor: 'pointer', fontFamily: 'Syne, sans-serif', padding: '8px 0' }}
+              >
+                No thanks, skip
+              </button>
+            )}
+          </div>
+        )}
+
         {submitted ? (
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             <div style={{ fontSize: 56, marginBottom: 20 }}>🙏</div>
@@ -121,7 +206,7 @@ export default function ClientSurveyPage() {
               </div>
             )}
           </div>
-        ) : (
+        ) : !showReferral ? (
           <>
             <div style={{ marginBottom: 32 }}>
               <div style={{ fontFamily: MONO, fontSize: 10, color: '#E81A1A', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
@@ -202,7 +287,7 @@ export default function ClientSurveyPage() {
               </div>
             )}
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

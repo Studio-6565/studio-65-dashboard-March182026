@@ -22,7 +22,6 @@ const NAV_SECTIONS = [
       { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
       { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
       { path: '/insights',   Icon: LineChart, label: 'Studio Insights' },
-      { path: '/capacity',   Icon: Gauge, label: 'Capacity' },
     ]
   },
   {
@@ -36,9 +35,10 @@ const NAV_SECTIONS = [
     ]
   },
   {
-    section: 'Admin',
-    items: [
-      { path: '/gear',       Icon: Backpack, label: 'Gear' },
+  section: 'Admin',
+  items: [
+    { path: '/capacity',   Icon: Gauge, label: 'Capacity' },
+    { path: '/gear',       Icon: Backpack, label: 'Gear' },
       { path: '/contracts',  Icon: FileText, label: 'Contracts' },
       { path: '/operations', Icon: CheckSquare, label: 'Operations' },
       { path: '/inbox',      Icon: Mail, label: 'Inbox' },

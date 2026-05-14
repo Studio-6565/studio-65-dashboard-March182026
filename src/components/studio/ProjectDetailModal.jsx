@@ -19,7 +19,6 @@ import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 import EquipmentChecklist from './tabs/EquipmentChecklist';
 import ContentSchedulerPanel from './ContentSchedulerPanel';
-import ChangeOrdersTab from './tabs/ChangeOrdersTab';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -383,7 +382,26 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const financeSubTab = ['invoice', 'expenses', 'margin', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
-  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'change orders', 'notes & log'];
+  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'notes & log'];
+
+  const handleStatusChange = async (newStatus) => {
+    await update({ status: newStatus, _logMsg: `Status changed to ${newStatus}` });
+    // Auto-send survey when project is marked Delivered
+    if (newStatus === 'Delivered' && p.status !== 'Delivered') {
+      const allContacts = contacts || [];
+      const clientContact = allContacts.find(c =>
+        c.name?.toLowerCase() === p.client?.toLowerCase() &&
+        (c.types || []).includes('Client')
+      );
+      if (clientContact?.email) {
+        base44.functions.invoke('deliverableNotify', {
+          project_id: p.id,
+          deliverable_names: [],
+          send_survey: true,
+        }).then(() => showToast('Survey auto-sent to client 📧', 'blue')).catch(() => {});
+      }
+    }
+  };
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -404,22 +422,6 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
           <button onClick={onDelete} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.3)', color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Delete</button>
         </div>
       </div>
-
-      {/* Pending Change Orders Banner */}
-      {(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length > 0 && (
-        <div
-          onClick={() => setTab('change orders')}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 14px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 10, cursor: 'pointer' }}
-        >
-          <span style={{ fontSize: 16 }}>⚠️</span>
-          <div style={{ flex: 1 }}>
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>
-              {(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length} pending change order{(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length > 1 ? 's' : ''} — action required
-            </span>
-          </div>
-          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#F59E0B', opacity: 0.7 }}>View →</span>
-        </div>
-      )}
 
       {/* Main Tabs */}
       <div style={{ display: 'flex', gap: 2, marginBottom: 10, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -478,8 +480,16 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
               </div>
             </div>
             <div style={{ background: '#2A2A2A', borderRadius: 8, padding: '10px 14px' }}>
-              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Status</div>
-              <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, fontFamily: '"DM Mono", monospace', fontWeight: 600, background: st.bg, color: st.clr }}>{p.status || 'Booked'}</span>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Status</div>
+            <select
+              value={p.status || 'Booked'}
+              onChange={e => handleStatusChange(e.target.value)}
+              style={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 6, padding: '4px 8px', color: '#fff', fontSize: 11, fontFamily: '"DM Mono", monospace', cursor: 'pointer', outline: 'none' }}
+            >
+              {['Booked','In Production','In Edit','Delivered','Feedback Requested','Invoiced'].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
             </div>
           </div>
           {(p.address || p.start_time || p.poc_name) && (
@@ -966,7 +976,6 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       {tab === 'post' && postSub === 'content schedule' && <ContentSchedulerPanel project={p} contacts={contacts} />}
       {tab === 'post' && postSub === 'ratings' && <CrewRatingsTab project={p} contacts={contacts} onContactsChange={onContactsChange} />}
       {tab === 'post' && postSub === 'edit' && <EditReviewTab project={p} contacts={contacts} />}
-      {tab === 'change orders' && <ChangeOrdersTab project={p} onUpdate={update} />}
       {tab === 'notes & log' && notesSub === 'crew chat' && <ProjectChat project={p} studioName="Studio 65" />}
 
       {tab === 'notes & log' && notesSub === 'activity' && (

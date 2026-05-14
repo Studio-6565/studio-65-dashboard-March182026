@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 import { fmt } from '@/lib/studio';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import MorningTaskList from '@/components/studio/MorningTaskList';
@@ -10,6 +11,7 @@ import PaymentDeadlines from '@/components/studio/PaymentDeadlines';
 import OverdueInvoices from '@/components/studio/OverdueInvoices';
 import MonthlyStatsDashboard from '@/components/studio/MonthlyStatsDashboard';
 import ProjectProfitChart from '@/components/studio/ProjectProfitChart';
+import TopReferrers from '@/components/dashboard/TopReferrers';
 
 const MONO = '"DM Mono", monospace';
 
@@ -74,6 +76,10 @@ const SHORT_MONTH = (ym) => {
 
 export default function DashboardHome({ projects = [], contacts = [], onOpenDetail }) {
   const navigate = useNavigate();
+  const [leads, setLeads] = useState([]);
+  useEffect(() => {
+    base44.entities.ClientLead.list('-created_date', 200).then(setLeads).catch(() => {});
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
   const thisMonth = today.slice(0, 7);
@@ -288,6 +294,7 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
       <OverdueInvoices projects={active} onOpenDetail={openProject} />
       <AISmartNudges projects={active} />
       <RevenueGoal projects={active} />
+      <TopReferrers contacts={contacts} leads={leads} projects={active} />
 
       {active.length === 0 && (
         <div style={{ textAlign: 'center', marginTop: 80, color: '#444' }}>

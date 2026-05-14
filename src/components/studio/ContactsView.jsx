@@ -23,13 +23,14 @@ const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadi
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
 const TYPES = ['Crew', 'Client', 'Vendor', 'Editor', 'Other'];
 const emptyForm = {
-  name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat',
-  notes: '', portal_password: '', offerings: [],
-  crew_skills: '', crew_experience: '', crew_equipment: '', crew_availability: '',
-  crew_instagram: '', crew_portfolio: '',
-  client_company: '', client_project_type: '', client_budget: '', client_how_found: '',
-  vendor_company: '', vendor_service_area: '', vendor_website: '',
-  editor_software: '', editor_style: '', editor_portfolio: '', editor_rate: '', editor_availability: '',
+name: '', types: [], role: '', phone: '', email: '', rate: '', rate_type: 'flat',
+notes: '', portal_password: '', offerings: [],
+crew_skills: '', crew_experience: '', crew_equipment: '', crew_availability: '',
+crew_instagram: '', crew_portfolio: '',
+client_company: '', client_project_type: '', client_budget: '', client_how_found: '',
+referred_by_contact_id: '', referred_by_name: '',
+vendor_company: '', vendor_service_area: '', vendor_website: '',
+editor_software: '', editor_style: '', editor_portfolio: '', editor_rate: '', editor_availability: '',
 };
 
 function VendorOfferingsEditor({ offerings, onChange }) {
@@ -152,6 +153,7 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
       crew_instagram: c.crew_instagram || '', crew_portfolio: c.crew_portfolio || '',
       client_company: c.client_company || '', client_project_type: c.client_project_type || '',
       client_budget: c.client_budget || '', client_how_found: c.client_how_found || '',
+      referred_by_contact_id: c.referred_by_contact_id || '', referred_by_name: c.referred_by_name || '',
       vendor_company: c.vendor_company || '', vendor_service_area: c.vendor_service_area || '',
       vendor_website: c.vendor_website || '',
       editor_software: c.editor_software || '', editor_style: c.editor_style || '',
@@ -270,6 +272,22 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                   <div><label style={labelStyle}>Budget Range</label><input style={inputStyle} value={form.client_budget} onChange={e => setForm(f => ({ ...f, client_budget: e.target.value }))} placeholder="e.g. $2k–$5k" /></div>
                   <div><label style={labelStyle}>How Did They Find Us</label><input style={inputStyle} value={form.client_how_found} onChange={e => setForm(f => ({ ...f, client_how_found: e.target.value }))} placeholder="e.g. Instagram, referral" /></div>
                 </div>
+                <div>
+                  <label style={labelStyle}>Referred By</label>
+                  <select
+                    style={{ ...inputStyle, background: '#2A2A2A' }}
+                    value={form.referred_by_contact_id}
+                    onChange={e => {
+                      const selected = contacts.find(c => c.id === e.target.value);
+                      setForm(f => ({ ...f, referred_by_contact_id: e.target.value, referred_by_name: selected?.name || '' }));
+                    }}
+                  >
+                    <option value="">— None —</option>
+                    {contacts.filter(c => (c.types || []).includes('Client') && c.id !== editingId).map(c => (
+                      <option key={c.id} value={c.id}>{c.name}{c.client_company ? ` (${c.client_company})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
 
@@ -364,6 +382,19 @@ export default function ContactsView({ contacts, onContactsChange, projects, onP
                   {c.email && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✉ {c.email}</div>}
                   {c.rate && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, color: '#F59E0B' }}>💰 ${c.rate}{c.rate_type === 'hourly' ? '/hr' : ' flat'}</div>}
                   {c.notes && <div style={{ fontSize: 11, color: '#666', marginTop: 2, lineHeight: 1.4 }}>{c.notes}</div>}
+                  {types.includes('Client') && c.referred_by_name && (
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF', marginTop: 2 }}>
+                      👋 Referred by {c.referred_by_name}
+                    </div>
+                  )}
+                  {types.includes('Client') && (() => {
+                    const referralCount = contacts.filter(rc => rc.referred_by_contact_id === c.id).length;
+                    return referralCount > 0 ? (
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#7BC853', marginTop: 2 }}>
+                        🤝 Referred {referralCount} client{referralCount > 1 ? 's' : ''}
+                      </div>
+                    ) : null;
+                  })()}
                   {c.portal_password && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                       <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#A78BFA' }}>🔑 {c.portal_password}</span>

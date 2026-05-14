@@ -19,6 +19,7 @@ import AssetLibrary from './pages/AssetLibrary';
 import ClientRemindersPage from './pages/ClientRemindersPage';
 import ClientSurveyPage from './pages/ClientSurvey';
 import DeliverableReview from './pages/DeliverableReview';
+import CapacityPage from './pages/CapacityPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/editor-portal" element={<EditorPortal />} />
       <Route path="/leads" element={<LeadsPage />} />
+
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
       <Route path="/content-calendar" element={<ContentCalendar />} />
       <Route path="/client-reminders" element={<ClientRemindersPage />} />
