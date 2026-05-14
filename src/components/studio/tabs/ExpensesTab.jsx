@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { fmt } from '@/lib/studio';
 import { showToast } from '../StudioToast';
 import { base44 } from '@/api/base44Client';
+import ReceiptScanner from '@/components/studio/ReceiptScanner';
 
 const MONO = '"DM Mono", monospace';
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -12,9 +13,10 @@ const CAT_COLORS = { Travel: '#4A9EFF', Food: '#F59E0B', Props: '#A78BFA', Softw
 
 const emptyForm = { desc: '', category: 'Other', amount: '', date: new Date().toISOString().split('T')[0], receipt_url: '' };
 
-export default function ExpensesTab({ project: p, onUpdate }) {
+export default function ExpensesTab({ project: p, onUpdate, allProjects = [] }) {
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const fileRef = useRef(null);
   const expenses = p.expenses || [];
 
@@ -50,13 +52,39 @@ export default function ExpensesTab({ project: p, onUpdate }) {
     byCategory[e.category] += (e.amount || 0);
   });
 
+  // When the scanner adds an expense to *this* project, update locally
+  const handleExpenseAdded = ({ projectId, expense }) => {
+    if (projectId === p.id) {
+      onUpdate({ expenses: [...(p.expenses || []), expense] });
+    }
+    setShowScanner(false);
+  };
+
   return (
     <div>
+      {showScanner && (
+        <ReceiptScanner
+          projects={allProjects.length ? allProjects : [p]}
+          onExpenseAdded={handleExpenseAdded}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Misc Expenses</div>
-        {total > 0 && (
-          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>Total: {fmt(total)}</span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Misc Expenses</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {total > 0 && (
+            <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>Total: {fmt(total)}</span>
+          )}
+          <button
+            onClick={() => setShowScanner(true)}
+            style={{ padding: '6px 12px', background: 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.25)', borderRadius: 7, color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: MONO, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}
+          >
+            ✦ Scan Receipt
+          </button>
+        </div>
       </div>
 
       {/* Category summary chips */}

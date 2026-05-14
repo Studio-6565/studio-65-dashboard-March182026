@@ -938,7 +938,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
         </div>
       )}
 
-      {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}
+      {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} allProjects={projects} />}
       {tab === 'finance' && financeSub === 'invoice' && <InvoiceGenerator project={p} onUpdate={onUpdate} />}
       {tab === 'shoot' && shootSub === 'equipment' && <EquipmentChecklist project={p} onUpdate={update} />}
       {tab === 'shoot' && shootSub === 'setup' && <SetupTab project={p} onUpdate={update} />}
