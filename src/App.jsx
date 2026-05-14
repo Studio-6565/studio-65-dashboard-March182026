@@ -13,7 +13,6 @@ import ClientPortal from './pages/ClientPortal.jsx';
 import Onboarding from './pages/Onboarding';
 import LeadsPage from './pages/LeadsPage';
 import ScriptAnalytics from './pages/ScriptAnalytics';
-import ContentCalendar from './pages/ContentCalendar';
 import EditorPortal from './pages/EditorPortal';
 import AssetLibrary from './pages/AssetLibrary';
 import ClientRemindersPage from './pages/ClientRemindersPage';
@@ -82,7 +81,6 @@ const AuthenticatedApp = () => {
       <Route path="/capture" element={<CaptureInbox />} />
 
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
-      <Route path="/content-calendar" element={<ContentCalendar />} />
       <Route path="/client-reminders" element={<ClientRemindersPage />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
