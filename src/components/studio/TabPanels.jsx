@@ -20,7 +20,7 @@ import DashboardHome from '@/pages/DashboardHome';
 import EditorsDashboard from '@/pages/EditorsDashboard';
 import AssetLibrary from '@/pages/AssetLibrary';
 import KanbanView from './KanbanView';
-import ScriptEngine from '@/pages/ScriptEngine';
+import ScriptEngine from '@/pages/ScriptEngine.jsx';
 import StudioAnalytics from '@/pages/StudioAnalytics';
 import StudioInsights from '@/pages/StudioInsights';
 
