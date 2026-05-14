@@ -28,16 +28,16 @@ function StatCard({ label, value, sub, color, onClick }) {
     <div
       onClick={onClick}
       style={{
-        background: '#fff', border: '1px solid #E8E8E8', borderRadius: 10,
+        background: '#1A1A1A', border: '1px solid #1E1E1E', borderRadius: 10,
         padding: '20px', cursor: onClick ? 'pointer' : 'default',
         transition: 'all 0.15s',
       }}
-      onMouseEnter={e => onClick && (e.currentTarget.style.borderColor = '#D0D0D0')}
-      onMouseLeave={e => onClick && (e.currentTarget.style.borderColor = '#E8E8E8')}
+      onMouseEnter={e => onClick && (e.currentTarget.style.borderColor = '#333')}
+      onMouseLeave={e => onClick && (e.currentTarget.style.borderColor = '#1E1E1E')}
     >
-      <div style={{ fontFamily: MONO, fontSize: 9, color: '#888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700, color: color || '#1A1A1A', lineHeight: 1 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: '#999', marginTop: 6, fontFamily: MONO }}>{sub}</div>}
+      <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 700, color: color || '#fff', lineHeight: 1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: '#777', marginTop: 6, fontFamily: MONO }}>{sub}</div>}
     </div>
   );
 }
@@ -50,15 +50,15 @@ function SectionLabel({ title }) {
 
 function ProjectRow({ project, onClick, right }) {
   return (
-    <div onClick={onClick} style={{ background: '#fff', border: '1px solid #E8E8E8', borderRadius: 10, padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, transition: 'all 0.15s' }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = '#D0D0D0'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = '#E8E8E8'}
+    <div onClick={onClick} style={{ background: '#1A1A1A', border: '1px solid #1E1E1E', borderRadius: 10, padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, transition: 'all 0.15s' }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = '#333'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = '#1E1E1E'}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#1A1A1A' }}>{project.name}</div>
-        <div style={{ fontSize: 11, color: '#999', fontFamily: MONO, marginTop: 2 }}>{project.client}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.name}</div>
+        <div style={{ fontSize: 11, color: '#777', fontFamily: MONO, marginTop: 2 }}>{project.client}</div>
       </div>
-      <div style={{ flexShrink: 0, color: '#1A1A1A' }}>{right}</div>
+      <div style={{ flexShrink: 0 }}>{right}</div>
     </div>
   );
 }
