@@ -21,7 +21,12 @@ export default function ContentCalendar() {
   const [projects, setProjects] = useState([]);
   const [scriptVersions, setScriptVersions] = useState([]);
   const [scheduledScripts, setScheduledScripts] = useState([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Default to the month with the most recent project
+  const [currentDate, setCurrentDate] = useState(() => {
+    // Start on today; user can navigate. We'll auto-jump after data loads.
+    return new Date();
+  });
+  const [didAutoJump, setDidAutoJump] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(null);
   const [scheduleModal, setScheduleModal] = useState(null); // { version, date }
@@ -42,6 +47,17 @@ export default function ContentCalendar() {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  // Auto-jump to the most recent month that has project data
+  useEffect(() => {
+    if (didAutoJump || projects.length === 0) return;
+    const allDates = projects.map(p => p.date).filter(Boolean).sort().reverse();
+    if (allDates.length > 0) {
+      const mostRecent = new Date(allDates[0] + 'T00:00:00');
+      setCurrentDate(mostRecent);
+      setDidAutoJump(true);
+    }
+  }, [projects, didAutoJump]);
 
   // Build a project map for quick lookup
   const projectMap = useMemo(() => {
