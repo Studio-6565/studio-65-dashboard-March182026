@@ -8,13 +8,6 @@
     "course": {
       "type": "string"
     },
-    "due_date": {
-      "type": "string",
-      "format": "date"
-    },
-    "due_time": {
-      "type": "string"
-    },
     "type": {
       "type": "string",
       "enum": [
@@ -26,6 +19,13 @@
         "other"
       ],
       "default": "assignment"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_time": {
+      "type": "string"
     },
     "effort": {
       "type": "string",
@@ -40,14 +40,14 @@
     },
     "weight_pct": {
       "type": "number",
-      "description": "% weight of final grade"
+      "description": "Grade weight percentage"
+    },
+    "notes": {
+      "type": "string"
     },
     "done": {
       "type": "boolean",
       "default": false
-    },
-    "notes": {
-      "type": "string"
     }
   },
   "required": [
