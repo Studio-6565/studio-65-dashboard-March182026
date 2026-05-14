@@ -750,10 +750,10 @@ export default function Portal() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{contact.name}</div>
-              <div style={{ fontSize: 10, color: '#555', fontFamily: MONO }}>
+              <div style={{ fontSize: 10, color: '#555', fontFamily: MONO, lineHeight: 1.5 }}>
                 {contact.role || 'Crew'}
-                {contact.email && <div>{contact.email}</div>}
-                {contact.phone && <div>{contact.phone}</div>}
+                {contact.email && <div style={{ color: '#4A9EFF', marginTop: 2 }}>{contact.email}</div>}
+                {contact.phone && <div style={{ color: '#25D366', marginTop: 1 }}>{contact.phone}</div>}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
