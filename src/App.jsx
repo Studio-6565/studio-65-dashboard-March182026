@@ -2,15 +2,26 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
 import Dashboard from './pages/Dashboard.jsx';
+import ContractsPage from './pages/ContractsPage.jsx';
 import Portal from './pages/Portal';
 import ClientPortal from './pages/ClientPortal.jsx';
 import Onboarding from './pages/Onboarding';
+import LeadsPage from './pages/LeadsPage';
+import ScriptAnalytics from './pages/ScriptAnalytics';
+import ContentCalendar from './pages/ContentCalendar';
 import EditorPortal from './pages/EditorPortal';
+import AssetLibrary from './pages/AssetLibrary';
+import ClientRemindersPage from './pages/ClientRemindersPage';
 import ClientSurveyPage from './pages/ClientSurvey';
 import DeliverableReview from './pages/DeliverableReview';
+import CapacityPage from './pages/CapacityPage';
+import CaptureInbox from './pages/CaptureInbox';
+import TodayView from './pages/TodayView';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -63,7 +74,14 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/editor-portal" element={<EditorPortal />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/leads" element={<LeadsPage />} />
+      <Route path="/capture" element={<CaptureInbox />} />
+      <Route path="/today" element={<TodayView />} />
+
+      <Route path="/script-analytics" element={<ScriptAnalytics />} />
+      <Route path="/content-calendar" element={<ContentCalendar />} />
+      <Route path="/client-reminders" element={<ClientRemindersPage />} />
+      <Route path="/" element={<Navigate to="/today" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
   );

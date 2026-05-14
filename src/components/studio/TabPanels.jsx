@@ -25,9 +25,7 @@ import StudioAnalytics from '@/pages/StudioAnalytics';
 import StudioInsights from '@/pages/StudioInsights';
 import ContentCalendar from '@/pages/ContentCalendar.jsx';
 import CapacityPage from '@/pages/CapacityPage';
-import CaptureInbox from '@/pages/CaptureInbox';
-import ScriptAnalytics from '@/pages/ScriptAnalytics';
-import ClientRemindersPage from '@/pages/ClientRemindersPage';
+import TodayView from '@/pages/TodayView';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -214,7 +212,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'capture', 'script-analytics', 'client-reminders', 'editors', 'asset-library', 'capacity', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['today', 'dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'capacity', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -304,6 +302,7 @@ export default function TabPanels({
               loadData={loadData || noopRefresh}
             />
           )}
+          {tab === 'today' && <TodayView />}
           {tab === 'dashboard' && <DashboardHome projects={projects} contacts={contacts} onOpenDetail={onOpenDetail} />}
           {tab === 'script-engine' && <ScriptEngine />}
           {tab === 'content-calendar' && <ContentCalendar />}
@@ -311,9 +310,6 @@ export default function TabPanels({
           {tab === 'capacity' && <CapacityPage />}
           {tab === 'editors' && <EditorsDashboard />}
           {tab === 'asset-library' && <AssetLibrary />}
-          {tab === 'capture' && <CaptureInbox />}
-          {tab === 'script-analytics' && <ScriptAnalytics />}
-          {tab === 'client-reminders' && <ClientRemindersPage />}
         </div>
       ))}
     </div>

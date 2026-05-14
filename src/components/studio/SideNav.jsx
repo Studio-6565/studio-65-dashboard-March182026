@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library, Bell, LineChart, CalendarDays, Gauge, Zap } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library, Bell, LineChart, CalendarDays, Gauge, Zap, Sun } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import CaptureBar from '@/components/capture/CaptureBar';
 
@@ -11,6 +11,7 @@ const NAV_SECTIONS = [
   {
     section: 'Core',
     items: [
+      { path: '/today',      Icon: Sun, label: 'Today' },
       { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
       { path: '/projects',   Icon: Film, label: 'Projects' },
       { path: '/capture',    Icon: Zap, label: 'Capture Inbox' },
