@@ -20,6 +20,7 @@ import ClientRemindersPage from './pages/ClientRemindersPage';
 import ClientSurveyPage from './pages/ClientSurvey';
 import DeliverableReview from './pages/DeliverableReview';
 import CapacityPage from './pages/CapacityPage';
+import CaptureInbox from './pages/CaptureInbox';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/editor-portal" element={<EditorPortal />} />
       <Route path="/leads" element={<LeadsPage />} />
+      <Route path="/capture" element={<CaptureInbox />} />
 
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
       <Route path="/content-calendar" element={<ContentCalendar />} />

@@ -1,0 +1,114 @@
+{
+  "name": "CaptureTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "raw_input": {
+      "type": "string",
+      "description": "Original natural-language entry"
+    },
+    "who_asked": {
+      "type": "string",
+      "description": "Contact name or 'self' / 'unspecified'"
+    },
+    "who_asked_contact_id": {
+      "type": "string"
+    },
+    "client": {
+      "type": "string"
+    },
+    "client_contact_id": {
+      "type": "string"
+    },
+    "linked_project_id": {
+      "type": "string"
+    },
+    "linked_project_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "deliverable",
+        "decision",
+        "follow-up",
+        "errand",
+        "admin"
+      ],
+      "default": "admin"
+    },
+    "effort": {
+      "type": "string",
+      "enum": [
+        "15min",
+        "30min",
+        "1hr",
+        "half-day",
+        "full-day"
+      ],
+      "default": "30min"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "default": "P2"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "inbox",
+        "snoozed",
+        "done",
+        "converted"
+      ],
+      "default": "inbox"
+    },
+    "snooze_until": {
+      "type": "string",
+      "format": "date"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "brain_influences": {
+      "type": "string",
+      "description": "JSON array of brain elements that influenced the parse"
+    },
+    "clarifying_question": {
+      "type": "string"
+    },
+    "clarifying_answer": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

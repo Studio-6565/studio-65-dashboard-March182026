@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library, Bell, LineChart, CalendarDays, Gauge } from 'lucide-react';
+import { Film, Calendar, BarChart3, Clock, Users, Clipboard, Mail, Backpack, CheckSquare, FileText, Settings, LayoutDashboard, Video, Sparkles, ChevronDown, UserCheck, Library, Bell, LineChart, CalendarDays, Gauge, Zap } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
+import CaptureBar from '@/components/capture/CaptureBar';
 
 const MONO = '"DM Mono", monospace';
 
@@ -12,6 +13,7 @@ const NAV_SECTIONS = [
     items: [
       { path: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
       { path: '/projects',   Icon: Film, label: 'Projects' },
+      { path: '/capture',    Icon: Zap, label: 'Capture Inbox' },
       { path: '/script-engine', Icon: Sparkles, label: 'Script Engine' },
       { path: '/content-calendar', Icon: CalendarDays, label: 'Content Calendar' },
     ]
@@ -119,6 +121,13 @@ export default function SideNav({ onNewProject, projects, contacts }) {
       {!collapsed && (
         <div style={{ padding: '8px 12px', flexShrink: 0 }}>
           <GlobalSearch projects={projects || []} contacts={contacts || []} />
+        </div>
+      )}
+
+      {/* Capture Bar */}
+      {!collapsed && (
+        <div style={{ padding: '0 12px 8px', flexShrink: 0 }}>
+          <CaptureBar projects={projects || []} contacts={contacts || []} onTaskCreated={() => {}} />
         </div>
       )}
 
