@@ -221,10 +221,8 @@ export default function LeadsPage() {
                 lead={lead}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
-                onEdit={() => {
-                  setEditingLead(lead);
-                  setModalOpen(true);
-                }}
+                onEdit={() => { setEditingLead(lead); setModalOpen(true); }}
+                onBuildProposal={setProposalLead}
               />
             ))
           )}
@@ -234,12 +232,18 @@ export default function LeadsPage() {
       <LeadModal
         open={modalOpen}
         lead={editingLead}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingLead(null);
-        }}
+        onClose={() => { setModalOpen(false); setEditingLead(null); }}
         onSave={editingLead ? handleUpdate : handleCreate}
       />
+
+      {proposalLead && (
+        <ProposalBuilder
+          lead={proposalLead}
+          open={!!proposalLead}
+          onClose={() => setProposalLead(null)}
+          onLeadUpdate={handleLeadUpdate}
+        />
+      )}
     </div>
   );
 }
