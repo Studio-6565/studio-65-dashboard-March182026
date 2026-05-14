@@ -20,6 +20,7 @@ import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 import EquipmentChecklist from './tabs/EquipmentChecklist';
 import ContentSchedulerPanel from './ContentSchedulerPanel';
 import ProjectMilestoneTimeline from './ProjectMilestoneTimeline';
+import { generateCallSheetPDF } from './tabs/CallSheetTab';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -431,10 +432,17 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
 
       {/* Sub-tabs */}
       {tab === 'shoot' && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           {shootSubTab.map(t => (
             <button key={t} onClick={() => setShootSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${shootSub === t ? '#444' : '#2A2A2A'}`, background: shootSub === t ? '#2A2A2A' : 'transparent', color: shootSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
           ))}
+          <button
+            onClick={async () => {
+              try { await generateCallSheetPDF(p); showToast('Call sheet PDF downloaded!', 'green'); }
+              catch { showToast('PDF generation failed', 'red'); }
+            }}
+            style={{ marginLeft: 'auto', padding: '4px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(232,26,26,0.4)', background: 'rgba(232,26,26,0.1)', color: '#E81A1A', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}
+          >⬇ Call Sheet PDF</button>
         </div>
       )}
       {tab === 'post' && (

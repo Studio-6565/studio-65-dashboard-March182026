@@ -197,8 +197,222 @@ function CallSheetPreview({ project, extra }) {
   );
 }
 
+export async function generateCallSheetPDF(p, extraContent = '') {
+  const { jsPDF } = await import('jspdf');
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const W = doc.internal.pageSize.getWidth();
+  const SANS = 'helvetica';
+  const MARGIN = 36;
+  let y = 0;
+
+  // Helper: add page if needed
+  const checkPage = (needed = 20) => {
+    if (y + needed > doc.internal.pageSize.getHeight() - 36) {
+      doc.addPage();
+      y = 40;
+    }
+  };
+
+  // Header bar
+  doc.setFillColor(232, 26, 26);
+  doc.rect(0, 0, W, 70, 'F');
+  doc.setFont(SANS, 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(255, 180, 180);
+  doc.text('STUDIO 65  ·  CALL SHEET', MARGIN, 18);
+
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text(p.name || 'Call Sheet', MARGIN, 40);
+
+  doc.setFont(SANS, 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(255, 200, 200);
+  const subLine = [p.project_id, p.client ? `Client: ${p.client}` : ''].filter(Boolean).join('  ·  ');
+  if (subLine) doc.text(subLine, MARGIN, 54);
+
+  // Date / time top-right
+  const dateStr = p.end_date && p.end_date !== p.date
+    ? `${p.date} – ${p.end_date}`
+    : p.date || '';
+  doc.setFont(SANS, 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(255, 255, 255);
+  if (dateStr) doc.text(dateStr, W - MARGIN, 36, { align: 'right' });
+  if (p.start_time) {
+    doc.setFont(SANS, 'normal');
+    doc.setFontSize(8);
+    const timeStr = `Call: ${p.start_time}${p.end_time ? '  →  Wrap: ' + p.end_time : ''}`;
+    doc.text(timeStr, W - MARGIN, 50, { align: 'right' });
+  }
+  if (p.setup?.arrival_time) {
+    doc.setFontSize(8);
+    doc.text(`Crew Arrival: ${p.setup.arrival_time}`, W - MARGIN, 62, { align: 'right' });
+  }
+
+  y = 90;
+
+  // Section helper
+  const sectionHeader = (title, accent = [232, 26, 26]) => {
+    checkPage(22);
+    doc.setFillColor(...accent);
+    doc.rect(MARGIN, y, 3, 12, 'F');
+    doc.setFont(SANS, 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...accent);
+    doc.text(title.toUpperCase(), MARGIN + 8, y + 9);
+    y += 18;
+  };
+
+  const labelValue = (label, value, xOffset = MARGIN) => {
+    doc.setFont(SANS, 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(120, 120, 120);
+    doc.text(label.toUpperCase(), xOffset, y);
+    doc.setFont(SANS, 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(30, 30, 30);
+    const lines = doc.splitTextToSize(value, W - xOffset - MARGIN);
+    doc.text(lines, xOffset, y + 11);
+    y += 11 + lines.length * 11 + 4;
+  };
+
+  // Location & POC
+  if (p.address || p.poc_name) {
+    sectionHeader('Location & Contact', [74, 158, 255]);
+    if (p.address) labelValue('Location', p.address);
+    if (p.poc_name) labelValue('Point of Contact', p.poc_name + (p.poc_phone ? `  ·  ${p.poc_phone}` : ''));
+    y += 6;
+  }
+
+  // Crew
+  if ((p.crew || []).length > 0) {
+    sectionHeader('Crew', [245, 158, 11]);
+    p.crew.forEach((c) => {
+      checkPage(18);
+      doc.setFillColor(248, 248, 248);
+      doc.roundedRect(MARGIN, y, W - MARGIN * 2, 16, 2, 2, 'F');
+      doc.setFont(SANS, 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(20, 20, 20);
+      doc.text(c.name || '—', MARGIN + 6, y + 11);
+      doc.setFont(SANS, 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      const roleStr = [c.role, c.phone, c.email].filter(Boolean).join('  ·  ');
+      if (roleStr) doc.text(roleStr, MARGIN + 6 + doc.getTextWidth(c.name || '—') + 8, y + 11);
+      y += 20;
+    });
+    y += 4;
+  }
+
+  // Camera Setup
+  const setup = p.setup || {};
+  const setupItems = [
+    ['Orientation', setup.camera_orientation],
+    ['Frame Rate', setup.frame_rate ? setup.frame_rate + ' fps' : ''],
+    ['Resolution', setup.resolution],
+    ['Codec', setup.codec],
+    ['Color Profile', setup.color_profile],
+  ].filter(([, v]) => v);
+  if (setupItems.length || setup.gear) {
+    sectionHeader('Camera & Technical Setup', [74, 158, 255]);
+    setupItems.forEach(([l, v]) => { checkPage(14); labelValue(l, v); });
+    if (setup.gear) { checkPage(14); labelValue('Gear', setup.gear); }
+    y += 4;
+  }
+
+  // Rentals
+  if ((p.rentals || []).length > 0) {
+    sectionHeader('Rentals / Equipment', [123, 200, 83]);
+    p.rentals.forEach((r) => {
+      checkPage(18);
+      doc.setFillColor(248, 248, 248);
+      doc.roundedRect(MARGIN, y, W - MARGIN * 2, 16, 2, 2, 'F');
+      doc.setFont(SANS, 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(20, 20, 20);
+      doc.text(r.equipment || '—', MARGIN + 6, y + 11);
+      if (r.vendor || r.phone) {
+        doc.setFont(SANS, 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text([r.vendor && `via ${r.vendor}`, r.phone].filter(Boolean).join('  ·  '), W - MARGIN - 6, y + 11, { align: 'right' });
+      }
+      y += 20;
+    });
+    y += 4;
+  }
+
+  // Shot List
+  if ((p.shot_list || []).length > 0) {
+    sectionHeader('Shot List', [232, 26, 26]);
+    (p.shot_list).forEach((s, i) => {
+      checkPage(14);
+      doc.setFont(SANS, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(s.done ? 150 : 30, s.done ? 150 : 30, s.done ? 150 : 30);
+      doc.text(`${i + 1}.  ${s.shot || ''}`, MARGIN + 6, y);
+      y += 13;
+    });
+    y += 6;
+  }
+
+  // Deliverables
+  if ((p.deliverables || []).length > 0) {
+    sectionHeader('Deliverables', [167, 139, 250]);
+    (p.deliverables).forEach((d) => {
+      checkPage(13);
+      doc.setFont(SANS, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(50, 50, 50);
+      doc.text(`• ${d.name}${d.due ? `  (due ${d.due})` : ''}`, MARGIN + 6, y);
+      y += 13;
+    });
+    y += 6;
+  }
+
+  // Notes
+  if (p.notes || setup.notes) {
+    sectionHeader('Notes', [100, 100, 100]);
+    if (setup.notes) { checkPage(14); labelValue('Setup Notes', setup.notes); }
+    if (p.notes) { checkPage(14); labelValue('Project Notes', p.notes); }
+    y += 4;
+  }
+
+  // Extra AI content
+  if (extraContent) {
+    sectionHeader('Additional Info', [74, 158, 255]);
+    checkPage(14);
+    doc.setFont(SANS, 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(40, 40, 40);
+    const lines = doc.splitTextToSize(extraContent, W - MARGIN * 2);
+    lines.forEach((line) => { checkPage(12); doc.text(line, MARGIN + 6, y); y += 12; });
+    y += 4;
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    const ph = doc.internal.pageSize.getHeight();
+    doc.setDrawColor(220, 220, 220);
+    doc.line(MARGIN, ph - 24, W - MARGIN, ph - 24);
+    doc.setFont(SANS, 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(160, 160, 160);
+    doc.text('Studio 65  ·  studio65production@gmail.com', MARGIN, ph - 12);
+    doc.text(`Page ${i} of ${pageCount}  ·  Generated ${new Date().toLocaleDateString('en-CA')}`, W - MARGIN, ph - 12, { align: 'right' });
+  }
+
+  const safeName = (p.name || 'CallSheet').replace(/[^a-z0-9]/gi, '_');
+  doc.save(`CallSheet_${safeName}_${p.date || 'undated'}.pdf`);
+}
+
 export default function CallSheetTab({ project, onUpdate }) {
   const [uploading, setUploading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [chatMsg, setChatMsg] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [extraContent, setExtraContent] = useState('');
@@ -207,6 +421,17 @@ export default function CallSheetTab({ project, onUpdate }) {
   const chatEndRef = useRef();
 
   const p = project;
+
+  const handleGeneratePDF = async () => {
+    setPdfLoading(true);
+    try {
+      await generateCallSheetPDF(p, extraContent);
+      showToast('Call sheet PDF downloaded!', 'green');
+    } catch (e) {
+      showToast('PDF generation failed', 'red');
+    }
+    setPdfLoading(false);
+  };
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -263,8 +488,11 @@ Respond with ONLY the new/updated content to add or replace in the "Additional I
     <div>
       {/* Top actions */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={handlePrint} style={{ padding: '9px 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-          🖨 Print / Save PDF
+        <button onClick={handleGeneratePDF} disabled={pdfLoading} style={{ padding: '9px 16px', background: '#E81A1A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: pdfLoading ? 0.7 : 1 }}>
+          {pdfLoading ? '⏳ Generating...' : '⬇ Generate Call Sheet PDF'}
+        </button>
+        <button onClick={handlePrint} style={{ padding: '9px 16px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 8, color: '#ccc', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          🖨 Print
         </button>
         <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleUpload} style={{ display: 'none' }} />
         <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '9px 16px', background: '#2A2A2A', border: '1px solid #444', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
