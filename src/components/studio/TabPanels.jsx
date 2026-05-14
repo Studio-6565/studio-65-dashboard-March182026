@@ -24,6 +24,7 @@ import ScriptEngine from '@/pages/ScriptEngine';
 import StudioAnalytics from '@/pages/StudioAnalytics';
 import StudioInsights from '@/pages/StudioInsights';
 import ContentCalendar from '@/pages/ContentCalendar.jsx';
+import CapacityPage from '@/pages/CapacityPage';
 
 // ── Inline ProjectsView (moved here so state is preserved in the panel) ──────
 
@@ -210,7 +211,7 @@ function ProjectsPanel({ projects, onOpenDetail, onNewProject, onProjectUpdate, 
 
 // ── TabPanels: all tabs always mounted, shown/hidden via CSS ─────────────────
 
-const TABS = ['dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
+const TABS = ['dashboard', 'projects', 'script-engine', 'content-calendar', 'analytics', 'insights', 'capacity', 'calendar', 'crew', 'timeline', 'clients', 'contacts', 'leads', 'editors', 'asset-library', 'gear', 'operations', 'contracts', 'inbox', 'settings'];
 
 function ContactsTab({ contacts, onContactsChange, projects, onProjectsChange, loadData }) {
   const { containerRef, isRefreshing, pullProgress } = usePullToRefresh(loadData);
@@ -273,6 +274,7 @@ export default function TabPanels({
           )}
           {tab === 'analytics' && <StudioAnalytics />}
           {tab === 'insights' && <StudioInsights />}
+          {tab === 'capacity' && <CapacityPage />}
           {tab === 'calendar' && <CalendarView projects={projects} onOpenDetail={onOpenDetail} />}
           {tab === 'crew' && (
             <div>

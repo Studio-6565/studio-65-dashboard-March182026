@@ -19,6 +19,7 @@ import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 import EquipmentChecklist from './tabs/EquipmentChecklist';
 import ContentSchedulerPanel from './ContentSchedulerPanel';
+import ChangeOrdersTab from './tabs/ChangeOrdersTab';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -382,7 +383,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const financeSubTab = ['invoice', 'expenses', 'margin', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
-  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'notes & log'];
+  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'change orders', 'notes & log'];
 
   return (
     <StudioModal open={open} onClose={onClose} maxWidth={720} inline={inline}>
@@ -403,6 +404,22 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
           <button onClick={onDelete} style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(232,26,26,0.1)', border: '1px solid rgba(232,26,26,0.3)', color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}>Delete</button>
         </div>
       </div>
+
+      {/* Pending Change Orders Banner */}
+      {(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length > 0 && (
+        <div
+          onClick={() => setTab('change orders')}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 14px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 10, cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 16 }}>⚠️</span>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>
+              {(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length} pending change order{(p.change_orders || []).filter(co => co.status === 'pending' || co.status === 'sent_for_approval').length > 1 ? 's' : ''} — action required
+            </span>
+          </div>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#F59E0B', opacity: 0.7 }}>View →</span>
+        </div>
+      )}
 
       {/* Main Tabs */}
       <div style={{ display: 'flex', gap: 2, marginBottom: 10, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid #1E1E1E', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
