@@ -21,7 +21,6 @@ import ClientSurveyPage from './pages/ClientSurvey';
 import DeliverableReview from './pages/DeliverableReview';
 import CapacityPage from './pages/CapacityPage';
 import CaptureInbox from './pages/CaptureInbox';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import GlobalVoiceCapture from './components/capture/GlobalVoiceCapture';
 
 const AuthenticatedApp = () => {
@@ -54,12 +53,14 @@ const AuthenticatedApp = () => {
     // If user is admin, let them access the dashboard
     if (user?.role === 'admin') {
       return (
-        <Routes>
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/" element={<Navigate to="/projects" replace />} />
-          <Route path="/*" element={<Dashboard />} />
+        <>
+          <Routes>
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/" element={<Navigate to="/projects" replace />} />
+            <Route path="/*" element={<Dashboard />} />
           </Routes>
           <GlobalVoiceCapture />
+        </>
       );
     }
     // Non-admins go to onboarding
@@ -73,20 +74,20 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <>
-      <Routes>
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/admin-login" element={<Onboarding />} />
-        <Route path="/editor-portal" element={<EditorPortal />} />
-        <Route path="/leads" element={<LeadsPage />} />
-        <Route path="/capture" element={<CaptureInbox />} />
-        <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
-        <Route path="/script-analytics" element={<ScriptAnalytics />} />
-        <Route path="/content-calendar" element={<ContentCalendar />} />
-        <Route path="/client-reminders" element={<ClientRemindersPage />} />
-        <Route path="/" element={<Navigate to="/projects" replace />} />
-        <Route path="/*" element={<Dashboard />} />
-      </Routes>
-      <GlobalVoiceCapture />
+    <Routes>
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/admin-login" element={<Onboarding />} />
+      <Route path="/editor-portal" element={<EditorPortal />} />
+      <Route path="/leads" element={<LeadsPage />} />
+      <Route path="/capture" element={<CaptureInbox />} />
+
+      <Route path="/script-analytics" element={<ScriptAnalytics />} />
+      <Route path="/content-calendar" element={<ContentCalendar />} />
+      <Route path="/client-reminders" element={<ClientRemindersPage />} />
+      <Route path="/" element={<Navigate to="/projects" replace />} />
+      <Route path="/*" element={<Dashboard />} />
+    </Routes>
+    <GlobalVoiceCapture />
     </>
   );
 };
