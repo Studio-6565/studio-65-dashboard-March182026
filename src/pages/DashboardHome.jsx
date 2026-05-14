@@ -154,160 +154,198 @@ export default function DashboardHome({ projects = [], contacts = [], onOpenDeta
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <div style={{ maxWidth: 960, paddingBottom: 60 }}>
+    <div style={{ paddingBottom: 60, background: '#0A0A0A', minHeight: '100vh' }}>
 
-      {/* Greeting */}
-      <div style={{ marginBottom: 36 }}>
-        <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>{greeting} 👋</div>
-        <div style={{ fontSize: 13, color: '#999', fontFamily: MONO, fontWeight: 500 }}>
-          {new Date().toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </div>
-      </div>
-
-      {/* TODAY alert banner */}
-      {todayShoots.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          {todayShoots.map(p => (
-            <div key={p.id} onClick={() => openProject(p)} style={{ background: '#FEF2F2', border: '1px solid #FDD', borderRadius: 12, padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div>
-                <div style={{ fontSize: 10, fontFamily: MONO, color: '#E81A1A', fontWeight: 700, marginBottom: 4, letterSpacing: '0.1em' }}>🎬 SHOOTING TODAY</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{p.name}</div>
-                <div style={{ fontSize: 11, color: '#999', fontFamily: MONO, marginTop: 3 }}>
-                  {p.client}{p.start_time ? ' · ' + p.start_time : ''}{p.address ? ' · ' + p.address : ''}
+      {/* Hero Section - Greeting + Today Shoots */}
+      <div style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #0D0D0D 100%)', borderBottom: '1px solid #1E1E1E', padding: '32px 20px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 6 }}>{greeting} 👋</div>
+            <div style={{ fontSize: 12, color: '#666', fontFamily: MONO }}>
+              {new Date().toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
+          </div>
+          
+          {todayShoots.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {todayShoots.map(p => (
+                <div key={p.id} onClick={() => openProject(p)} style={{ background: 'rgba(232,26,26,0.15)', border: '1px solid rgba(232,26,26,0.4)', borderRadius: 12, padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(232,26,26,0.7)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(232,26,26,0.4)'}
+                >
+                  <div>
+                    <div style={{ fontSize: 10, fontFamily: MONO, color: '#E81A1A', fontWeight: 700, marginBottom: 4, letterSpacing: '0.1em' }}>🎬 SHOOTING TODAY</div>
+                    <div style={{ fontSize: 15, fontWeight: 700 }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: '#777', fontFamily: MONO, marginTop: 3 }}>
+                      {p.client}{p.start_time ? ' · ' + p.start_time : ''}{p.address ? ' · ' + p.address : ''}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#E81A1A', fontFamily: MONO, fontWeight: 700 }}>→</div>
                 </div>
-              </div>
-              <div style={{ fontSize: 12, color: '#E81A1A', fontFamily: MONO, fontWeight: 700 }}>→</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Monthly stats */}
-      <MonthlyStatsDashboard projects={active} />
-
-      {/* Key stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 32 }}>
-        <StatCard label="Month Revenue" value={fmt(monthRevenue)} />
-        <StatCard label="Month Net" value={fmt(monthNet)} color={monthNet >= 0 ? '#2E7D32' : '#C62828'} />
-        <StatCard label="Crew Owed" value={fmt(crewOwedTotal)} color={crewOwedTotal > 0 ? '#E65100' : '#2E7D32'} />
-        <StatCard label="Unpaid Invoices" value={unpaidInvoices.length} color={unpaidInvoices.length > 0 ? '#C62828' : '#2E7D32'} onClick={unpaidInvoices.length > 0 ? () => navigate('/projects') : null} />
-        <StatCard label="Active Projects" value={active.filter(p => !['Delivered','Invoiced'].includes(p.status)).length} />
-        <StatCard label="Total Contacts" value={contacts.length} onClick={() => navigate('/contacts')} />
-      </div>
-
-      {/* Pipeline status bar */}
-      <div style={{ background: '#fff', border: '1px solid #E8E8E8', borderRadius: 12, padding: '20px', marginBottom: 24 }}>
-        <div style={{ fontFamily: MONO, fontSize: 9, color: '#999', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Pipeline</div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {Object.entries(statusCounts).map(([status, count]) => (
-            <div key={status} onClick={() => navigate('/projects')} style={{ flex: 1, minWidth: 80, textAlign: 'center', padding: '12px 10px', borderRadius: 8, background: '#F8F8F8', border: '1px solid #E8E8E8', cursor: 'pointer', transition: 'all 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = '#D0D0D0'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = '#E8E8E8'}
-            >
-              <div style={{ fontSize: 20, fontWeight: 700, color: STATUS_COLOR[status] }}>{count}</div>
-              <div style={{ fontSize: 9, fontFamily: MONO, color: '#999', marginTop: 4, lineHeight: 1.3 }}>{status}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Revenue chart */}
-      <div style={{ background: '#fff', border: '1px solid #E8E8E8', borderRadius: 12, padding: '20px', marginBottom: 24 }}>
-        <div style={{ fontFamily: MONO, fontSize: 9, color: '#999', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 18, fontWeight: 600 }}>Revenue — Last 6 Months</div>
-        <ResponsiveContainer width="100%" height={140}>
-          <BarChart data={chartData} barGap={3}>
-            <XAxis dataKey="month" tick={{ fill: '#999', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{ background: '#fff', border: '1px solid #E8E8E8', borderRadius: 8, fontFamily: MONO, fontSize: 11, color: '#1A1A1A' }}
-              formatter={(val, name) => [fmt(val), name === 'revenue' ? 'Revenue' : 'Net']}
-              cursor={{ fill: 'rgba(0,0,0,0.02)' }}
-            />
-            <Bar dataKey="revenue" fill="#333" radius={[4, 4, 0, 0]}>
-              {chartData.map((entry, i) => (
-                <Cell key={i} fill={i === chartData.length - 1 ? '#E81A1A' : '#2A2A2A'} />
               ))}
-            </Bar>
-            <Bar dataKey="net" fill="#7BC853" radius={[4, 4, 0, 0]} opacity={0.7} />
-          </BarChart>
-        </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: '#D0D0D0' }} /><span style={{ fontSize: 10, color: '#999', fontFamily: MONO }}>Revenue</span></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: '#2E7D32', opacity: 0.8 }} /><span style={{ fontSize: 10, color: '#999', fontFamily: MONO }}>Net</span></div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Project profit trend */}
-      <ProjectProfitChart projects={active} />
+      {/* Main Content */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 20px' }}>
 
-      {/* Two column layout for lists */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px,1fr))', gap: 24, marginBottom: 24 }}>
+        {/* Key Metrics - Horizontal Scroll */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Key Metrics</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+            <StatCard label="Month Revenue" value={fmt(monthRevenue)} />
+            <StatCard label="Month Net" value={fmt(monthNet)} color={monthNet >= 0 ? '#7BC853' : '#E81A1A'} />
+            <StatCard label="Crew Owed" value={fmt(crewOwedTotal)} color={crewOwedTotal > 0 ? '#F59E0B' : '#7BC853'} />
+            <StatCard label="Unpaid" value={unpaidInvoices.length} color={unpaidInvoices.length > 0 ? '#E81A1A' : '#7BC853'} onClick={unpaidInvoices.length > 0 ? () => navigate('/projects') : null} />
+            <StatCard label="Active Projects" value={active.filter(p => !['Delivered','Invoiced'].includes(p.status)).length} />
+            <StatCard label="Contacts" value={contacts.length} onClick={() => navigate('/contacts')} />
+          </div>
+        </div>
 
-        {/* Upcoming shoots */}
-        {upcomingShoots.length > 0 && (
-          <div>
-            <SectionLabel title="Upcoming Shoots" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-               {upcomingShoots.map(p => {
-                 const daysAway = Math.ceil((new Date(p.date) - new Date()) / 86400000);
-                 return (
-                   <ProjectRow key={p.id} project={p} onClick={() => openProject(p)}
-                     right={<span style={{ fontSize: 10, fontFamily: MONO, color: daysAway <= 3 ? '#E65100' : '#999', fontWeight: 600 }}>{daysAway}d</span>}
-                   />
-                 );
-               })}
+        {/* Pipeline Status */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Pipeline</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {Object.entries(statusCounts).map(([status, count]) => (
+              <div key={status} onClick={() => navigate('/projects')} style={{ padding: '14px 18px', borderRadius: 10, background: '#1A1A1A', border: `1px solid ${STATUS_COLOR[status]}30`, cursor: 'pointer', flex: '1', minWidth: 100, textAlign: 'center', transition: 'all 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = STATUS_COLOR[status] + '70'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = STATUS_COLOR[status] + '30'}
+              >
+                <div style={{ fontSize: 22, fontWeight: 700, color: STATUS_COLOR[status] }}>{count}</div>
+                <div style={{ fontSize: 9, fontFamily: MONO, color: '#666', marginTop: 5, lineHeight: 1.3 }}>{status}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Revenue Trend */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Revenue — Last 6 Months</div>
+          <div style={{ background: '#1A1A1A', border: '1px solid #1E1E1E', borderRadius: 12, padding: '20px' }}>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={chartData} barGap={3}>
+                <XAxis dataKey="month" tick={{ fill: '#666', fontSize: 10, fontFamily: MONO }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{ background: '#1E1E1E', border: '1px solid #333', borderRadius: 8, fontFamily: MONO, fontSize: 11 }}
+                  formatter={(val, name) => [fmt(val), name === 'revenue' ? 'Revenue' : 'Net']}
+                  cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                />
+                <Bar dataKey="revenue" fill="#333" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, i) => (
+                    <Cell key={i} fill={i === chartData.length - 1 ? '#E81A1A' : '#2A2A2A'} />
+                  ))}
+                </Bar>
+                <Bar dataKey="net" fill="#7BC853" radius={[4, 4, 0, 0]} opacity={0.7} />
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: '#2A2A2A' }} /><span style={{ fontSize: 10, color: '#666', fontFamily: MONO }}>Revenue</span></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: '#7BC853', opacity: 0.7 }} /><span style={{ fontSize: 10, color: '#666', fontFamily: MONO }}>Net</span></div>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Unpaid invoices */}
+        {/* Project Insights */}
+        <ProjectProfitChart projects={active} />
+
+        {/* Scrollable Card Sections */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Upcoming</div>
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8, scrollBehavior: 'smooth' }}>
+            {upcomingShoots.map(p => {
+              const daysAway = Math.ceil((new Date(p.date) - new Date()) / 86400000);
+              return (
+                <div key={p.id} onClick={() => openProject(p)} style={{ 
+                  background: '#1A1A1A', border: '1px solid #1E1E1E', borderRadius: 10, padding: '14px 16px', cursor: 'pointer', 
+                  minWidth: 280, transition: 'all 0.15s', flexShrink: 0 
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#333'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = '#1E1E1E'}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: '#777', fontFamily: MONO, marginBottom: 10 }}>{p.client}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #222' }}>
+                    <span style={{ fontSize: 11, color: '#777', fontFamily: MONO }}>{p.date}</span>
+                    <span style={{ fontSize: 10, fontFamily: MONO, color: daysAway <= 3 ? '#F59E0B' : '#777', fontWeight: 700 }}>{daysAway}d away</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Outstanding Invoices */}
         {unpaidInvoices.length > 0 && (
-          <div>
-            <SectionLabel title="Outstanding Invoices 💸" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-               {unpaidInvoices.slice(0, 5).map(p => (
-                 <ProjectRow key={p.id} project={p} onClick={() => openProject(p)}
-                   right={<span style={{ fontSize: 13, fontWeight: 700, color: '#C62828' }}>{fmt(p.revenue)}</span>}
-                 />
-               ))}
+          <div style={{ marginBottom: 40 }}>
+            <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Outstanding Invoices</div>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8, scrollBehavior: 'smooth' }}>
+              {unpaidInvoices.slice(0, 8).map(p => (
+                <div key={p.id} onClick={() => openProject(p)} style={{ 
+                  background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.2)', borderRadius: 10, padding: '14px 16px', cursor: 'pointer', 
+                  minWidth: 280, transition: 'all 0.15s', flexShrink: 0 
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(232,26,26,0.4)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(232,26,26,0.2)'}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: '#777', fontFamily: MONO, marginBottom: 10 }}>{p.client}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(232,26,26,0.2)' }}>
+                    <span style={{ fontSize: 11, color: '#777', fontFamily: MONO }}>{p.status}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#E81A1A' }}>{fmt(p.revenue)}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Pending deliverables */}
+        {/* Pending Deliverables */}
         {pendingDeliverables.length > 0 && (
-          <div>
-            <SectionLabel title="Pending Deliverables" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-               {pendingDeliverables.map(({ project: p, count }) => (
-                 <ProjectRow key={p.id} project={p} onClick={() => openProject(p)}
-                   right={<span style={{ fontSize: 10, fontFamily: MONO, color: '#6A1B9A', fontWeight: 700 }}>{count} left</span>}
-                 />
-               ))}
+          <div style={{ marginBottom: 40 }}>
+            <div style={{ fontFamily: MONO, fontSize: 9, color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, fontWeight: 600 }}>Pending Deliverables</div>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8, scrollBehavior: 'smooth' }}>
+              {pendingDeliverables.map(({ project: p, count }) => (
+                <div key={p.id} onClick={() => openProject(p)} style={{ 
+                  background: '#1A1A1A', border: '1px solid #1E1E1E', borderRadius: 10, padding: '14px 16px', cursor: 'pointer', 
+                  minWidth: 280, transition: 'all 0.15s', flexShrink: 0 
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#333'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = '#1E1E1E'}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: '#777', fontFamily: MONO, marginBottom: 10 }}>{p.client}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #222' }}>
+                    <span style={{ fontSize: 11, color: '#777', fontFamily: MONO }}>Status: {p.status}</span>
+                    <span style={{ fontSize: 10, fontFamily: MONO, color: '#A78BFA', fontWeight: 700 }}>{count} left</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
+        {/* Additional Sections */}
+        <MorningTaskList />
+        <UpcomingReminders projects={active} />
+        <PaymentDeadlines projects={active} />
+        <OverdueInvoices projects={active} onOpenDetail={openProject} />
+        <AISmartNudges projects={active} />
+        <RevenueGoal projects={active} />
+        <TopReferrers contacts={contacts} leads={leads} projects={active} />
+
+        {active.length === 0 && (
+          <div style={{ textAlign: 'center', marginTop: 80, color: '#555' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🎬</div>
+            <div style={{ fontSize: 15 }}>No active projects yet.</div>
+            <button onClick={() => navigate('/projects')} style={{ marginTop: 16, padding: '12px 28px', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+              Create First Project
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* Task list + reminders */}
-      <MorningTaskList />
-      <UpcomingReminders projects={active} />
-      <PaymentDeadlines projects={active} />
-      <OverdueInvoices projects={active} onOpenDetail={openProject} />
-      <AISmartNudges projects={active} />
-      <RevenueGoal projects={active} />
-      <TopReferrers contacts={contacts} leads={leads} projects={active} />
-
-      {active.length === 0 && (
-        <div style={{ textAlign: 'center', marginTop: 80, color: '#444' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🎬</div>
-          <div style={{ fontSize: 15, color: '#555' }}>No active projects yet.</div>
-          <button onClick={() => navigate('/projects')} style={{ marginTop: 16, padding: '12px 28px', background: '#E81A1A', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-            Create First Project
-          </button>
-        </div>
-      )}
     </div>
   );
 }
