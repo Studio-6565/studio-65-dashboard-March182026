@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, CalendarDays, Plus, X, Calendar, Phone, Film, PlayCircle, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, MessageSquare, CreditCard, CalendarDays, Plus, X, Calendar, Phone, Film, PlayCircle, ClipboardCheck, Star } from 'lucide-react';
 import ClientApprovalsTab from '@/components/client-portal/ClientApprovalsTab';
 import ClientContentSchedule from '@/components/client-portal/ClientContentSchedule';
 import ClientEditReview from '@/components/client-portal/ClientEditReview';
@@ -174,6 +174,7 @@ function FabMenu({ open, onClose, onRequestShoot, onReserveDate, onCallBack }) {
     { icon: Film, label: 'Request a Shoot', color: '#E81A1A', bg: 'rgba(232,26,26,0.1)', onClick: onRequestShoot },
     { icon: Calendar, label: 'Reserve a Date', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', onClick: onReserveDate },
     { icon: Phone, label: 'Request a Call Back', color: '#4A9EFF', bg: 'rgba(74,158,255,0.1)', onClick: onCallBack },
+    { icon: Star, label: 'Leave a Review', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)', onClick: () => window.open('https://maps.app.goo.gl/6wRi8n7JvPqWzJjM7', '_blank') },
   ];
   return (
     <>
