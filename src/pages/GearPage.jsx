@@ -8,6 +8,7 @@ import GearMaintenanceTab from '@/components/gear/GearMaintenanceTab';
 import GearProjectAssign from '@/components/gear/GearProjectAssign';
 import { Camera, Eye, Mic2, Lightbulb, Radio, Maximize2, HardDrive, Plug, Package, Download, Wrench } from 'lucide-react';
 import RentalAvailabilityDashboard from '@/components/gear/RentalAvailabilityDashboard';
+import GearBookingDashboard from '@/components/gear/GearBookingDashboard';
 
 const MONO = '"DM Mono", monospace';
 const IS = { background: '#161616', border: '1px solid #2A2A2A', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
@@ -21,7 +22,7 @@ const CAT_ICON = { Camera, Lens: Eye, Audio: Mic2, Lighting: Lightbulb, Drone: R
 const emptyForm = { name: '', category: 'Camera', brand: '', model: '', serial_number: '', condition: 'Good', ownership: 'Mine', owner_name: '', vendor_contact_id: '', purchase_date: '', purchase_price: '', rental_rate: '', rental_rate_unit: 'day', notes: '' };
 
 export default function GearPage() {
-  const [tab, setTab] = useState('inventory'); // 'inventory' | 'kits' | 'calendar' | 'maintenance'
+  const [tab, setTab] = useState('inventory'); // 'inventory' | 'kits' | 'calendar' | 'conflicts' | 'rentals' | 'maintenance'
   const [gear, setGear] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -159,7 +160,7 @@ export default function GearPage() {
 
   const TAB_BAR = (
     <div style={{ display: 'flex', gap: 0, background: '#1A1A1A', borderRadius: 10, padding: 4, marginBottom: 24, flexWrap: 'wrap' }}>
-      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Calendar' }, { key: 'rentals', label: '🔁 Rentals' }, { key: 'maintenance', label: '🔧 Maintenance' }].map(t => (
+      {[{ key: 'inventory', label: '🗃 Inventory' }, { key: 'kits', label: '🎒 Shoot Kits' }, { key: 'calendar', label: '📅 Calendar' }, { key: 'conflicts', label: '⚠ Booking' }, { key: 'rentals', label: '🔁 Rentals' }, { key: 'maintenance', label: '🔧 Maintenance' }].map(t => (
         <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none', background: tab === t.key ? '#E81A1A' : 'transparent', color: tab === t.key ? '#fff' : '#666', whiteSpace: 'nowrap' }}>{t.label}</button>
       ))}
     </div>
@@ -179,6 +180,15 @@ export default function GearPage() {
       <div style={{ paddingBottom: 40 }}>
         {TAB_BAR}
         <GearCalendar gear={activeGear} />
+      </div>
+    );
+  }
+
+  if (tab === 'conflicts') {
+    return (
+      <div style={{ paddingBottom: 40 }}>
+        {TAB_BAR}
+        <GearBookingDashboard gear={activeGear} projects={projects} />
       </div>
     );
   }
