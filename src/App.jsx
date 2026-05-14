@@ -77,11 +77,6 @@ const AuthenticatedApp = () => {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/editor-portal" element={<EditorPortal />} />
-      <Route path="/leads" element={<LeadsPage />} />
-      <Route path="/capture" element={<CaptureInbox />} />
-
-      <Route path="/script-analytics" element={<ScriptAnalytics />} />
-      <Route path="/client-reminders" element={<ClientRemindersPage />} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
