@@ -715,6 +715,7 @@ export default function Portal() {
   const [projects, setProjects] = useState([]);
   const [crewTab, setCrewTab]   = useState('projects');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showContactMenu, setShowContactMenu] = useState(false);
 
   const handleLogin = (c, projs) => { setContact(c); setProjects(projs); };
   const handleSignOut = () => { setContact(null); setProjects([]); setCrewTab('projects'); setUnreadCount(0); };
@@ -747,27 +748,25 @@ export default function Portal() {
       <header style={{ borderBottom: '1px solid #1A1A1A', background: '#0A0A0A', padding: '0 20px', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
           <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 26 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
+            <button onClick={() => setShowContactMenu(!showContactMenu)} style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{contact.name}</div>
-              <div style={{ fontSize: 10, color: '#555', fontFamily: MONO, lineHeight: 1.5 }}>
-                {contact.role || 'Crew'}
-                {contact.email && <div style={{ color: '#4A9EFF', marginTop: 2 }}>{contact.email}</div>}
-                {contact.phone && <div style={{ color: '#25D366', marginTop: 1 }}>{contact.phone}</div>}
+              <div style={{ fontSize: 10, color: '#555', fontFamily: MONO }}>{contact.role || 'Crew'}</div>
+            </button>
+            {showContactMenu && (
+              <div style={{ position: 'absolute', top: 50, right: 0, background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 8, padding: '8px 0', minWidth: 200, zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                {contact.email && (
+                  <a href={`mailto:${contact.email}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', color: '#4A9EFF', textDecoration: 'none', fontSize: 12, borderBottom: '1px solid #111' }}>
+                    <Mail size={14} /> {contact.email}
+                  </a>
+                )}
+                {contact.phone && (
+                  <a href={`https://wa.me/${contact.phone.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', color: '#25D366', textDecoration: 'none', fontSize: 12 }}>
+                    <MessageCircle size={14} /> {contact.phone}
+                  </a>
+                )}
               </div>
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {contact.email && (
-                <a href={`mailto:${contact.email}`} title="Send email" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 6, color: '#4A9EFF', cursor: 'pointer', textDecoration: 'none' }}>
-                  <Mail size={14} />
-                </a>
-              )}
-              {contact.phone && (
-                <a href={`https://wa.me/${contact.phone.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noreferrer" title="Send WhatsApp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 6, color: '#25D366', cursor: 'pointer', textDecoration: 'none' }}>
-                  <MessageCircle size={14} />
-                </a>
-              )}
-            </div>
+            )}
             <button onClick={handleSignOut} style={{ padding: '6px 12px', background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 8, color: '#666', fontSize: 12, cursor: 'pointer' }}>Sign Out</button>
           </div>
         </div>
