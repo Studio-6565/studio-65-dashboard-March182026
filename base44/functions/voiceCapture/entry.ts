@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     console.log('Transcript:', transcript);
 
     // Update VoiceCapture with transcript
-    if (voice_capture_id) {
+    if (voice_capture_id && voice_capture_id !== 'null') {
       await base44.asServiceRole.entities.VoiceCapture.update(voice_capture_id, { transcript });
     }
 
@@ -192,7 +192,7 @@ Return JSON only.`;
     }
 
     // Update VoiceCapture record
-    if (voice_capture_id) {
+    if (voice_capture_id && voice_capture_id !== 'null') {
       await base44.asServiceRole.entities.VoiceCapture.update(voice_capture_id, {
         status: 'parsed',
         transcript,

@@ -21,7 +21,7 @@ import ClientSurveyPage from './pages/ClientSurvey';
 import DeliverableReview from './pages/DeliverableReview';
 import CapacityPage from './pages/CapacityPage';
 import CaptureInbox from './pages/CaptureInbox';
-import TodayView from './pages/TodayView';
+import GlobalVoiceCapture from './components/capture/GlobalVoiceCapture';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -70,20 +70,22 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <>
     <Routes>
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/admin-login" element={<Onboarding />} />
       <Route path="/editor-portal" element={<EditorPortal />} />
       <Route path="/leads" element={<LeadsPage />} />
       <Route path="/capture" element={<CaptureInbox />} />
-      <Route path="/today" element={<TodayView />} />
 
       <Route path="/script-analytics" element={<ScriptAnalytics />} />
       <Route path="/content-calendar" element={<ContentCalendar />} />
       <Route path="/client-reminders" element={<ClientRemindersPage />} />
-      <Route path="/" element={<Navigate to="/today" replace />} />
+      <Route path="/" element={<Navigate to="/projects" replace />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
+    <GlobalVoiceCapture />
+    </>
   );
 };
 

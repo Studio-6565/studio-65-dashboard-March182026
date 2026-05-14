@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from '@/components/studio/StudioToast';
 import { Zap, Loader2, X, Mic, Image, ChevronRight } from 'lucide-react';
+import VoiceCaptureButton from './VoiceCaptureButton';
 
 const MONO = '"DM Mono", monospace';
 
@@ -14,7 +15,7 @@ export default function CaptureBar({ projects = [], contacts = [], onTaskCreated
   const inputRef = useRef(null);
   const fileRef = useRef(null);
 
-  // Global keyboard shortcut: Cmd/Ctrl + K
+  // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -237,6 +238,15 @@ Return JSON only.`;
             />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
               <div style={{ display: 'flex', gap: 8 }}>
+                <VoiceCaptureButton
+                  projects={projects}
+                  contacts={contacts}
+                  onTasksCreated={(result) => {
+                    onTaskCreated?.();
+                    setOpen(false);
+                  }}
+                  size="small"
+                />
                 <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: 'transparent', border: '1px solid #222', borderRadius: 8, color: '#555', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: MONO }}>
                   <Image size={12} /> Screenshot
                 </button>
