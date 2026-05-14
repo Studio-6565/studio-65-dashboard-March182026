@@ -24,6 +24,7 @@ const NAV_SECTIONS = [
     items: [
       { path: '/calendar',   Icon: Calendar, label: 'Calendar' },
       { path: '/analytics',  Icon: BarChart3, label: 'Analytics' },
+      { path: '/analytics-dashboard', Icon: BarChart3, label: 'Metrics Dashboard' },
       { path: '/insights',   Icon: LineChart, label: 'Studio Insights' },
     ]
   },

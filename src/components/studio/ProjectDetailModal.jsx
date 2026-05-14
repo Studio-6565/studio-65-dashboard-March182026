@@ -19,6 +19,7 @@ import CrewAvailabilityCalendar from './CrewAvailabilityCalendar';
 import ProjectFilesHub from '@/components/shared/ProjectFilesHub';
 import EquipmentChecklist from './tabs/EquipmentChecklist';
 import ContentSchedulerPanel from './ContentSchedulerPanel';
+import ProjectMilestoneTimeline from './ProjectMilestoneTimeline';
 
 const SS = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif' };
 const LL = { fontSize: 11, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: '"DM Mono", monospace', marginBottom: 5, display: 'block' };
@@ -382,7 +383,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
   const financeSubTab = ['invoice', 'expenses', 'margin', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
-  const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'notes & log'];
+  const tabs = ['overview', 'timeline', 'shoot', 'post', 'finance', 'files', 'notes & log'];
 
   const handleStatusChange = async (newStatus) => {
     await update({ status: newStatus, _logMsg: `Status changed to ${newStatus}` });
@@ -456,6 +457,11 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
             <button key={t} onClick={() => setNotesSub(t)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${notesSub === t ? '#444' : '#2A2A2A'}`, background: notesSub === t ? '#2A2A2A' : 'transparent', color: notesSub === t ? '#fff' : '#555', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
           ))}
         </div>
+      )}
+
+      {/* Timeline tab */}
+      {tab === 'timeline' && (
+        <ProjectMilestoneTimeline project={p} onUpdate={onUpdate} />
       )}
 
       {/* AI Actions */}
