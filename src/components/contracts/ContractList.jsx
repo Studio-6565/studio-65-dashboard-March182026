@@ -10,8 +10,9 @@ const STATUS_STYLE = {
 };
 
 const TYPE_STYLE = {
-  client: { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA', label: 'Client' },
-  crew:   { bg: 'rgba(245,158,11,0.12)',  color: '#F59E0B', label: 'Crew' },
+  client:   { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA', label: 'Client' },
+  crew:     { bg: 'rgba(245,158,11,0.12)',  color: '#F59E0B', label: 'Crew' },
+  retainer: { bg: 'rgba(123,200,83,0.12)',  color: '#7BC853', label: 'Retainer' },
 };
 
 export default function ContractList({ contracts, filterType, onFilterType, onNew, onEdit, onDelete, onSend }) {
@@ -45,9 +46,10 @@ export default function ContractList({ contracts, filterType, onFilterType, onNe
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {chip(filterType === 'all',    'All',    () => onFilterType('all'))}
-        {chip(filterType === 'client', 'Client', () => onFilterType('client'))}
-        {chip(filterType === 'crew',   'Crew',   () => onFilterType('crew'))}
+        {chip(filterType === 'all',      'All',      () => onFilterType('all'))}
+        {chip(filterType === 'client',   'Client',   () => onFilterType('client'))}
+        {chip(filterType === 'crew',     'Crew',     () => onFilterType('crew'))}
+        {chip(filterType === 'retainer', '📋 Retainers', () => onFilterType('retainer'))}
       </div>
 
       {/* List */}

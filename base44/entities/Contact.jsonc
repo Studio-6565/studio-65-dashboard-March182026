@@ -7,8 +7,7 @@
     },
     "is_test": {
       "type": "boolean",
-      "default": false,
-      "description": "Marks this as test/dev data \u2014 hidden from the live Portal"
+      "default": false
     },
     "types": {
       "type": "array",
@@ -50,16 +49,13 @@
       "type": "string"
     },
     "referred_by_contact_id": {
-      "type": "string",
-      "description": "Contact ID of the client who referred this client"
+      "type": "string"
     },
     "referred_by_name": {
-      "type": "string",
-      "description": "Denormalised name of the referring client"
+      "type": "string"
     },
     "portal_users": {
       "type": "array",
-      "description": "Additional staff/team members who can access this client's portal",
       "items": {
         "type": "object",
         "properties": {
@@ -73,15 +69,13 @@
             "type": "string"
           },
           "role": {
-            "type": "string",
-            "description": "e.g. Marketing Manager, Owner"
+            "type": "string"
           }
         }
       }
     },
     "brand_profile": {
       "type": "object",
-      "description": "Client brand guidelines and identity",
       "properties": {
         "primary_color": {
           "type": "string"
@@ -121,9 +115,172 @@
         }
       }
     },
+    "client_brain": {
+      "type": "object",
+      "description": "Full client brain data",
+      "properties": {
+        "website_url": {
+          "type": "string"
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "brand_voice_adjectives": {
+              "type": "string",
+              "description": "3-5 adjectives"
+            },
+            "tone_dos": {
+              "type": "string"
+            },
+            "tone_donts": {
+              "type": "string"
+            },
+            "banned_words": {
+              "type": "string"
+            },
+            "signature_phrases": {
+              "type": "string"
+            },
+            "point_of_view": {
+              "type": "string"
+            }
+          }
+        },
+        "audience": {
+          "type": "object",
+          "properties": {
+            "primary_demo": {
+              "type": "string"
+            },
+            "psychographic": {
+              "type": "string"
+            },
+            "pain_points": {
+              "type": "string"
+            },
+            "desires": {
+              "type": "string"
+            },
+            "objections": {
+              "type": "string"
+            }
+          }
+        },
+        "content_pillars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "example_topics": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "performance_memory": {
+          "type": "object",
+          "properties": {
+            "top_posts": {
+              "type": "string",
+              "description": "Pasted top 10 posts"
+            },
+            "winning_hooks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "winning_formats": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "competitors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "platform": {
+                "type": "string"
+              },
+              "handle": {
+                "type": "string"
+              },
+              "what_they_do_well": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "regulated_industry": {
+              "type": "string"
+            },
+            "required_disclaimers": {
+              "type": "string"
+            },
+            "restricted_language": {
+              "type": "string"
+            }
+          }
+        },
+        "offer_stack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "product_name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "positioning_angle": {
+                "type": "string"
+              },
+              "price": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "brain_versions": {
+          "type": "array",
+          "description": "Snapshot history",
+          "items": {
+            "type": "object",
+            "properties": {
+              "saved_at": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "snapshot": {
+                "type": "string",
+                "description": "JSON stringified brain"
+              }
+            }
+          }
+        }
+      }
+    },
     "offerings": {
       "type": "array",
-      "description": "Items/gear this vendor offers for rent or sale",
       "items": {
         "type": "object",
         "properties": {

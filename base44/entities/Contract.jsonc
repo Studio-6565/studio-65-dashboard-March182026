@@ -9,7 +9,8 @@
       "type": "string",
       "enum": [
         "client",
-        "crew"
+        "crew",
+        "retainer"
       ],
       "default": "client"
     },
@@ -19,7 +20,10 @@
         "draft",
         "sent",
         "signed",
-        "declined"
+        "declined",
+        "active",
+        "expired",
+        "cancelled"
       ],
       "default": "draft"
     },
@@ -43,8 +47,7 @@
       "type": "string"
     },
     "signature_name": {
-      "type": "string",
-      "description": "Name typed at signing"
+      "type": "string"
     },
     "declined_at": {
       "type": "string"
@@ -54,6 +57,26 @@
     },
     "sent_at": {
       "type": "string"
+    },
+    "retainer_monthly_hours": {
+      "type": "number",
+      "description": "Monthly hours bucket"
+    },
+    "retainer_monthly_fee": {
+      "type": "number",
+      "description": "Monthly fee in dollars"
+    },
+    "retainer_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "retainer_renewal_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "retainer_auto_renew": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

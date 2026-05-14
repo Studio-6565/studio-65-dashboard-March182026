@@ -122,51 +122,13 @@
     "call_sheet_url": {
       "type": "string"
     },
-    "change_orders": {
-      "type": "array",
-      "description": "Change order requests for scope/cost adjustments",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "additional_cost": {
-            "type": "number"
-          },
-          "additional_hours": {
-            "type": "number"
-          },
-          "requested_by": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pending",
-              "sent_for_approval",
-              "approved",
-              "declined"
-            ],
-            "default": "pending"
-          },
-          "created_at": {
-            "type": "string"
-          },
-          "sent_at": {
-            "type": "string"
-          },
-          "approved_at": {
-            "type": "string"
-          },
-          "declined_at": {
-            "type": "string"
-          }
-        }
-      }
+    "retainer_contract_id": {
+      "type": "string",
+      "description": "Contract ID of the retainer this project is billed against"
+    },
+    "retainer_contract_name": {
+      "type": "string",
+      "description": "Denormalised retainer name"
     },
     "crew": {
       "type": "array",

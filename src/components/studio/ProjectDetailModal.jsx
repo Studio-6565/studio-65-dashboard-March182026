@@ -36,7 +36,7 @@ const DetailTab = ({ label, active, onClick }) => (
   }}>{label}</button>
 );
 
-export default function ProjectDetailModal({ open, onClose, project, contacts, projects = [], onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange, inline = false }) {
+export default function ProjectDetailModal({ open, onClose, project, contacts, projects = [], retainers = [], onUpdate, onDelete, onEdit, onDuplicate, onSaveAsTemplate, onContactsChange, inline = false }) {
   const [tab, setTab] = useState('overview');
   const [crewForm, setCrewForm] = useState({ name: '', role: '', cost: '', hours: '', rate_type: 'flat', phone: '', email: '' });
   const [editingCrewIdx, setEditingCrewIdx] = useState(null);
@@ -538,6 +538,43 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
               <div style={{ fontSize: 16, fontWeight: 700 }}>{del.filter(d => d.done).length}/{del.length}</div>
             </div>
           </div>
+
+          {/* Retainer tagging */}
+          {retainers.length > 0 && (
+            <div style={{ marginTop: 16, padding: '12px 14px', background: p.retainer_contract_id ? 'rgba(123,200,83,0.05)' : '#111', border: `1px solid ${p.retainer_contract_id ? 'rgba(123,200,83,0.25)' : '#1E1E1E'}`, borderRadius: 10 }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 9, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>📋 Retainer</div>
+              {p.retainer_contract_id ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#7BC853' }}>{p.retainer_contract_name}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#555', marginTop: 2 }}>
+                      Hours logged this project: {(p.hours || []).reduce((s, h) => s + (h.hours || 0), 0).toFixed(1)}h deducted from bucket
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => update({ retainer_contract_id: '', retainer_contract_name: '', _logMsg: 'Unlinked from retainer' })}
+                    style={{ padding: '5px 12px', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.2)', borderRadius: 6, color: '#E81A1A', fontSize: 11, cursor: 'pointer', fontFamily: '"DM Mono", monospace' }}
+                  >Unlink</button>
+                </div>
+              ) : (
+                <div>
+                  <select
+                    defaultValue=""
+                    onChange={async e => {
+                      const r = retainers.find(r => r.id === e.target.value);
+                      if (r) await update({ retainer_contract_id: r.id, retainer_contract_name: r.title, _logMsg: `Tagged to retainer: ${r.title}` });
+                    }}
+                    style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', cursor: 'pointer' }}
+                  >
+                    <option value="">— Tag to a retainer —</option>
+                    {retainers.filter(r => r.status === 'active').map(r => (
+                      <option key={r.id} value={r.id}>{r.title}{r.contact_name ? ` · ${r.contact_name}` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

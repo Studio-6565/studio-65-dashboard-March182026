@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -14,6 +14,10 @@ const slideIn = {
 };
 
 export default function ProjectDetailPage({ projects, contacts, templates, onUpdate, onDelete, onDuplicate, onSaveAsTemplate, onContactsChange, onProjectsChange, onEdit }) {
+  const [retainers, setRetainers] = useState([]);
+  useEffect(() => {
+    base44.entities.Contract.filter({ type: 'retainer' }, 'title', 100).then(setRetainers).catch(() => {});
+  }, []);
   const { id } = useParams();
   const navigate = useNavigate();
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -81,6 +85,8 @@ export default function ProjectDetailPage({ projects, contacts, templates, onUpd
         onClose={() => navigate('/projects')}
         project={project}
         contacts={contacts}
+        projects={projects}
+        retainers={retainers}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
         onEdit={handleEdit}
