@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { fmt, fmtDateRange, STATUS_STYLE } from '@/lib/studio';
 import CrewContractsTab from '@/components/portal/CrewContractsTab';
 import EditorSection from '@/components/portal/EditorSection';
-import { Mail, Key, Files, ChevronDown, ChevronUp, CheckSquare, Package, Fingerprint } from 'lucide-react';
+import { Mail, Key, Files, ChevronDown, ChevronUp, CheckSquare, Package, Fingerprint, MessageCircle, ExternalLink } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
 
@@ -208,8 +208,14 @@ function LoginScreen({ onLogin }) {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: '#444' }}>
-          No access? Contact Studio 65.
+        <div style={{ textAlign: 'center', marginTop: 16, display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#444' }}>Need help?</span>
+          <a href="mailto:studio65production@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#4A9EFF', textDecoration: 'none' }}>
+            <Mail size={14} /> Email
+          </a>
+          <a href="https://wa.me/416555xxxx" target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#25D366', textDecoration: 'none' }}>
+            <MessageCircle size={14} /> WhatsApp
+          </a>
         </div>
       </div>
     </div>
@@ -741,10 +747,22 @@ export default function Portal() {
       <header style={{ borderBottom: '1px solid #1A1A1A', background: '#0A0A0A', padding: '0 20px', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
           <img src="https://media.base44.com/images/public/69bacd1e4d380f864be78403/3193dc328_Editable_Isotype5copy.png" alt="Studio 65" style={{ height: 26 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{contact.name}</div>
               <div style={{ fontSize: 10, color: '#555', fontFamily: MONO }}>{contact.role || 'Crew'}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {contact.email && (
+                <a href={`mailto:${contact.email}`} title="Send email" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 6, color: '#4A9EFF', cursor: 'pointer', textDecoration: 'none' }}>
+                  <Mail size={14} />
+                </a>
+              )}
+              {contact.phone && (
+                <a href={`https://wa.me/${contact.phone.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noreferrer" title="Send WhatsApp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 6, color: '#25D366', cursor: 'pointer', textDecoration: 'none' }}>
+                  <MessageCircle size={14} />
+                </a>
+              )}
             </div>
             <button onClick={handleSignOut} style={{ padding: '6px 12px', background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 8, color: '#666', fontSize: 12, cursor: 'pointer' }}>Sign Out</button>
           </div>
