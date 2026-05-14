@@ -45,8 +45,7 @@
     },
     "follow_up_date": {
       "type": "string",
-      "format": "date",
-      "description": "Next scheduled follow-up"
+      "format": "date"
     },
     "proposal_sent_date": {
       "type": "string",
@@ -58,6 +57,86 @@
     },
     "notes": {
       "type": "string"
+    },
+    "proposals": {
+      "type": "array",
+      "description": "Proposals built for this lead",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "shoot_type": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "terms": {
+            "type": "string"
+          },
+          "markup_pct": {
+            "type": "number",
+            "default": 0
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "qty": {
+                  "type": "number"
+                },
+                "unit_cost": {
+                  "type": "number"
+                },
+                "total": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "markup_amount": {
+            "type": "number"
+          },
+          "grand_total": {
+            "type": "number"
+          },
+          "proposal_status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "sent",
+              "viewed",
+              "accepted",
+              "rejected"
+            ],
+            "default": "draft"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string"
+          },
+          "accepted_at": {
+            "type": "string"
+          }
+        }
+      }
     },
     "activity": {
       "type": "array",

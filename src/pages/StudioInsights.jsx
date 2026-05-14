@@ -114,7 +114,6 @@ export default function StudioInsights() {
   // ── 4. Profitability by content/shoot type ──────────────────────────────────
   const shootTypeMap = {};
   inRange.forEach(p => {
-    // Try to derive shoot type from project name keywords or use status group
     const nameLower = (p.name || '').toLowerCase();
     let type = 'Other';
     if (nameLower.includes('reel') || nameLower.includes('instagram')) type = 'Reel';
@@ -125,15 +124,27 @@ export default function StudioInsights() {
     else if (nameLower.includes('event')) type = 'Event';
     else if (nameLower.includes('product')) type = 'Product';
     else if (nameLower.includes('podcast')) type = 'Podcast';
-    if (!shootTypeMap[type]) shootTypeMap[type] = { type, revenue: 0, net: 0, projects: 0 };
+    if (!shootTypeMap[type]) shootTypeMap[type] = { type, revenue: 0, net: 0, projects: 0, margins: [] };
     shootTypeMap[type].revenue += p.revenue || 0;
     shootTypeMap[type].net += p.net || 0;
     shootTypeMap[type].projects += 1;
+    if ((p.revenue || 0) > 0) {
+      shootTypeMap[type].margins.push(Math.round(((p.net || 0) / p.revenue) * 100));
+    }
   });
   const shootTypeData = Object.values(shootTypeMap)
     .filter(d => d.revenue > 0)
-    .map(d => ({ ...d, margin: d.revenue > 0 ? Math.round((d.net / d.revenue) * 100) : 0 }))
+    .map(d => ({
+      ...d,
+      margin: d.revenue > 0 ? Math.round((d.net / d.revenue) * 100) : 0,
+      avgMargin: d.margins.length > 0 ? Math.round(d.margins.reduce((s, m) => s + m, 0) / d.margins.length) : 0,
+    }))
     .sort((a, b) => b.net - a.net);
+
+  // ── 5. Margin by shoot type (avg margin %) ──────────────────────────────────
+  const marginByTypeData = [...shootTypeData]
+    .filter(d => d.projects >= 1)
+    .sort((a, b) => b.avgMargin - a.avgMargin);
 
   // ── Summary stats ───────────────────────────────────────────────────────────
   const totalBilled = inRange.reduce((s, p) => s + (p.revenue || 0), 0);
@@ -272,7 +283,51 @@ export default function StudioInsights() {
         </div>
       )}
 
-      {/* Table 4: Client Lifetime Value */}
+      {/* Chart 4: Margin % by Shoot Type */}
+      {marginByTypeData.length > 0 && (
+        <div style={{ background: '#0D0D0D', border: '1px solid #1A1A1A', borderRadius: 16, padding: '22px 20px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <TrendingUp size={16} color="#F59E0B" />
+            <div style={{ fontSize: 14, fontWeight: 700 }}>Margin % by Shoot Type</div>
+            <span style={{ fontFamily: MONO, fontSize: 10, color: '#444', marginLeft: 4 }}>avg across all projects per type</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {marginByTypeData.map(d => {
+              const color = d.avgMargin >= 60 ? '#7BC853' : d.avgMargin >= 35 ? '#F59E0B' : '#E81A1A';
+              return (
+                <div key={d.type}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 5 }}>
+                    <div style={{ width: 110, fontFamily: MONO, fontSize: 11, color: '#888', flexShrink: 0 }}>{d.type}</div>
+                    <div style={{ flex: 1, height: 20, background: '#111', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, d.avgMargin))}%`, background: color, borderRadius: 4, transition: 'width 0.4s', opacity: 0.85 }} />
+                      {/* 50% target */}
+                      <div style={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', background: '#222' }} />
+                    </div>
+                    <div style={{ width: 44, textAlign: 'right', fontFamily: MONO, fontSize: 12, fontWeight: 800, color, flexShrink: 0 }}>{d.avgMargin}%</div>
+                    <div style={{ width: 60, fontFamily: MONO, fontSize: 10, color: '#444', textAlign: 'right', flexShrink: 0 }}>{d.projects} proj</div>
+                  </div>
+                  {/* Per-project margin dots */}
+                  <div style={{ paddingLeft: 122, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    {d.margins.map((m, i) => (
+                      <div key={i} title={`${m}%`} style={{ width: 8, height: 8, borderRadius: '50%', background: m >= 60 ? '#7BC853' : m >= 35 ? '#F59E0B' : '#E81A1A', opacity: 0.7 }} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 16, display: 'flex', gap: 16 }}>
+            {[['≥60%', '#7BC853', 'High margin'], ['35-59%', '#F59E0B', 'Mid'], ['<35%', '#E81A1A', 'Low / Loss']].map(([label, color, sub]) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: color }} />
+                <span style={{ fontFamily: MONO, fontSize: 10, color: '#555' }}>{label} {sub}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Table 5: Client Lifetime Value */}
       <div style={{ background: '#0D0D0D', border: '1px solid #1A1A1A', borderRadius: 16, padding: '22px 20px', marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <Users size={16} color="#4A9EFF" />

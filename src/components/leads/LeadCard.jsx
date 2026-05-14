@@ -11,7 +11,7 @@ const STATUS_INFO = {
 
 const MONO = '"DM Mono", monospace';
 
-export default function LeadCard({ lead, onStatusChange, onDelete, onEdit }) {
+export default function LeadCard({ lead, onStatusChange, onDelete, onEdit, onBuildProposal }) {
   const st = STATUS_INFO[lead.status];
   const daysSinceContact = lead.last_contact_date
     ? Math.floor((new Date() - new Date(lead.last_contact_date)) / (1000 * 60 * 60 * 24))
@@ -100,6 +100,15 @@ export default function LeadCard({ lead, onStatusChange, onDelete, onEdit }) {
         </div>
       )}
 
+      {/* Proposal count badge */}
+      {(lead.proposals || []).length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <span style={{ fontFamily: MONO, fontSize: 10, padding: '3px 8px', borderRadius: 5, background: 'rgba(167,139,250,0.1)', color: '#A78BFA', fontWeight: 700 }}>
+            📄 {(lead.proposals || []).length} proposal{lead.proposals.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+      )}
+
       {/* Actions */}
       <div
         style={{
@@ -107,9 +116,16 @@ export default function LeadCard({ lead, onStatusChange, onDelete, onEdit }) {
           gap: 8,
           paddingTop: 10,
           borderTop: '1px solid #1A1A1A',
-          onClick: (e) => e.stopPropagation(),
+          flexWrap: 'wrap',
         }}
+        onClick={e => e.stopPropagation()}
       >
+        <button
+          onClick={e => { e.stopPropagation(); onBuildProposal(lead); }}
+          style={{ width: '100%', padding: '8px 0', background: 'rgba(232,26,26,0.08)', border: '1px solid rgba(232,26,26,0.2)', borderRadius: 8, color: '#E81A1A', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: MONO, marginBottom: 4 }}
+        >
+          ✦ Build Proposal
+        </button>
         <select
           value={lead.status}
           onChange={(e) => onStatusChange(lead.id, e.target.value)}

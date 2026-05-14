@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { fmt } from '@/lib/studio';
 import { base44 } from '@/api/base44Client';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const STATUSES = ['Booked', 'In Production', 'In Edit', 'Delivered', 'Invoiced'];
 
@@ -139,6 +141,92 @@ function KanbanColumn({ status, projects, onOpenDetail, isDragOver }) {
   );
 }
 
+const MONO = '"DM Mono", monospace';
+
+function DeliveredMarginTable({ projects, onOpenDetail }) {
+  const [sortKey, setSortKey] = useState('margin');
+  const [sortDir, setSortDir] = useState(-1); // -1 = desc
+
+  const rows = projects
+    .filter(p => ['Delivered', 'Invoiced'].includes(p.status))
+    .map(p => ({
+      ...p,
+      margin: p.revenue > 0 ? Math.round(((p.net || 0) / p.revenue) * 100) : 0,
+    }))
+    .sort((a, b) => {
+      const va = a[sortKey] ?? 0;
+      const vb = b[sortKey] ?? 0;
+      if (typeof va === 'string') return sortDir * va.localeCompare(vb);
+      return sortDir * (va - vb);
+    });
+
+  if (!rows.length) return null;
+
+  const toggleSort = (key) => {
+    if (sortKey === key) setSortDir(d => -d);
+    else { setSortKey(key); setSortDir(-1); }
+  };
+
+  const SortIcon = ({ k }) => sortKey === k
+    ? (sortDir === -1 ? <ChevronDown size={11} /> : <ChevronUp size={11} />)
+    : null;
+
+  const colStyle = (k) => ({
+    padding: '8px 12px', fontFamily: MONO, fontSize: 9, color: sortKey === k ? '#fff' : '#444',
+    fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em',
+    borderBottom: '1px solid #141414', cursor: 'pointer', userSelect: 'none',
+    whiteSpace: 'nowrap', textAlign: k === 'name' || k === 'client' ? 'left' : 'right',
+  });
+
+  return (
+    <div style={{ marginTop: 24, background: '#0D0D0D', border: '1px solid #1A1A1A', borderRadius: 12, overflow: 'hidden' }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #141414', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 700 }}>Delivered Projects — Margin %</div>
+        <span style={{ fontFamily: MONO, fontSize: 10, color: '#444' }}>{rows.length} projects · click column to sort</span>
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: '#141414' }}>
+              {[['name', 'Project'], ['client', 'Client'], ['date', 'Date'], ['revenue', 'Revenue'], ['net', 'Net'], ['margin', 'Margin %']].map(([k, label]) => (
+                <th key={k} style={colStyle(k)} onClick={() => toggleSort(k)}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>{label} <SortIcon k={k} /></span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(p => {
+              const mc = p.margin >= 60 ? '#7BC853' : p.margin >= 35 ? '#F59E0B' : '#E81A1A';
+              return (
+                <tr key={p.id} onClick={() => onOpenDetail(p)}
+                  style={{ borderBottom: '1px solid #0D0D0D', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#111'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <td style={{ padding: '10px 12px', fontWeight: 600, color: '#fff' }}>{p.name}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: MONO, fontSize: 11, color: '#666' }}>{p.client}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: MONO, fontSize: 11, color: '#555', textAlign: 'right' }}>{p.date || '—'}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: MONO, fontSize: 11, color: '#fff', textAlign: 'right' }}>{fmt(p.revenue)}</td>
+                  <td style={{ padding: '10px 12px', fontFamily: MONO, fontSize: 11, color: p.net >= 0 ? '#7BC853' : '#E81A1A', fontWeight: 700, textAlign: 'right' }}>{fmt(p.net)}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                      <div style={{ width: 50, height: 4, background: '#1A1A1A', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, p.margin))}%`, background: mc, borderRadius: 2 }} />
+                      </div>
+                      <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 800, color: mc, minWidth: 36, textAlign: 'right' }}>{p.margin}%</span>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function KanbanView({ projects, onOpenDetail, onProjectUpdate }) {
   const [localProjects, setLocalProjects] = useState(null);
 
@@ -169,24 +257,27 @@ export default function KanbanView({ projects, onOpenDetail, onProjectUpdate }) 
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div style={{
-        display: 'flex',
-        gap: 12,
-        overflowX: 'auto',
-        paddingBottom: 20,
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#333 transparent',
-      }}>
-        {STATUSES.map(status => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            projects={byStatus[status]}
-            onOpenDetail={onOpenDetail}
-          />
-        ))}
-      </div>
-    </DragDropContext>
+    <>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div style={{
+          display: 'flex',
+          gap: 12,
+          overflowX: 'auto',
+          paddingBottom: 20,
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#333 transparent',
+        }}>
+          {STATUSES.map(status => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              projects={byStatus[status]}
+              onOpenDetail={onOpenDetail}
+            />
+          ))}
+        </div>
+      </DragDropContext>
+      <DeliveredMarginTable projects={active} onOpenDetail={onOpenDetail} />
+    </>
   );
 }

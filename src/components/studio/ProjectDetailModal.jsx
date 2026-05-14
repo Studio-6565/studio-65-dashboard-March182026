@@ -10,6 +10,7 @@ import CallSheetTab from './tabs/CallSheetTab';
 import RemindersTab from './tabs/RemindersTab';
 import CrewRatingsTab from './tabs/CrewRatingsTab';
 import ExpensesTab from './tabs/ExpensesTab';
+import MarginTab from './tabs/MarginTab';
 import EditReviewTab from './tabs/EditReviewTab';
 import InvoiceGenerator from './InvoiceGenerator';
 import ProjectChat from './ProjectChat';
@@ -378,7 +379,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
 
   const shootSubTab = ['crew', 'rentals', 'equipment', 'setup', 'call sheet', 'reminders'];
   const postSubTab = ['deliverables', 'content schedule', 'edit', 'ratings'];
-  const financeSubTab = ['invoice', 'expenses', ...(p.track_hours ? ['hours'] : [])];
+  const financeSubTab = ['invoice', 'expenses', 'margin', ...(p.track_hours ? ['hours'] : [])];
   const notesSubTab = ['notes', 'crew chat', 'activity'];
 
   const tabs = ['overview', 'shoot', 'post', 'finance', 'files', 'notes & log'];
@@ -939,6 +940,7 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       )}
 
       {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} allProjects={projects} />}
+      {tab === 'finance' && financeSub === 'margin' && <MarginTab project={p} contacts={contacts} />}
       {tab === 'finance' && financeSub === 'invoice' && <InvoiceGenerator project={p} onUpdate={onUpdate} />}
       {tab === 'shoot' && shootSub === 'equipment' && <EquipmentChecklist project={p} onUpdate={update} />}
       {tab === 'shoot' && shootSub === 'setup' && <SetupTab project={p} onUpdate={update} />}

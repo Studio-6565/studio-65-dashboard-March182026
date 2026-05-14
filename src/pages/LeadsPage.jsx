@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import LeadCard from '@/components/leads/LeadCard';
 import LeadModal from '@/components/leads/LeadModal';
 import LeadMetrics from '@/components/leads/LeadMetrics';
+import ProposalBuilder from '@/components/leads/ProposalBuilder';
 import { Plus } from 'lucide-react';
 
 const MONO = '"DM Mono", monospace';
@@ -13,6 +14,7 @@ export default function LeadsPage() {
   const [editingLead, setEditingLead] = useState(null);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [proposalLead, setProposalLead] = useState(null);
 
   const loadLeads = useCallback(async () => {
     const data = await base44.entities.ClientLead.list('-created_date', 200);
@@ -61,6 +63,11 @@ export default function LeadsPage() {
       ],
     };
     await base44.entities.ClientLead.update(id, updated);
+  };
+
+  const handleLeadUpdate = (updatedLead) => {
+    setLeads(prev => prev.map(l => l.id === updatedLead.id ? updatedLead : l));
+    if (proposalLead?.id === updatedLead.id) setProposalLead(updatedLead);
   };
 
   const handleDelete = async (id) => {
@@ -189,10 +196,8 @@ export default function LeadsPage() {
                     lead={lead}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
-                    onEdit={() => {
-                      setEditingLead(lead);
-                      setModalOpen(true);
-                    }}
+                    onEdit={() => { setEditingLead(lead); setModalOpen(true); }}
+                    onBuildProposal={setProposalLead}
                   />
                 ))}
               </div>
