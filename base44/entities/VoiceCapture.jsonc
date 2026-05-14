@@ -1,0 +1,57 @@
+{
+  "name": "VoiceCapture",
+  "type": "object",
+  "properties": {
+    "audio_url": {
+      "type": "string"
+    },
+    "transcript": {
+      "type": "string"
+    },
+    "duration_seconds": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "parsed",
+        "failed"
+      ],
+      "default": "processing"
+    },
+    "task_count": {
+      "type": "number",
+      "default": 0
+    },
+    "needs_input_count": {
+      "type": "number",
+      "default": 0
+    },
+    "note_count": {
+      "type": "number",
+      "default": 0
+    },
+    "parse_error": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

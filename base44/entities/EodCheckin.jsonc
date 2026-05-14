@@ -1,0 +1,48 @@
+{
+  "name": "EodCheckin",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "done_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "slipped_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "added_notes": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

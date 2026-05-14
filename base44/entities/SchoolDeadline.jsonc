@@ -1,0 +1,74 @@
+{
+  "name": "SchoolDeadline",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "course": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_time": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "quiz",
+        "exam",
+        "project",
+        "reading",
+        "other"
+      ],
+      "default": "assignment"
+    },
+    "effort": {
+      "type": "string",
+      "enum": [
+        "15min",
+        "30min",
+        "1hr",
+        "half-day",
+        "full-day"
+      ],
+      "default": "1hr"
+    },
+    "weight_pct": {
+      "type": "number",
+      "description": "% weight of final grade"
+    },
+    "done": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "due_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

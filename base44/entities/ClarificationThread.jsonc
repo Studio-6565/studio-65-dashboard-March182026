@@ -1,0 +1,73 @@
+{
+  "name": "ClarificationThread",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "user"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "learned_corrections": {
+      "type": "array",
+      "description": "Patterns the AI learned from this thread",
+      "items": {
+        "type": "object",
+        "properties": {
+          "heard": {
+            "type": "string"
+          },
+          "corrected_to": {
+            "type": "string"
+          },
+          "correction_count": {
+            "type": "number",
+            "default": 1
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "task_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

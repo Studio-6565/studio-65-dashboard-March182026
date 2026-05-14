@@ -266,9 +266,7 @@ export default function ContentCalendar() {
 
           {/* Weeks */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
-            {weeks.map((week, wi) => (
-              <React.Fragment key={wi}>
-                {week.map((day, di) => {
+            {weeks.map((week, wi) => week.map((day, di) => {
                   const items = getItemsForDate(day);
                   const dateStr = day ? getDateStr(day) : '';
                   const isToday = dateStr === todayStr;
@@ -347,9 +345,7 @@ export default function ContentCalendar() {
                       )}
                     </Droppable>
                   );
-                })}
-              </React.Fragment>
-            ))}
+                }))}
           </div>
         </div>
 

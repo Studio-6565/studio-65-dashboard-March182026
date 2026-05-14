@@ -6,12 +6,18 @@
       "type": "string"
     },
     "raw_input": {
+      "type": "string"
+    },
+    "audio_url": {
       "type": "string",
-      "description": "Original natural-language entry"
+      "description": "URL to raw audio file"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Full Whisper transcript"
     },
     "who_asked": {
-      "type": "string",
-      "description": "Contact name or 'self' / 'unspecified'"
+      "type": "string"
     },
     "who_asked_contact_id": {
       "type": "string"
@@ -35,9 +41,9 @@
         "decision",
         "follow-up",
         "errand",
-        "admin"
-      ],
-      "default": "admin"
+        "admin",
+        "note"
+      ]
     },
     "effort": {
       "type": "string",
@@ -47,8 +53,7 @@
         "1hr",
         "half-day",
         "full-day"
-      ],
-      "default": "30min"
+      ]
     },
     "due_date": {
       "type": "string",
@@ -67,28 +72,63 @@
       "type": "string",
       "enum": [
         "inbox",
+        "needs_input",
         "snoozed",
         "done",
         "converted"
       ],
       "default": "inbox"
     },
+    "confidence": {
+      "type": "number",
+      "description": "0-100 AI confidence score"
+    },
+    "parse_source": {
+      "type": "string",
+      "enum": [
+        "text",
+        "voice",
+        "image"
+      ],
+      "default": "text"
+    },
+    "parse_flag": {
+      "type": "string",
+      "enum": [
+        "auto-parsed",
+        "review",
+        "needs_input",
+        "unparsed"
+      ],
+      "description": "Parsing quality flag"
+    },
+    "transcript_snippet": {
+      "type": "string",
+      "description": "Relevant portion of transcript for this task"
+    },
     "snooze_until": {
       "type": "string",
       "format": "date"
     },
-    "assigned_to": {
-      "type": "string"
+    "roll_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this task has been auto-deferred"
     },
-    "brain_influences": {
-      "type": "string",
-      "description": "JSON array of brain elements that influenced the parse"
+    "stale_flagged": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if item has been in needs_input > 7 days"
     },
     "clarifying_question": {
       "type": "string"
     },
     "clarifying_answer": {
       "type": "string"
+    },
+    "voice_capture_id": {
+      "type": "string",
+      "description": "Reference to VoiceCapture record"
     }
   },
   "required": [
