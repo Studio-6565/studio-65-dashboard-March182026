@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { showToast } from './StudioToast';
 import { waLink } from '@/lib/studio';
-import { ExternalLink, Copy, Mail, MessageCircle, User, Plus, Trash2, Users, Palette } from 'lucide-react';
+import { ExternalLink, Copy, Mail, MessageCircle, User, Plus, Trash2, Users, Palette, Brain } from 'lucide-react';
+import ClientBrainModal from '@/components/client-brain/ClientBrainModal';
 
 const MONO = '"DM Mono", monospace';
 const inputStyle = { background: '#2A2A2A', border: '1px solid #333', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', fontFamily: 'Syne, sans-serif', boxSizing: 'border-box' };
@@ -20,7 +21,7 @@ const emptyForm = {
   },
 };
 
-function ClientCard({ client: c, projects, onEdit, onDelete }) {
+function ClientCard({ client: c, projects, onEdit, onDelete, onOpenBrain }) {
   const initials = c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   const clientProjects = projects.filter(p => p.client === c.name);
   const totalRevenue = clientProjects.reduce((s, p) => s + (p.revenue || 0), 0);
@@ -110,6 +111,9 @@ function ClientCard({ client: c, projects, onEdit, onDelete }) {
             <Mail size={12} /> Email
           </a>
         )}
+        <button onClick={() => onOpenBrain(c)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '7px 11px', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO, background: 'rgba(167,139,250,0.12)', color: '#A78BFA' }}>
+          <Brain size={12} /> Brain
+        </button>
         <button onClick={() => onEdit(c)} style={{ padding: '7px 12px', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', marginLeft: 'auto' }}>Edit</button>
         <button onClick={() => onDelete(c)} style={{ padding: '7px 12px', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: MONO, background: 'rgba(232,26,26,0.12)', color: '#E81A1A' }}>Delete</button>
       </div>
@@ -122,8 +126,9 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [formTab, setFormTab] = useState('info'); // 'info' | 'brand' | 'portal'
+  const [formTab, setFormTab] = useState('info');
   const [newPortalUser, setNewPortalUser] = useState({ name: '', email: '', access_code: '', role: '' });
+  const [brainClient, setBrainClient] = useState(null);
 
   // Include contacts tagged as Client OR any project client name not yet in contacts
   const taggedClients = contacts.filter(c => (c.types || []).includes('Client'));
@@ -381,6 +386,18 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
         </div>
       )}
 
+      {/* Client Brain Modal */}
+      {brainClient && (
+        <ClientBrainModal
+          client={brainClient}
+          onClose={() => setBrainClient(null)}
+          onSaved={(updated) => {
+            onContactsChange(contacts.map(c => c.id === updated.id ? updated : c));
+            setBrainClient(updated);
+          }}
+        />
+      )}
+
       {/* Client cards */}
       {!filtered.length ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#555' }}>
@@ -395,7 +412,7 @@ export default function ClientsView({ contacts, onContactsChange, projects }) {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
           {filtered.map(c => (
-            <ClientCard key={c.id} client={c} projects={projects} onEdit={handleEdit} onDelete={handleDelete} />
+            <ClientCard key={c.id} client={c} projects={projects} onEdit={handleEdit} onDelete={handleDelete} onOpenBrain={setBrainClient} />
           ))}
         </div>
       )}
