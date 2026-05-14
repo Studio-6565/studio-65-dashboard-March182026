@@ -910,13 +910,32 @@ export default function ProjectDetailModal({ open, onClose, project, contacts, p
       )}
 
       {tab === 'files' && (
-        <ProjectFilesHub
-          projectId={p.id}
-          projectName={p.name}
-          clientName={p.client}
-          isStudio={true}
-          uploaderName="Studio 65"
-        />
+        <div>
+          {/* Share Review Link */}
+          <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(74,158,255,0.05)', border: '1px solid rgba(74,158,255,0.15)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, color: '#4A9EFF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Client Deliverable Review</div>
+              <div style={{ fontSize: 12, color: '#555' }}>Share a review link so your client can approve deliverables & leave timestamped comments.</div>
+            </div>
+            <button
+              onClick={() => {
+                const token = btoa(`${p.id}:${p.client}`);
+                const url = `${window.location.origin}/deliverable-review?project_id=${p.id}&client_name=${encodeURIComponent(p.client)}&token=${token}`;
+                navigator.clipboard.writeText(url).then(() => showToast('Review link copied! 🔗', 'blue'));
+              }}
+              style={{ padding: '8px 16px', background: 'rgba(74,158,255,0.12)', border: '1px solid rgba(74,158,255,0.3)', borderRadius: 8, color: '#4A9EFF', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Mono", monospace', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              📋 Copy Review Link
+            </button>
+          </div>
+          <ProjectFilesHub
+            projectId={p.id}
+            projectName={p.name}
+            clientName={p.client}
+            isStudio={true}
+            uploaderName="Studio 65"
+          />
+        </div>
       )}
 
       {tab === 'finance' && financeSub === 'expenses' && <ExpensesTab project={p} onUpdate={update} />}

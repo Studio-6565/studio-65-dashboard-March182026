@@ -1,0 +1,66 @@
+{
+  "name": "DeliverableComment",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "file_id": {
+      "type": "string",
+      "description": "ProjectFile id this comment belongs to"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "from_role": {
+      "type": "string",
+      "enum": [
+        "client",
+        "studio"
+      ],
+      "default": "client"
+    },
+    "body": {
+      "type": "string"
+    },
+    "timecode": {
+      "type": "string",
+      "description": "e.g. 1:32"
+    },
+    "timecode_seconds": {
+      "type": "number"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "changes_requested",
+        "pending"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "project_id",
+    "file_id",
+    "client_name",
+    "body"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {},
+    "write": {}
+  }
+}

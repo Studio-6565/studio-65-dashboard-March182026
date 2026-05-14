@@ -18,6 +18,7 @@ import EditorPortal from './pages/EditorPortal';
 import AssetLibrary from './pages/AssetLibrary';
 import ClientRemindersPage from './pages/ClientRemindersPage';
 import ClientSurveyPage from './pages/ClientSurvey';
+import DeliverableReview from './pages/DeliverableReview';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, navigateToLogin } = useAuth();
@@ -39,6 +40,7 @@ const AuthenticatedApp = () => {
         <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="/editor-portal" element={<EditorPortal />} />
         <Route path="/client-survey" element={<ClientSurveyPage />} />
+        <Route path="/deliverable-review" element={<DeliverableReview />} />
       </Routes>
     );
   }
