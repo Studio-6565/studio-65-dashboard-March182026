@@ -59,6 +59,7 @@
     },
     "preprod_checklist": {
       "type": "object",
+      "description": "Map of pre-production task IDs to boolean completion state. Set by client via portal.",
       "additionalProperties": {
         "type": "boolean"
       }
@@ -121,14 +122,6 @@
     },
     "call_sheet_url": {
       "type": "string"
-    },
-    "retainer_contract_id": {
-      "type": "string",
-      "description": "Contract ID of the retainer this project is billed against"
-    },
-    "retainer_contract_name": {
-      "type": "string",
-      "description": "Denormalised retainer name"
     },
     "crew": {
       "type": "array",
