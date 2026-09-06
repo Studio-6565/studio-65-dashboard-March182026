@@ -1,0 +1,37 @@
+{
+  "name": "Email Client on New Studio Message",
+  "description": "",
+  "trigger": {
+    "condition": "${ (.trigger.data.from == \"studio\") }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "ClientMessage"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "email_client_on_new_studio_message",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "clientNotifyEmail",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "clientNotifyEmail"
+  }
+}

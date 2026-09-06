@@ -1,0 +1,37 @@
+{
+  "name": "Auto-Deliver Project When All Deliverables Done",
+  "description": "",
+  "trigger": {
+    "condition": "${ (.trigger.changed_fields | index(\"deliverables\") != null) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Project"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_deliver_project_when_all_deliverables_done",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoDeliverProject",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "autoDeliverProject"
+  }
+}
